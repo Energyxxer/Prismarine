@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/enx-lex/src/main/enx-lex.iml" filepath="$PROJECT_DIR$/enx-lex/src/main/enx-lex.iml" />
+      <module fileurl="file://$PROJECT_DIR$/enx-util/src/main/enx-util.iml" filepath="$PROJECT_DIR$/enx-util/src/main/enx-util.iml" />
+      <module fileurl="file://$PROJECT_DIR$/nbt-type-mapper/src/main/nbt-type-mapper.iml" filepath="$PROJECT_DIR$/nbt-type-mapper/src/main/nbt-type-mapper.iml" />
+      <module fileurl="file://$PROJECT_DIR$/prismarine/src/main/prismarine.iml" filepath="$PROJECT_DIR$/prismarine/src/main/prismarine.iml" />
+    </modules>
+  </component>
+</project>

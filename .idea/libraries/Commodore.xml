@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Commodore">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../Commodore/Commodore.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

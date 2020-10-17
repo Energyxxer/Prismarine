@@ -1,0 +1,110 @@
+package com.energyxxer.prismarine.walker;
+
+import com.energyxxer.commodore.util.io.CompoundInput;
+import com.energyxxer.commodore.util.io.DirectoryCompoundInput;
+import com.energyxxer.prismarine.in.ProjectReader;
+import com.energyxxer.prismarine.util.PathMatcher;
+import com.energyxxer.prismarine.worker.PrismarineProjectWorker;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+
+public class FileWalker<T> {
+    private CompoundInput input;
+    private ProjectReader reader;
+
+    @Nullable
+    private PrismarineProjectWorker worker;
+    private T subject;
+
+    private ArrayList<FileWalkerStop<T>> stops = new ArrayList<>();
+
+    public FileWalker(CompoundInput input, @Nullable PrismarineProjectWorker worker, T subject) {
+        this.input = input;
+        this.worker = worker;
+        this.subject = subject;
+
+        this.reader = new ProjectReader(input, worker);
+    }
+
+    public void walk() throws IOException {
+        try {
+            input.open();
+            walk(null);
+        } finally {
+            input.close();
+        }
+    }
+
+    private void walk(Path path) {
+        String pathStr = path == null ? "" : path.toString().replace(File.separatorChar, '/');
+
+        Iterable<String> innerEntries = input.listSubEntries(pathStr);
+
+        if(innerEntries != null) {
+            for(String fileName : innerEntries) {
+
+                Path relativePath = path == null ? Paths.get(fileName) : path.resolve(fileName);
+                String matcherInput = relativePath.toString().replace(File.separatorChar, '/');
+
+                boolean anyMatchHitEnd = false;
+                for(FileWalkerStop<T> stop : stops) {
+                    PathMatcher.Result result = stop.pathMatcher.getMatchResult(matcherInput);
+
+                    if(result.hitEnd) anyMatchHitEnd = true;
+
+                    if(result.matched) {
+                        try {
+
+                            File file;
+                            if(input instanceof DirectoryCompoundInput) {
+                                file = input.getRootFile().toPath().resolve(relativePath).toFile();
+                            } else {
+                                file = input.getRootFile();
+                            }
+
+                            boolean consumed = stop.accept(file, relativePath, result, worker, this);
+                            if(consumed) break;
+                        } catch(IOException x) {
+                            x.printStackTrace();
+                            //TODO logException x
+                        }
+                    }
+                }
+
+                // do not walk through this directory if none of the
+                // matches hit the end; more input will not make any stop match
+                if(anyMatchHitEnd && input.isDirectory(matcherInput)) {
+                    walk(relativePath);
+                }
+            }
+        }
+    }
+
+    public ProjectReader getReader() {
+        return reader;
+    }
+
+    public T getSubject() {
+        return subject;
+    }
+
+    public void addStops(FileWalkerStop<T>... stops) {
+        Collections.addAll(this.stops, stops);
+    }
+
+    public void addStops(Collection<FileWalkerStop<T>> stops) {
+        this.stops.addAll(stops);
+    }
+
+    public void setReader(ProjectReader reader) {
+        this.reader = reader;
+    }
+
+}

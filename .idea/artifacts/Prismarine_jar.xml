@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="Prismarine:jar">
+    <output-path>$PROJECT_DIR$/</output-path>
+    <root id="archive" name="Prismarine.jar">
+      <element id="module-output" name="enx-lex" />
+      <element id="module-output" name="enx-util" />
+      <element id="module-output" name="prismarine" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/annotations-java8.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../Commodore/Commodore.jar" path-in-jar="/" />
+      <element id="module-output" name="nbt-type-mapper" />
+    </root>
+  </artifact>
+</component>
