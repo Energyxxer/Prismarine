@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 
 import static com.energyxxer.prismarine.Prismarine.DEFAULT_CHARSET;
@@ -46,6 +47,7 @@ public class ProjectReader {
         for(Result result : cache.values()) {
             result.pattern = null;
             result.summary = null;
+            result.matchResponse = null;
         }
         lexers.clear();
     }
@@ -56,6 +58,10 @@ public class ProjectReader {
 
     public void setWorker(PrismarineProjectWorker worker) {
         this.worker = worker;
+    }
+
+    public void populateWithCachedReader(ProjectReader cachedReader) {
+        this.cache.putAll(cachedReader.cache);
     }
 
     public static class Query {
@@ -135,10 +141,11 @@ public class ProjectReader {
 
         int hashCode = Arrays.hashCode(bytes);
 
-        if(existing != null && existing.hashCode == hashCode && existing.matchesRequirements(query)) {
+        if(existing != null && existing.hashCode == hashCode) {
             //Return cached result if it contains what the caller needs and is up to date
             if(query.skipIfNotChanged) return null;
-            return existing;
+            else existing.skippableIfNotChanged = false;
+            if(existing.matchesRequirements(query)) return existing;
         }
 
         //Create a new result
@@ -146,6 +153,7 @@ public class ProjectReader {
         result.relativePath = query.relativePath;
         result.hashCode = hashCode;
         result.bytes = bytes;
+        result.skippableIfNotChanged = query.skipIfNotChanged;
         if(query.needsString) result.string = new String(bytes, DEFAULT_CHARSET);
         if(query.needsJSON) {
             result.jsonObject = new Gson().fromJson(result.string, JsonObject.class);
@@ -166,13 +174,16 @@ public class ProjectReader {
     }
 
     public Result populateParseResult(Query query, File file, Result result) {
+        result.relativePath = query.relativePath;
+
         if(query.needsPattern) {
             Lexer lexer = getLexerForUnitConfig(query.unitConfig);
 
             PrismarineSummaryModule summary = null;
             if(query.needsSummary) {
                 summary = query.unitConfig.createSummaryModule(file, query.relativePath);
-                lexer.setSummaryModule(result.summary);
+                summary.setFileLocation(query.relativePath);
+                lexer.setSummaryModule(summary);
             }
 
             lexer.start(file, result.string, query.unitConfig.createLexerProfile());
@@ -181,6 +192,7 @@ public class ProjectReader {
             if(response.matched) {
                 result.pattern = response.pattern;
             }
+            result.matchResponse = response;
 
             if(query.needsSummary && (response.matched || !query.skipSummaryIfMatchFailed)) {
                 result.summary = summary;
@@ -211,6 +223,19 @@ public class ProjectReader {
         return newLexer;
     }
 
+    public void putResultHash(Path relativePath, int hashCode) {
+        if(!cache.containsKey(relativePath)) {
+            Result result = new Result();
+            result.relativePath = relativePath;
+            result.hashCode = hashCode;
+            cache.put(relativePath, result);
+        }
+    }
+
+    public Collection<Result> getResults() {
+        return cache.values();
+    }
+
     public static class Result {
         protected Path relativePath;
         protected int hashCode;
@@ -219,13 +244,16 @@ public class ProjectReader {
         protected JsonObject jsonObject;
         protected TokenPattern<?> pattern;
         protected PrismarineSummaryModule summary;
+        protected boolean skippableIfNotChanged = true;
+
+        public TokenMatchResponse matchResponse;
 
         protected boolean matchesRequirements(Query query) {
-            return (!query.needsBytes || bytes != null) ||
-                    (!query.needsString || string != null) ||
-                    (!query.needsJSON || jsonObject != null) ||
-                    (!query.needsPattern || pattern != null) ||
-                    (!query.needsSummary  || summary != null)
+            return  !(query.needsBytes && bytes == null) &&
+                    !(query.needsString && string == null) &&
+                    !(query.needsJSON && jsonObject == null) &&
+                    !(query.needsPattern && pattern == null) &&
+                    !(query.needsSummary  && summary == null)
             ;
         }
 
@@ -255,6 +283,14 @@ public class ProjectReader {
 
         public Path getRelativePath() {
             return relativePath;
+        }
+
+        public boolean isSkippableIfNotChanged() {
+            return skippableIfNotChanged;
+        }
+
+        public TokenMatchResponse getMatchResponse() {
+            return matchResponse;
         }
     }
 }

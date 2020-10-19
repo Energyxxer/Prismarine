@@ -19,4 +19,8 @@ public abstract class PrismarinePluginUnitConfiguration {
     public abstract void onStaticWalkerStop(PrismarinePluginUnit unit, File file, Path relativePath, PathMatcher.Result pathMatchResult, PrismarineProjectWorker worker, FileWalker<PrismarinePlugin> walker) throws IOException;
 
     public abstract void updateUnitForProjectWorker(PrismarinePluginUnit unit, PrismarineProjectWorker projectWorker) throws IOException;
+
+    public boolean consumePluginWalkerStop() {
+        return true;
+    }
 }

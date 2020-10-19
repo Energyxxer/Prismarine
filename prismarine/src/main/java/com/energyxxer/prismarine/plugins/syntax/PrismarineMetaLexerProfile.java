@@ -11,6 +11,7 @@ public class PrismarineMetaLexerProfile extends LexerProfile {
 
     private static final List<String> functionNames = Arrays.asList("ofType", "stringMatch", "literal", "group", "optional", "list", "choice", "name", "hint", "storeVar", "storeFlat", "noToken", "brace");
     private static final List<String> keywords = Arrays.asList("return", "define");
+    private static final List<String> booleans = Arrays.asList("true", "false");
 
     public PrismarineMetaLexerProfile() {
         this.initialize();
@@ -35,8 +36,8 @@ public class PrismarineMetaLexerProfile extends LexerProfile {
 
     private void initialize() {
 
-        contexts.add(new StringTypeMatchLexerContext(new String[]{".", ",", ":", ";", "=", "(", ")", "[", "]", "{", "}", "<", ">", "~", "^", "!", "#", "true", "false"},
-                new TokenType[]{DOT, COMMA, COLON, SEMICOLON, EQUALS, BRACE, BRACE, BRACE, BRACE, BRACE, BRACE, BRACE, BRACE, TILDE, CARET, NOT, HASH, BOOLEAN, BOOLEAN}
+        contexts.add(new StringTypeMatchLexerContext(new String[]{".", ",", ":", ";", "=", "(", ")", "[", "]", "{", "}", "<", ">", "~", "^", "!", "#"},
+                new TokenType[]{DOT, COMMA, COLON, SEMICOLON, EQUALS, BRACE, BRACE, BRACE, BRACE, BRACE, BRACE, BRACE, BRACE, TILDE, CARET, NOT, HASH}
         ));
 
         //String literals
@@ -59,6 +60,7 @@ public class PrismarineMetaLexerProfile extends LexerProfile {
         if(token.type == IDENTIFIER) {
             if(functionNames.contains(token.value)) token.type = FUNCTION;
             else if(keywords.contains(token.value)) token.type = KEYWORD;
+            else if(booleans.contains(token.value)) token.type = BOOLEAN;
         }
         return false;
     }

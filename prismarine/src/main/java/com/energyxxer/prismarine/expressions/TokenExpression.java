@@ -45,7 +45,7 @@ public abstract class TokenExpression extends TokenPattern<TokenPattern<?>[]> {
             expr.pushOperator(operator, operatorPattern);
             return expr;
         } else {
-            throw new ExpressionBalanceException("Unexpected operator of class " + operator.getClass());
+            throw new IllegalStateException("Unexpected operator of class " + operator.getClass());
         }
     }
 

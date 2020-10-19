@@ -28,4 +28,11 @@ public abstract class PrismarineLanguageUnitConfiguration<T extends PrismarineLa
 
     public void onPassStart(PrismarineCompiler compiler, int passNumber) {}
     public void onPassEnd(PrismarineCompiler compiler, int passNumber) {}
+
+    public boolean consumeCompilerWalkerStop() {
+        return true;
+    }
+    public boolean consumeSummaryWalkerStop() {
+        return true;
+    }
 }

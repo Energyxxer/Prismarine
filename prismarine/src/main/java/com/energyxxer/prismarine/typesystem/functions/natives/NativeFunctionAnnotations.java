@@ -22,7 +22,7 @@ public class NativeFunctionAnnotations {
     }
 
     @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.PARAMETER)
+    @Target({ElementType.PARAMETER,ElementType.METHOD})
     public @interface UserDefinedTypeObjectArgument {
         String typeIdentifier();
     }

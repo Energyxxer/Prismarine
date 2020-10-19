@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Contract;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class PrismarineTypeSystem {
@@ -296,6 +297,16 @@ public abstract class PrismarineTypeSystem {
         return PrismarineProductions.group(innerMatch).setEvaluator((p, d) -> {
             TokenPattern<?> inner = ((TokenGroup) p).getContents()[0];
             Object result = inner.evaluate(d);
+            if(result == null && nullable) return null;
+            result = assertOfClass(result, inner, ((ISymbolContext) d[0]), expected);
+            return finalEvaluator.apply(result, p, d);
+        });
+    }
+
+    public static TokenPatternMatch validatorGroup(TokenPatternMatch innerMatch, Function<Object[], Object[]> dataTransformer, PrismarineProductions.PostValidationPatternEvaluator finalEvaluator, boolean nullable, Class... expected) {
+        return PrismarineProductions.group(innerMatch).setEvaluator((p, d) -> {
+            TokenPattern<?> inner = ((TokenGroup) p).getContents()[0];
+            Object result = inner.evaluate(dataTransformer.apply(d));
             if(result == null && nullable) return null;
             result = assertOfClass(result, inner, ((ISymbolContext) d[0]), expected);
             return finalEvaluator.apply(result, p, d);

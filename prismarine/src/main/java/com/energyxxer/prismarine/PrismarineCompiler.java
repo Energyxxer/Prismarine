@@ -131,12 +131,11 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
         this.setProgress("Parsing files");
         walker = new FileWalker<>(new DirectoryCompoundInput(rootPath.toFile()), worker, this);
         if(cachedReader != null) {
-            walker.setReader(cachedReader);
-            cachedReader.setWorker(worker);
+            walker.getReader().populateWithCachedReader(cachedReader);
         }
 
-        suiteConfig.setupWalkerForCompilation(walker);
         walker.addStops(DefaultWalkerStops.createCompilerWalkerStops(suiteConfig));
+        suiteConfig.setupWalkerForCompilation(walker);
 
         try {
             walker.walk();
@@ -185,15 +184,17 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
 
         suiteConfig.onDependenciesResolved(this);
 
+        this.setProgress("Setting up standard libraries");
+
         PrismarineLibrary standardLibrary = suiteConfig.getStandardLibrary();
         if(standardLibrary != null) {
             standardLibrary.populateCompiler(this);
         }
 
+        this.setProgress("Instantiating units");
+
         //pass 0 (instantiation)
         for(Map.Entry<PrismarineLanguageUnitConfiguration, ArrayList<ProjectReader.Result>> entry : unitReadResults.entrySet()) {
-            //TODO check that dependencies in combine mode have their unit read results merged
-
             PrismarineLanguageUnitConfiguration unitConfig = entry.getKey();
             ArrayList<PrismarineLanguageUnit> unitsForType = new ArrayList<>();
             unitsList.put(unitConfig, unitsForType);
@@ -203,7 +204,7 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
                     unitsForType.add(unit);
                     pathToUnitMap.put(readResult.getRelativePath(), unit);
                 } catch(Exception ex) {
-                    report.addNotice(new Notice(NoticeType.ERROR, ex.toString(), readResult.getPattern()));
+                    logException(ex);
                     break;
                 }
             }
@@ -214,10 +215,12 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
             return;
         }
 
+        this.setProgress("Performing passes");
         if(!performPasses()) {
             finalizeProcess(false);
             return;
         }
+
         updateProgress(-1);
 
         suiteConfig.onAllPassesFinished(this);
@@ -232,6 +235,7 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
             return;
         }
 
+        this.setProgress("Generating output");
         suiteConfig.generateOutput(this);
 
         if(report.hasErrors()) {
@@ -390,7 +394,7 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
         return callStack;
     }
 
-    public ProjectReader getFileReader() {
+    public ProjectReader getProjectReader() {
         return walker.getReader();
     }
 

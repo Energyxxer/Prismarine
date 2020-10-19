@@ -17,6 +17,11 @@ public abstract class SymbolVisibility {
         public boolean isVisibleFromSummaryBlock(SummarySymbol symbol, Path fromPath, int inFileIndex) {
             return true;
         }
+
+        @Override
+        public String toString() {
+            return "GLOBAL";
+        }
     };
 
     private final int visibilityIndex;

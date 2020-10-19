@@ -6,6 +6,7 @@ import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 import com.energyxxer.prismarine.PrismarineLanguageUnitConfiguration;
 import com.energyxxer.prismarine.plugins.PrismarinePluginFile;
 import com.energyxxer.prismarine.plugins.PrismarinePluginUnit;
+import com.energyxxer.util.logger.Debug;
 
 import java.io.File;
 import java.io.IOException;

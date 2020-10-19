@@ -29,7 +29,7 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
     private ArrayList<Runnable> completionListeners = new ArrayList<>();
 
     private PrismarineProjectWorker worker;
-    private boolean workerHasWorked;
+    FileWalker<PrismarineProjectSummary> walker;
 
     private ProjectReader cachedReader;
 
@@ -38,7 +38,6 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
         this.rootFile = rootFile;
 
         this.worker = new PrismarineProjectWorker(suiteConfig, rootFile);
-        this.workerHasWorked = false;
 
         this.summary = (T) suiteConfig.createSummary();
     }
@@ -48,7 +47,6 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
         this.rootFile = worker.rootDir;
 
         this.worker = worker;
-        this.workerHasWorked = true;
 
         this.summary = (T) suiteConfig.createSummary();
     }
@@ -74,7 +72,7 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
         suiteConfig.setupWorkerForSummary(worker);
 
         try {
-            if(!workerHasWorked) worker.work();
+            worker.work();
         } catch(Exception x) {
             logException(x);
             return;
@@ -101,11 +99,11 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
 
         suiteConfig.runSummaryPreFileTree(this);
 
-        FileWalker<PrismarineProjectSummary> walker = new FileWalker(new DirectoryCompoundInput(rootFile), worker, summary);
-        suiteConfig.setupWalkerForSummary(walker);
+        walker = new FileWalker<>(new DirectoryCompoundInput(rootFile), worker, summary);
         walker.addStops(DefaultWalkerStops.createSummaryWalkerStops(suiteConfig));
+        suiteConfig.setupWalkerForSummary(walker);
 
-        if(cachedReader != null) walker.setReader(cachedReader);
+        if(cachedReader != null) walker.getReader().populateWithCachedReader(cachedReader);
         try {
             walker.walk();
         } catch (IOException x) {
@@ -153,8 +151,8 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
         return worker.output.get(task);
     }
 
-    public ProjectReader getCachedReader() {
-        return cachedReader;
+    public ProjectReader getProjectReader() {
+        return walker.getReader();
     }
 
     public void setCachedReader(ProjectReader cachedReader) {

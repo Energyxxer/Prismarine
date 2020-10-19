@@ -53,15 +53,29 @@ public class FileWalker<T> {
                 Path relativePath = path == null ? Paths.get(fileName) : path.resolve(fileName);
                 String matcherInput = relativePath.toString().replace(File.separatorChar, '/');
 
+                PathMatcher.Result[] results = new PathMatcher.Result[stops.size()];
+
                 boolean anyMatchHitEnd = false;
+                int i = 0;
                 for(FileWalkerStop<T> stop : stops) {
                     PathMatcher.Result result = stop.pathMatcher.getMatchResult(matcherInput);
-
                     if(result.hitEnd) anyMatchHitEnd = true;
+                    results[i] = result;
+                    i++;
+                }
+
+                // do not walk through this directory if none of the
+                // matches hit the end; more input will not make any stop match
+                if(anyMatchHitEnd && input.isDirectory(matcherInput)) {
+                    walk(relativePath);
+                }
+
+                for(i = 0; i < results.length; i++) {
+                    PathMatcher.Result result = results[i];
+                    FileWalkerStop<T> stop = stops.get(i);
 
                     if(result.matched) {
                         try {
-
                             File file;
                             if(input instanceof DirectoryCompoundInput) {
                                 file = input.getRootFile().toPath().resolve(relativePath).toFile();
@@ -76,12 +90,6 @@ public class FileWalker<T> {
                             //TODO logException x
                         }
                     }
-                }
-
-                // do not walk through this directory if none of the
-                // matches hit the end; more input will not make any stop match
-                if(anyMatchHitEnd && input.isDirectory(matcherInput)) {
-                    walk(relativePath);
                 }
             }
         }
@@ -101,10 +109,6 @@ public class FileWalker<T> {
 
     public void addStops(Collection<FileWalkerStop<T>> stops) {
         this.stops.addAll(stops);
-    }
-
-    public void setReader(ProjectReader reader) {
-        this.reader = reader;
     }
 
 }

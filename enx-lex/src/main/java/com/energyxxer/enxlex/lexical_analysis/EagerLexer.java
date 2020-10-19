@@ -217,7 +217,7 @@ public class EagerLexer extends Lexer {
 	@Override
 	public Token retrieveTokenOfType(TokenType type) {
 		Token token = retrieveAnyToken();
-		if(token.type == type || (type == null && token.type == TokenType.UNKNOWN)) {
+		if(token != null && (token.type == type || (type == null && token.type == TokenType.UNKNOWN))) {
 			return token;
 		}
 		return null;

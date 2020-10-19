@@ -11,12 +11,14 @@ import java.util.HashMap;
 public class PrismarinePluginUnit {
     private final PrismarinePlugin definingPlugin;
     private final PrismarinePluginUnitConfiguration config;
+    private final Path relativePath;
 
     private HashMap<PluginDataIdentifier<?>, Object> data = new HashMap<>();
 
-    public PrismarinePluginUnit(PrismarinePlugin definingPlugin, PrismarinePluginUnitConfiguration config) {
+    public PrismarinePluginUnit(PrismarinePlugin definingPlugin, PrismarinePluginUnitConfiguration config, Path relativePath) {
         this.definingPlugin = definingPlugin;
         this.config = config;
+        this.relativePath = relativePath;
     }
 
     public void update(PrismarineProjectWorker projectWorker) throws IOException {
@@ -55,5 +57,9 @@ public class PrismarinePluginUnit {
 
     public <T> void set(PluginDataIdentifier<T> identifier, T data) {
         this.data.put(identifier, data);
+    }
+
+    public Path getRelativePath() {
+        return relativePath;
     }
 }

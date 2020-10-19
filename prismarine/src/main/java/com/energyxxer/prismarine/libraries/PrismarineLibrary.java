@@ -7,8 +7,12 @@ import com.energyxxer.prismarine.PrismarineSuiteConfiguration;
 import com.energyxxer.prismarine.in.ProjectReader;
 import com.energyxxer.prismarine.summaries.PrismarineProjectSummary;
 import com.energyxxer.prismarine.worker.PrismarineProjectWorker;
+import com.energyxxer.util.logger.Debug;
+import com.energyxxer.util.out.Console;
 
+import java.io.IOException;
 import java.nio.file.Path;
+import java.text.ParseException;
 import java.util.ArrayList;
 
 public class PrismarineLibrary {
@@ -47,7 +51,11 @@ public class PrismarineLibrary {
 
             for(PrismarineLibraryUnit unit : libraryUnits) {
                 ProjectReader.Query query = reader.startQuery(unit.getRelativePath()).needsPattern(unit.getUnitConfig()).needsSummary(unit.getUnitConfig(), true);
-                ProjectReader.Result result = reader.populateParseResult(query, Prismarine.NULL_FILE, reader.createResultFromString(unit.getContent()));
+                ProjectReader.Result result = reader.populateParseResult(query, unit.getRelativePath().toFile(), reader.createResultFromString(unit.getContent()));
+
+                if(!result.matchResponse.matched) {
+                    throw new RuntimeException("FATAL: Syntax error in library for " + unit.getUnitConfig().getClass().getSimpleName() + ": " + unit.getRelativePath());
+                }
 
                 unit.setParseResult(result);
             }
@@ -64,7 +72,7 @@ public class PrismarineLibrary {
 
     public void populateSummary(PrismarineProjectSummary summary) {
         for(PrismarineLibraryUnit unit : libraryUnits) {
-            if(!unit.getAvailability().compiler) continue;
+            if(!unit.getAvailability().summary) continue;
             summary.store(null, unit.getParseResult().getSummary());
         }
     }

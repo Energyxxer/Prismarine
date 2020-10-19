@@ -35,7 +35,7 @@ public class DefaultWalkerStops {
 
                     walker.getSubject().putUnitReadResults(unitConfig, result);
 
-                    return true;
+                    return unitConfig.consumeCompilerWalkerStop();
                 }
             };
 
@@ -62,7 +62,7 @@ public class DefaultWalkerStops {
                         walker.getSubject().store(file, result.getSummary());
                     }
 
-                    return true;
+                    return unitConfig.consumeSummaryWalkerStop();
                 }
             };
 
@@ -82,13 +82,14 @@ public class DefaultWalkerStops {
 
                     PrismarinePluginUnit unit = new PrismarinePluginUnit(
                             walker.getSubject(),
-                            unitConfig
+                            unitConfig,
+                            relativePath
                     );
 
                     unitConfig.onStaticWalkerStop(unit, file, relativePath, pathMatchResult, worker, walker);
                     walker.getSubject().addUnit(unit);
 
-                    return true;
+                    return unitConfig.consumePluginWalkerStop();
                 }
             };
             stops.add(stop);

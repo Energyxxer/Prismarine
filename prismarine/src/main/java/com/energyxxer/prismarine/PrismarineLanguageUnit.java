@@ -3,6 +3,7 @@ package com.energyxxer.prismarine;
 import com.energyxxer.prismarine.symbols.contexts.ISymbolContext;
 import com.energyxxer.prismarine.symbols.contexts.SymbolContext;
 
+import java.io.File;
 import java.nio.file.Path;
 
 public abstract class PrismarineLanguageUnit extends SymbolContext {
@@ -24,6 +25,6 @@ public abstract class PrismarineLanguageUnit extends SymbolContext {
     }
 
     public String getPrettyName() {
-        return getPathFromRoot().toString();
+        return getPathFromRoot().toString().replace(File.separatorChar, '/');
     }
 }

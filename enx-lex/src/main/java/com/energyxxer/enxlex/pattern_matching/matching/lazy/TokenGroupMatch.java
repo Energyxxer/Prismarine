@@ -12,6 +12,7 @@ import static com.energyxxer.enxlex.pattern_matching.TokenMatchResponse.*;
 
 public class TokenGroupMatch extends TokenPatternMatch {
     public ArrayList<TokenPatternMatch> items;
+    private boolean greedy = false;
 
     public TokenGroupMatch() {
         this.optional = false;
@@ -48,6 +49,10 @@ public class TokenGroupMatch extends TokenPatternMatch {
         Token faultyToken = null;
         int length = 0;
         TokenPatternMatch expected = null;
+
+        int longestFailedMatchLength = -1;
+        TokenMatchResponse longestFailedMatch = null;
+
         itemLoop: for (int i = 0; i < items.size(); i++) {
 
             if (currentIndex > lexer.getFileLength() && !items.get(i).optional) {
@@ -68,6 +73,11 @@ public class TokenGroupMatch extends TokenPatternMatch {
                     break;
                 }
                 case PARTIAL_MATCH: {
+                    int totalLengthUpToNow = length + itemMatch.length;
+                    if(totalLengthUpToNow > longestFailedMatchLength) {
+                        longestFailedMatch = itemMatch;
+                        longestFailedMatchLength = totalLengthUpToNow;
+                    }
                     if(!(items.get(i).optional && i+1 < items.size() && items.get(i+1).match(currentIndex, lexer).matched)) {
                         hasMatched = false;
                         length += itemMatch.length;
@@ -88,6 +98,11 @@ public class TokenGroupMatch extends TokenPatternMatch {
 
         while(--popSuggestionStatus >= 0) {
             lexer.getSuggestionModule().popStatus();
+        }
+        if(greedy && !hasMatched && longestFailedMatch != null) {
+            faultyToken = longestFailedMatch.faultyToken;
+            length = longestFailedMatchLength;
+            expected = longestFailedMatch.expected;
         }
         TokenMatchResponse response = new TokenMatchResponse(hasMatched, faultyToken, length, expected, group);
         if(hasMatched) {
@@ -153,6 +168,11 @@ public class TokenGroupMatch extends TokenPatternMatch {
             }
         }
         return sb.toString();
+    }
+
+    public TokenGroupMatch setGreedy(boolean greedy) {
+        this.greedy = greedy;
+        return this;
     }
 
     public TokenPatternMatch setSimplificationFunctionContentIndex(int contentIndex) {

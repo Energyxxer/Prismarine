@@ -30,7 +30,7 @@ public class PrismarinePlugin {
         this.name = name;
         this.loaded = false;
         this.pluginWorker = new PrismarineProjectWorker(suiteConfig, sourceFile);
-        this.walker = new FileWalker(source, pluginWorker, this);
+        this.walker = new FileWalker<>(source, pluginWorker, this);
         this.sourcePath = sourceFile.toPath();
     }
 
@@ -49,13 +49,15 @@ public class PrismarinePlugin {
             throw new IOException(x.getMessage()); //TODO ?
         }
 
-        suiteConfig.setupWalkerForPlugin(walker);
         walker.addStops(DefaultWalkerStops.createPluginWalkerStops(suiteConfig));
+        suiteConfig.setupWalkerForPlugin(walker);
 
         walker.walk();
+
+        loaded = true;
     }
 
-    public void attachToProjectWorker(PrismarineProjectWorker projectWorker) throws IOException {
+    public synchronized void attachToProjectWorker(PrismarineProjectWorker projectWorker) throws IOException {
         load();
 
         this.walker.getReader().setWorker(projectWorker);

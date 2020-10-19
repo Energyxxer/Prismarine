@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 @SuppressWarnings("FieldCanBeLocal")
 public class PrismarineProductions {
@@ -85,6 +86,13 @@ public class PrismarineProductions {
     public static TokenGroupMatch wrapper(TokenPatternMatch inner, PostValidationPatternEvaluator evaluator) {
         return (TokenGroupMatch) group(inner).setEvaluator((p, d) -> {
             Object result = ((TokenGroup) p).getContents()[0].evaluate(d);
+            return evaluator.apply(result, p, d);
+        });
+    }
+
+    public static TokenGroupMatch wrapper(TokenPatternMatch inner, Function<Object[], Object[]> dataTransformer, PostValidationPatternEvaluator evaluator) {
+        return (TokenGroupMatch) group(inner).setEvaluator((p, d) -> {
+            Object result = ((TokenGroup) p).getContents()[0].evaluate(dataTransformer.apply(d));
             return evaluator.apply(result, p, d);
         });
     }

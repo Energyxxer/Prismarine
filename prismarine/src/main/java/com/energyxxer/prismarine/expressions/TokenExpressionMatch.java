@@ -59,8 +59,6 @@ public class TokenExpressionMatch extends TokenPatternMatch {
                         break itemLoop;
                     }
                     case COMPLETE_MATCH: {
-                        i += itemMatch.length;
-                        length += itemMatch.length;
                         String flattenedOperator = itemMatch.pattern.flatten(false);
                         Operator op = operatorPool.getBinaryOrTernaryOperatorForSymbol(flattenedOperator);
 
@@ -78,10 +76,12 @@ public class TokenExpressionMatch extends TokenPatternMatch {
                             } else {
                                 expr = TokenExpression.createExpressionForOperator(expr, op, itemMatch.pattern, this).setName(this.name).addTags(this.tags);
                             }
+                            i += itemMatch.length;
+                            length += itemMatch.length;
                         } catch(ExpressionBalanceException x) {
-                            hasMatched = false;
-                            faultyToken = itemMatch.pattern.flattenTokens().get(0);
-                            expected = this.operatorMatch;
+//                            hasMatched = false;
+//                            faultyToken = itemMatch.pattern.flattenTokens().get(0);
+//                            expected = this.operatorMatch;
                             break itemLoop;
                         }
                     }

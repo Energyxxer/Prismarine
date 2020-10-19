@@ -28,7 +28,9 @@ public class PrismarineNativeFunctionBranch extends PrismarineFunctionBranch {
 
         Class<?> returnType = PrismarineTypeSystem.sanitizeClass(method.getReturnType());
         TypeHandler correspondingHandler = typeSystem.getHandlerForHandledClass(returnType);
-        if(correspondingHandler == null && returnType != Object.class && returnType != Void.TYPE) {
+        NativeFunctionAnnotations.UserDefinedTypeObjectArgument userDefinedConstraintAnnot = method.getAnnotation(NativeFunctionAnnotations.UserDefinedTypeObjectArgument.class);
+
+        if(correspondingHandler == null && returnType != Object.class && returnType != Void.TYPE && userDefinedConstraintAnnot == null) {
             Debug.log("Could not create return constraints for method '" + method + "': Did not find appropriate TypeHandler instance for class: " + returnType);
         }
         boolean nullable = true;
@@ -37,7 +39,18 @@ public class PrismarineNativeFunctionBranch extends PrismarineFunctionBranch {
             nullable = false;
         }
 
-        this.returnConstraints = new TypeConstraints(typeSystem, correspondingHandler, nullable);
+        String userDefinedIdentifier = null;
+        if(userDefinedConstraintAnnot != null) {
+            userDefinedIdentifier = userDefinedConstraintAnnot.typeIdentifier();
+            nullable = false;
+        }
+
+        if(userDefinedIdentifier == null) {
+            this.returnConstraints = new TypeConstraints(typeSystem, correspondingHandler, nullable);
+        } else {
+            this.returnConstraints = new TypeConstraints(typeSystem, userDefinedIdentifier, nullable);
+        }
+
     }
 
     private static Collection<FormalParameter> createFormalParameters(PrismarineTypeSystem typeSystem, Method method) {
