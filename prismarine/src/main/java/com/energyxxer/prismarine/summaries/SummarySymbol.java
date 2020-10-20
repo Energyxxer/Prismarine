@@ -7,6 +7,7 @@ import com.energyxxer.prismarine.symbols.SymbolVisibility;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.function.Function;
 
 public class SummarySymbol implements SummaryElement {
@@ -14,7 +15,7 @@ public class SummarySymbol implements SummaryElement {
     private String name;
     private int declarationIndex;
     private SymbolVisibility visibility;
-    private ArrayList<String> suggestionTags = new ArrayList<>();
+    private HashSet<String> suggestionTags = new HashSet<>();
     private SummaryBlock subBlock = null;
     private boolean isMember = false;
     private boolean isStaticField = false;
@@ -113,7 +114,7 @@ public class SummarySymbol implements SummaryElement {
         return this;
     }
 
-    public ArrayList<String> getSuggestionTags() {
+    public HashSet<String> getSuggestionTags() {
         return suggestionTags;
     }
 
