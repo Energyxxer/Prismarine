@@ -22,7 +22,7 @@ public class StackTrace {
         public String toString() {
             String fileMessage = this.fileMessage;
             if(fileMessage == null) {
-                fileMessage = pattern.getFile().getName() + ":" + pattern.getStringLocation().line;
+                fileMessage = pattern.getSource().getFileName() + ":" + pattern.getStringLocation().line;
             }
             return message + " (" + fileMessage + ")";
         }

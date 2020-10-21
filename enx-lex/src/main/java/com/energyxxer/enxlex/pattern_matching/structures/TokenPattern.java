@@ -1,6 +1,7 @@
 package com.energyxxer.enxlex.pattern_matching.structures;
 
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
+import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 import com.energyxxer.enxlex.pattern_matching.PatternEvaluator;
 import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
@@ -9,7 +10,6 @@ import com.energyxxer.util.StringLocation;
 import com.energyxxer.util.logger.Debug;
 import com.sun.istack.internal.NotNull;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -45,15 +45,16 @@ public abstract class TokenPattern<T> {
 
 	public abstract String flatten(boolean separate);
 
-	public abstract File getFile();
+	public abstract TokenSource getSource();
 
 	public String getLocation() {
 		StringLocation loc = getStringLocation();
-		return getFile().getName() + ":" + loc.line + ":" + loc.column + "#" + loc.index;
+		return getSource().getFileName() + ":" + loc.line + ":" + loc.column + "#" + loc.index;
 	}
 
 	public abstract StringLocation getStringLocation();
 	public abstract StringBounds getStringBounds();
+
 	public int getCharLength() {
 		ArrayList<Token> tokens = flattenTokens();
 		if(tokens.size() == 0) return 0;
@@ -61,12 +62,6 @@ public abstract class TokenPattern<T> {
 		Token lastToken = tokens.get(tokens.size()-1);
 		int end = lastToken.loc.index + lastToken.value.length();
 		return end - start;
-	}
-
-	public String getFormattedPath() {
-		StringLocation loc = getStringLocation();
-		return "\b" + getFile() + "\b" + loc.index + "\b" + getCharLength() + "\b"
-				+ getLocation() + "\b";
 	}
 
 	public abstract ArrayList<Token> flattenTokens();

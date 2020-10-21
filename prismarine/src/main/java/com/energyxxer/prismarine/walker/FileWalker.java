@@ -2,6 +2,7 @@ package com.energyxxer.prismarine.walker;
 
 import com.energyxxer.commodore.util.io.CompoundInput;
 import com.energyxxer.commodore.util.io.DirectoryCompoundInput;
+import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
 import com.energyxxer.prismarine.in.ProjectReader;
 import com.energyxxer.prismarine.util.PathMatcher;
 import com.energyxxer.prismarine.worker.PrismarineProjectWorker;
@@ -14,6 +15,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.function.Function;
 
 public class FileWalker<T> {
     private CompoundInput input;
@@ -25,12 +27,12 @@ public class FileWalker<T> {
 
     private ArrayList<FileWalkerStop<T>> stops = new ArrayList<>();
 
-    public FileWalker(CompoundInput input, @Nullable PrismarineProjectWorker worker, T subject) {
+    public FileWalker(CompoundInput input, Function<Path, TokenSource> sourceFunction, @Nullable PrismarineProjectWorker worker, T subject) {
         this.input = input;
         this.worker = worker;
         this.subject = subject;
 
-        this.reader = new ProjectReader(input, worker);
+        this.reader = new ProjectReader(input, sourceFunction, worker);
     }
 
     public void walk() throws IOException {

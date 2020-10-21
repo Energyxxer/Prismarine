@@ -29,7 +29,7 @@ public class CallStack {
 
         @Override
         public String toString() {
-            return "at " + calledFile.getPrettyName() + " ~ " + calledFunction + " (" + calledBy.getFile().getName() + ":" + calledBy.getStringLocation().line + ")\n";
+            return "at " + calledFile.getPrettyName() + " ~ " + calledFunction + " (" + calledBy.getSource().getFileName() + ":" + calledBy.getStringLocation().line + ")\n";
         }
     }
 
@@ -52,7 +52,7 @@ public class CallStack {
         for(int i = stack.size()-1; i >= 0; i--) {
             Call call = stack.get(i);
             TokenPattern<?> calledBy = i < stack.size()-1 ? stack.get(i+1).calledBy : leaf;
-            elements.add(new StackTrace.StackTraceElement("at " + (call.calledFile != null ? call.calledFile.getPrettyName() : "<internal function>") + " ~ " + call.calledFunction, calledBy, calledBy.getFile().equals(Prismarine.NULL_FILE) ? "standard library file" : null));
+            elements.add(new StackTrace.StackTraceElement("at " + (call.calledFile != null ? call.calledFile.getPrettyName() : "<internal function>") + " ~ " + call.calledFunction, calledBy, calledBy.getSource().equals(Prismarine.NULL_FILE) ? "standard library file" : null));
         }
         return new StackTrace(elements);
     }

@@ -1,26 +1,23 @@
 package com.energyxxer.prismarine.libraries;
 
-import com.energyxxer.prismarine.Prismarine;
 import com.energyxxer.prismarine.PrismarineCompiler;
 import com.energyxxer.prismarine.PrismarineLanguageUnitConfiguration;
 import com.energyxxer.prismarine.PrismarineSuiteConfiguration;
 import com.energyxxer.prismarine.in.ProjectReader;
 import com.energyxxer.prismarine.summaries.PrismarineProjectSummary;
 import com.energyxxer.prismarine.worker.PrismarineProjectWorker;
-import com.energyxxer.util.logger.Debug;
-import com.energyxxer.util.out.Console;
 
-import java.io.IOException;
 import java.nio.file.Path;
-import java.text.ParseException;
 import java.util.ArrayList;
 
 public class PrismarineLibrary {
+    private final String name;
     private final PrismarineSuiteConfiguration suiteConfig;
     private final ArrayList<PrismarineLibraryUnit> libraryUnits = new ArrayList<>();
     private boolean unitsLocked = false;
 
-    public PrismarineLibrary(PrismarineSuiteConfiguration suiteConfig) {
+    public PrismarineLibrary(String name, PrismarineSuiteConfiguration suiteConfig) {
+        this.name = name;
         this.suiteConfig = suiteConfig;
     }
 
@@ -46,12 +43,12 @@ public class PrismarineLibrary {
 
             worker.work();
 
-            ProjectReader reader = new ProjectReader(null, worker);
+            ProjectReader reader = new ProjectReader(worker);
             //input is null because we avoid calling performQuery(), and instead pass the string contents ourselves.
 
             for(PrismarineLibraryUnit unit : libraryUnits) {
                 ProjectReader.Query query = reader.startQuery(unit.getRelativePath()).needsPattern(unit.getUnitConfig()).needsSummary(unit.getUnitConfig(), true);
-                ProjectReader.Result result = reader.populateParseResult(query, unit.getRelativePath().toFile(), reader.createResultFromString(unit.getContent()));
+                ProjectReader.Result result = reader.populateParseResult(query, new LibrarySource(name, unit.getRelativePath()), reader.createResultFromString(unit.getContent()));
 
                 if(!result.matchResponse.matched) {
                     throw new RuntimeException("FATAL: Syntax error in library for " + unit.getUnitConfig().getClass().getSimpleName() + ": " + unit.getRelativePath());

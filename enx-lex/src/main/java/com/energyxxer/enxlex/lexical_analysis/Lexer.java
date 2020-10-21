@@ -3,12 +3,12 @@ package com.energyxxer.enxlex.lexical_analysis;
 import com.energyxxer.enxlex.lexical_analysis.profiles.LexerProfile;
 import com.energyxxer.enxlex.lexical_analysis.summary.SummaryModule;
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
+import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenStream;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 import com.energyxxer.enxlex.report.Notice;
 import com.energyxxer.enxlex.suggestions.SuggestionModule;
 
-import java.io.File;
 import java.util.ArrayList;
 
 public abstract class Lexer {
@@ -43,7 +43,7 @@ public abstract class Lexer {
         return suggestionModule;
     }
 
-    public abstract void start(File file, String str, LexerProfile profile);
+    public abstract void start(TokenSource source, String str, LexerProfile profile);
 
     public void setSuggestionModule(SuggestionModule suggestionModule) {
         this.suggestionModule = suggestionModule;

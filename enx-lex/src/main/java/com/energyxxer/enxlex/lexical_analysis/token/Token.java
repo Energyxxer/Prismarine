@@ -4,9 +4,9 @@ import com.energyxxer.enxlex.report.Notice;
 import com.energyxxer.util.StringBounds;
 import com.energyxxer.util.StringLocation;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * Class containing a value, or token, its type, source file and location within
@@ -15,8 +15,7 @@ import java.util.HashMap;
 public class Token {
 	public String value;
 	public TokenType type;
-	public String file;
-	public String filename;
+	public TokenSource source;
 	public StringLocation loc;
 	public HashMap<String, Object> attributes;
 	public HashMap<TokenSection, String> subSections;
@@ -24,41 +23,37 @@ public class Token {
 	public ArrayList<String> tags = new ArrayList<>();
 	public ArrayList<Notice> attachedNotices = new ArrayList<>();
 
-    public Token(String value, File file, StringLocation loc) {
+    public Token(String value, TokenSource source, StringLocation loc) {
 		this.value = value;
 		this.type = TokenType.UNKNOWN;
-		this.file = file.getAbsolutePath();
-		this.filename = file.getName();
+		this.source = source;
 		this.loc = loc;
 		this.attributes = new HashMap<>();
 		this.subSections = new HashMap<>();
 	}
 
-	public Token(String value, File file, StringLocation loc, HashMap<TokenSection, String> subSections) {
+	public Token(String value, TokenSource source, StringLocation loc, HashMap<TokenSection, String> subSections) {
 		this.value = value;
 		this.type = TokenType.UNKNOWN;
-		this.file = file.getAbsolutePath();
-		this.filename = file.getName();
+		this.source = source;
 		this.loc = loc;
 		this.attributes = new HashMap<>();
 		this.subSections = (subSections != null) ? subSections : new HashMap<>();
 	}
 
-	public Token(String value, TokenType tokenType, File file, StringLocation loc) {
+	public Token(String value, TokenType tokenType, TokenSource source, StringLocation loc) {
 		this.value = value;
 		this.type = (tokenType != null) ? tokenType : TokenType.UNKNOWN;
-		this.file = file.getAbsolutePath();
-		this.filename = file.getName();
+		this.source = source;
 		this.loc = loc;
 		this.attributes = new HashMap<>();
 		this.subSections = new HashMap<>();
 	}
 
-	public Token(String value, TokenType tokenType, File file, StringLocation loc, HashMap<TokenSection, String> subSections) {
+	public Token(String value, TokenType tokenType, TokenSource source, StringLocation loc, HashMap<TokenSection, String> subSections) {
 		this.value = value;
 		this.type = (tokenType != null) ? tokenType : TokenType.UNKNOWN;
-		this.file = file.getAbsolutePath();
-		this.filename = file.getName();
+		this.source = source;
 		this.loc = loc;
 		this.attributes = new HashMap<>();
 		this.subSections = (subSections != null) ? subSections : new HashMap<>();
@@ -69,12 +64,11 @@ public class Token {
 	}
 
 	public String getLocation() {
-		return filename + ":" + loc.line + ":" + loc.column + "#" + loc.index;
+		return source.getPrettyName() + ":" + loc.line + ":" + loc.column + "#" + loc.index;
 	}
 
-	public String getFormattedPath() {
-		return "\b" + file + "\b" + loc.index + "\b" + value.length() + "\b"
-				+ getLocation() + "\b";
+	public TokenSource getSource() {
+		return source;
 	}
 
 	@Override
@@ -91,7 +85,7 @@ public class Token {
 		for(Token t : tokens) {
 			s.append(t.value);
 		}
-		return new Token(s.toString(),type,new File(tokens[0].file),tokens[0].loc);
+		return new Token(s.toString(), type, tokens[0].source, tokens[0].loc);
 	}
 
 	public HashMap<TokenSection, String> getSubSections() {
@@ -109,18 +103,18 @@ public class Token {
 
 		Token token = (Token) o;
 
-		if (value != null ? !value.equals(token.value) : token.value != null) return false;
-		if (type != null ? !type.equals(token.type) : token.type != null) return false;
-		if (file != null ? !file.equals(token.file) : token.file != null) return false;
-		if (loc != null ? !loc.equals(token.loc) : token.loc != null) return false;
-		return attributes != null ? attributes.equals(token.attributes) : token.attributes == null;
+		if (!Objects.equals(value, token.value)) return false;
+		if (!Objects.equals(type, token.type)) return false;
+		if (!Objects.equals(source, token.source)) return false;
+		if (!Objects.equals(loc, token.loc)) return false;
+		return Objects.equals(attributes, token.attributes);
 	}
 
 	@Override
 	public int hashCode() {
 		int result = value != null ? value.hashCode() : 0;
 		result = 31 * result + (type != null ? type.hashCode() : 0);
-		result = 31 * result + (file != null ? file.hashCode() : 0);
+		result = 31 * result + (source != null ? source.hashCode() : 0);
 		result = 31 * result + (loc != null ? loc.hashCode() : 0);
 		result = 31 * result + (attributes != null ? attributes.hashCode() : 0);
 		return result;

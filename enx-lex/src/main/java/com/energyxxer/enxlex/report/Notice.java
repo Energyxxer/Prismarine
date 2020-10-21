@@ -1,9 +1,9 @@
 package com.energyxxer.enxlex.report;
 
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
+import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
-
-import java.io.File;
+import com.energyxxer.util.StringBounds;
 
 /**
  * Created by User on 5/15/2017.
@@ -12,9 +12,8 @@ public class Notice {
     private NoticeType type;
     private String message;
     private String extendedMessage;
-    private String formattedPath;
 
-    private String filePath;
+    private TokenSource source;
     private int locationIndex;
     private int locationLength;
 
@@ -43,7 +42,8 @@ public class Notice {
     }
 
     public Notice(String group, NoticeType type, String message, String extendedMessage, TokenPattern<?> pattern) {
-        this(group, type, message, extendedMessage, (pattern != null) ? pattern.getFormattedPath() : null);
+        this(group, type, message, extendedMessage);
+        setSourceLocation(pattern);
     }
 
     public Notice(NoticeType type, String message, Token token) {
@@ -51,22 +51,14 @@ public class Notice {
     }
 
     public Notice(String group, NoticeType type, String message, Token token) {
-        this(group, type, message, (token != null) ? token.getFormattedPath() : null);
+        this(group, type, message);
+        setSourceLocation(token);
     }
 
-    public Notice(NoticeType type, String message, String formattedPath) {
-        this(null, type, message, formattedPath);
-    }
-
-    public Notice(String group, NoticeType type, String message, String formattedPath) {
-        this(group, type, message, message, formattedPath);
-    }
-
-    public Notice(String group, NoticeType type, String message, String extendedMessage, String formattedPath) {
+    public Notice(String group, NoticeType type, String message, String extendedMessage) {
         this.type = type;
         this.message = message;
         this.extendedMessage = extendedMessage;
-        this.setFormattedPath(formattedPath);
         if(group != null) this.group = group;
     }
 
@@ -78,10 +70,6 @@ public class Notice {
         return message;
     }
 
-    public String getFormattedPath() {
-        return formattedPath;
-    }
-
     public void setType(NoticeType type) {
         this.type = type;
     }
@@ -90,20 +78,29 @@ public class Notice {
         this.message = message;
     }
 
-    public void setFormattedPath(String formattedPath) {
-        this.formattedPath = formattedPath;
-        if(formattedPath != null) {
-            String[] segments = formattedPath.split("\b");
-            this.filePath = segments[1];
-            this.locationIndex = Integer.parseInt(segments[2]);
-            this.locationLength = Integer.parseInt(segments[3]);
+    public void setSourceLocation(Token token) {
+        pointToSource(token.source);
+        this.locationIndex = token.loc.index;
+        this.locationLength = token.value.length();
+    }
 
-            this.group = this.filePath;
+    public void setSourceLocation(TokenPattern<?> pattern) {
+        pointToSource(pattern.getSource());
+        StringBounds bounds = pattern.getStringBounds();
+        if(bounds != null) {
+            this.locationIndex = bounds.start.index;
+            this.locationLength = bounds.end.index - this.locationIndex;
         }
     }
 
-    public String getFilePath() {
-        return filePath;
+    public void setSourceLocation(TokenSource source, int index, int length) {
+        pointToSource(source);
+        this.locationIndex = index;
+        this.locationLength = length;
+    }
+
+    public TokenSource getSource() {
+        return source;
     }
 
     public int getLocationIndex() {
@@ -124,7 +121,7 @@ public class Notice {
 
     @Override
     public String toString() {
-        return message + ((formattedPath != null) ? ("\n    at " + formattedPath) : "");
+        return message;
     }
 
     public String getExtendedMessage() {
@@ -144,7 +141,8 @@ public class Notice {
         return this;
     }
 
-    public void pointToFile(File file) {
-        this.group = this.filePath = file.toString();
+    public void pointToSource(TokenSource source) {
+        this.source = source;
+        this.group = source.getPrettyName();
     }
 }

@@ -30,7 +30,12 @@ public class PrismarinePlugin {
         this.name = name;
         this.loaded = false;
         this.pluginWorker = new PrismarineProjectWorker(suiteConfig, sourceFile);
-        this.walker = new FileWalker<>(source, pluginWorker, this);
+        this.walker = new FileWalker<>(
+                source,
+                p -> new PluginSource(sourceFile, p),
+                pluginWorker,
+                this
+        );
         this.sourcePath = sourceFile.toPath();
     }
 

@@ -1,9 +1,9 @@
 package com.energyxxer.prismarine.in;
 
 import com.energyxxer.commodore.util.io.CompoundInput;
-import com.energyxxer.commodore.util.io.DirectoryCompoundInput;
 import com.energyxxer.enxlex.lexical_analysis.LazyLexer;
 import com.energyxxer.enxlex.lexical_analysis.Lexer;
+import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenStream;
 import com.energyxxer.enxlex.pattern_matching.TokenMatchResponse;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
@@ -24,18 +24,27 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.function.Function;
 
 import static com.energyxxer.prismarine.Prismarine.DEFAULT_CHARSET;
 
 public class ProjectReader {
     private CompoundInput input;
+    private Function<Path, TokenSource> sourceFunction;
     private PrismarineProjectWorker worker;
 
     private HashMap<Path, Result> cache = new HashMap<>();
     private HashMap<PrismarineLanguageUnitConfiguration, Lexer> lexers = new HashMap<>();
 
-    public ProjectReader(CompoundInput input, PrismarineProjectWorker worker) {
+    public ProjectReader(PrismarineProjectWorker worker) {
+        this.input = null;
+        this.sourceFunction = null;
+        this.worker = worker;
+    }
+
+    public ProjectReader(CompoundInput input, Function<Path, TokenSource> sourceFunction, PrismarineProjectWorker worker) {
         this.input = input;
+        this.sourceFunction = sourceFunction;
         this.worker = worker;
     }
 
@@ -62,6 +71,10 @@ public class ProjectReader {
 
     public void populateWithCachedReader(ProjectReader cachedReader) {
         this.cache.putAll(cachedReader.cache);
+    }
+
+    public Function<Path, TokenSource> getSourceFunction() {
+        return sourceFunction;
     }
 
     public static class Query {
@@ -159,21 +172,16 @@ public class ProjectReader {
             result.jsonObject = new Gson().fromJson(result.string, JsonObject.class);
         }
 
-        File file;
-        if(input instanceof DirectoryCompoundInput) {
-            file = input.getRootFile().toPath().resolve(query.relativePath).toFile();
-        } else {
-            file = input.getRootFile();
-        }
+        TokenSource source = sourceFunction.apply(query.relativePath);
 
-        result = populateParseResult(query, file, result);
+        result = populateParseResult(query, source, result);
 
         cache.put(query.relativePath, result);
 
         return result;
     }
 
-    public Result populateParseResult(Query query, File file, Result result) {
+    public Result populateParseResult(Query query, TokenSource source, Result result) {
         result.relativePath = query.relativePath;
 
         if(query.needsPattern) {
@@ -181,12 +189,12 @@ public class ProjectReader {
 
             PrismarineSummaryModule summary = null;
             if(query.needsSummary) {
-                summary = query.unitConfig.createSummaryModule(file, query.relativePath);
+                summary = query.unitConfig.createSummaryModule(source, query.relativePath);
                 summary.setFileLocation(query.relativePath);
                 lexer.setSummaryModule(summary);
             }
 
-            lexer.start(file, result.string, query.unitConfig.createLexerProfile());
+            lexer.start(source, result.string, query.unitConfig.createLexerProfile());
             TokenMatchResponse response = ((LazyLexer) lexer).getMatchResponse();
 
             if(response.matched) {

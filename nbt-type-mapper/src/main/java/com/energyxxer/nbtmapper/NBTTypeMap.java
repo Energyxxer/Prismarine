@@ -7,6 +7,7 @@ import com.energyxxer.commodore.types.Type;
 import com.energyxxer.commodore.types.defaults.BlockEntityType;
 import com.energyxxer.commodore.types.defaults.EntityType;
 import com.energyxxer.enxlex.lexical_analysis.LazyLexer;
+import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenStream;
 import com.energyxxer.enxlex.pattern_matching.TokenMatchResponse;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenList;
@@ -14,11 +15,12 @@ import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenStructure;
 import com.energyxxer.enxlex.report.Notice;
 import com.energyxxer.enxlex.report.NoticeType;
+import com.energyxxer.nbtmapper.packs.NBTTypeMapPack;
+import com.energyxxer.nbtmapper.packs.RawNBTTypeMap;
 import com.energyxxer.nbtmapper.parser.NBTTMLexerProfile;
 import com.energyxxer.nbtmapper.parser.NBTTMProductions;
 import com.energyxxer.nbtmapper.tags.*;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -143,10 +145,10 @@ public class NBTTypeMap {
     }
 
     public class Parsing {
-        public void parseNBTTMFile(File file, String content, BiConsumer<String, DataType> consumer) {
+        public void parseNBTTMFile(TokenSource source, String content, BiConsumer<String, DataType> consumer) {
             TokenStream ts = new TokenStream();
             LazyLexer lex = new LazyLexer(ts, NBTTMProductions.FILE);
-            lex.start(file, content, new NBTTMLexerProfile(module));
+            lex.start(source, content, new NBTTMLexerProfile(module));
 
             notices.addAll(lex.getNotices());
 
@@ -169,8 +171,8 @@ public class NBTTypeMap {
             }
         }
 
-        public void parseNBTTMFile(File file, String content) {
-            parseNBTTMFile(file, content, NBTTypeMap.this::addType);
+        public void parseNBTTMFile(TokenSource source, String content) {
+            parseNBTTMFile(source, content, NBTTypeMap.this::addType);
         }
 
         private DataType parseType(TokenPattern<?> pattern) {
@@ -273,11 +275,9 @@ public class NBTTypeMap {
             return raw;
         }
 
-        public void parsePack(File rootFile, NBTTypeMapPack pack) {
-            File toBlame = pack.getRootFile();
-            if(toBlame == null) toBlame = rootFile;
-            for(String rawContent : pack.getAllFileContents()) {
-                parseNBTTMFile(toBlame, rawContent, NBTTypeMap.this::addType);
+        public void parsePack(NBTTypeMapPack pack) {
+            for(RawNBTTypeMap rawContent : pack.getAllFileContents()) {
+                parseNBTTMFile(rawContent.getSource(), rawContent.getContents(), NBTTypeMap.this::addType);
             }
         }
     }

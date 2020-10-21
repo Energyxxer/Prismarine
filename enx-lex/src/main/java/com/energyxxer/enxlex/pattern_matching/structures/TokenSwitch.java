@@ -1,12 +1,12 @@
 package com.energyxxer.enxlex.pattern_matching.structures;
 
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
+import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 import com.energyxxer.util.StringBounds;
 import com.energyxxer.util.StringLocation;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,8 +74,8 @@ public class TokenSwitch extends TokenPattern<TokenPattern<?>> {
 	}
 
 	@Override
-	public File getFile() {
-		return group.getFile();
+	public TokenSource getSource() {
+		return group.getSource();
 	}
 
 	@Override

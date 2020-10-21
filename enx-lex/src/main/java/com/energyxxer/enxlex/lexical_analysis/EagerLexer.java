@@ -3,15 +3,11 @@ package com.energyxxer.enxlex.lexical_analysis;
 import com.energyxxer.enxlex.lexical_analysis.profiles.LexerContext;
 import com.energyxxer.enxlex.lexical_analysis.profiles.LexerProfile;
 import com.energyxxer.enxlex.lexical_analysis.profiles.ScannerContextResponse;
-import com.energyxxer.enxlex.lexical_analysis.token.Token;
-import com.energyxxer.enxlex.lexical_analysis.token.TokenSection;
-import com.energyxxer.enxlex.lexical_analysis.token.TokenStream;
-import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
+import com.energyxxer.enxlex.lexical_analysis.token.*;
 import com.energyxxer.enxlex.report.Notice;
 import com.energyxxer.enxlex.report.NoticeType;
 import com.energyxxer.util.StringLocation;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +26,7 @@ public class EagerLexer extends Lexer {
 		this.stream = stream;
 	}
 
-	private File file;
+	private TokenSource source;
 
 	private StringBuilder token = new StringBuilder();
 	private int line = 0;
@@ -46,15 +42,15 @@ public class EagerLexer extends Lexer {
 	private HashMap<TokenSection, String> subSections = null;
 
 	@Override
-	public void start(File file, String str, LexerProfile profile) {
-		this.file = file;
+	public void start(TokenSource source, String str, LexerProfile profile) {
+		this.source = source;
 		stream.setProfile(profile);
 		profile.setStream(stream);
 		line = column = index = tokenLine = tokenColumn = tokenIndex = 0;
 		token.setLength(0);
 
 		{
-			Token header = new Token("", TokenType.FILE_HEADER, file, new StringLocation(0, 0, 0));
+			Token header = new Token("", TokenType.FILE_HEADER, source, new StringLocation(0, 0, 0));
 			profile.putHeaderInfo(header);
 			flush(header);
 		}
@@ -75,7 +71,9 @@ public class EagerLexer extends Lexer {
 				if(ctx.getCondition() == LexerContext.ContextCondition.LINE_START && column != 0) continue;
 				ScannerContextResponse response = ctx.analyze(str, i, profile);
 				if(response.errorMessage != null) {
-					notices.add(new Notice(NoticeType.ERROR, response.errorMessage, "\b" + file.getAbsolutePath() + "\b" + (i + response.errorIndex) + "\b" + response.errorLength));
+					Notice notice = new Notice(NoticeType.ERROR, response.errorMessage);
+					notice.setSourceLocation(source, response.errorIndex, response.errorLength);
+					notices.add(notice);
 				}
 				if(response.success) {
 					flush();
@@ -146,7 +144,7 @@ public class EagerLexer extends Lexer {
 
 	private void flush() {
 		if(token.length() > 0 || (tokenType == TokenType.FILE_HEADER || tokenType == TokenType.END_OF_FILE))
-			flush(new Token(token.toString(), tokenType, file, new StringLocation(tokenIndex, tokenLine, tokenColumn), subSections));
+			flush(new Token(token.toString(), tokenType, source, new StringLocation(tokenIndex, tokenLine, tokenColumn), subSections));
 
 		token.setLength(0);
 		tokenType = null;

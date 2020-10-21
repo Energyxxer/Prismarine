@@ -1,14 +1,13 @@
 package com.energyxxer.prismarine.plugins.syntax;
 
 import com.energyxxer.enxlex.lexical_analysis.EagerLexer;
+import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
 import com.energyxxer.enxlex.pattern_matching.TokenMatchResponse;
 import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 import com.energyxxer.prismarine.PrismarineLanguageUnitConfiguration;
 import com.energyxxer.prismarine.plugins.PrismarinePluginFile;
 import com.energyxxer.prismarine.plugins.PrismarinePluginUnit;
-import com.energyxxer.util.logger.Debug;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -28,9 +27,9 @@ public class PrismarineSyntaxFile extends PrismarinePluginFile<TokenPatternMatch
         //Since this uses an eager lexer and a fixed production...
         EagerLexer lexer = unit.getDefiningPlugin().getEagerLexer();
 
-        File file = relativePath.toFile();
+        TokenSource source = unit.getDefiningPlugin().getWalker().getReader().getSourceFunction().apply(relativePath);
 
-        lexer.start(file, string, new PrismarineMetaLexerProfile());
+        lexer.start(source, string, new PrismarineMetaLexerProfile());
 
         lexer.getStream().tokens.remove(0);
 
@@ -39,7 +38,7 @@ public class PrismarineSyntaxFile extends PrismarinePluginFile<TokenPatternMatch
         lexer.getStream().tokens.clear();
 
         if(!response.matched) {
-            throw new IOException("Syntax error in Meta Syntax file '" + file + "': " + response.getErrorMessage());
+            throw new IOException("Syntax error in Meta Syntax file '" + source + "': " + response.getErrorMessage());
         }
 
         pattern = response.pattern;

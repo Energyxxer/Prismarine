@@ -1,14 +1,13 @@
 package com.energyxxer.prismarine.reporting;
 
+import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.enxlex.report.Notice;
 import com.energyxxer.enxlex.report.NoticeType;
 import com.energyxxer.enxlex.report.StackTrace;
-import com.energyxxer.prismarine.Prismarine;
 import com.energyxxer.prismarine.symbols.contexts.ISymbolContext;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -40,11 +39,8 @@ public class PrismarineException extends RuntimeException {
         this.notice = new Notice(NoticeType.ERROR, message, message, cause).setStackTrace(stackTrace);
 
         for(StackTrace.StackTraceElement frame : stackTrace.getElements()) {
-            File file = frame.getPattern().getFile();
-            if(!file.equals(Prismarine.NULL_FILE)) {
-                notice.pointToFile(file);
-                break;
-            }
+            TokenSource source = frame.getPattern().getSource();
+            notice.pointToSource(source);
         }
         this.cause = cause;
     }

@@ -4,6 +4,7 @@ import com.energyxxer.enxlex.lexical_analysis.profiles.LexerContext;
 import com.energyxxer.enxlex.lexical_analysis.profiles.LexerProfile;
 import com.energyxxer.enxlex.lexical_analysis.profiles.ScannerContextResponse;
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
+import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenStream;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 import com.energyxxer.enxlex.pattern_matching.TokenMatchResponse;
@@ -13,8 +14,6 @@ import com.energyxxer.enxlex.report.NoticeType;
 import com.energyxxer.enxlex.suggestions.SuggestionModule;
 import com.energyxxer.util.StringLocation;
 import com.energyxxer.util.StringLocationCache;
-
-import java.io.File;
 
 public class LazyLexer extends Lexer {
 
@@ -29,13 +28,13 @@ public class LazyLexer extends Lexer {
     private StringLocationCache lineCache = new StringLocationCache();
     private LexerProfile profile = null;
 
-    private File file;
+    private TokenSource source;
 
     private TokenMatchResponse matchResponse = null;
 
     @Override
-    public void start(File file, String str, LexerProfile profile) {
-        this.file = file;
+    public void start(TokenSource source, String str, LexerProfile profile) {
+        this.source = source;
         this.fileContents = str;
         this.profile = profile;
 
@@ -45,7 +44,7 @@ public class LazyLexer extends Lexer {
         lineCache.prepopulate();
 
         {
-            Token header = new Token("", TokenType.FILE_HEADER, file, new StringLocation(0, 0, 0));
+            Token header = new Token("", TokenType.FILE_HEADER, source, new StringLocation(0, 0, 0));
             profile.putHeaderInfo(header);
             stream.write(header);
         }
@@ -63,7 +62,7 @@ public class LazyLexer extends Lexer {
         }
 
         {
-            Token eof = new Token("", TokenType.END_OF_FILE, file, lineCache.getLocationForOffset(fileContents.length()));
+            Token eof = new Token("", TokenType.END_OF_FILE, source, lineCache.getLocationForOffset(fileContents.length()));
             stream.write(eof);
         }
 
@@ -98,11 +97,11 @@ public class LazyLexer extends Lexer {
                         lookingIndexTrimmed :
                         currentIndex, type, profile);
                 if (response.success && response.tokenType == type) {
-                    Token token = new Token(response.value, response.tokenType, file, lineCache.getLocationForOffset(context.ignoreLeadingWhitespace() ?
+                    Token token = new Token(response.value, response.tokenType, source, lineCache.getLocationForOffset(context.ignoreLeadingWhitespace() ?
                             getLookingIndexTrimmed() :
                             getCurrentIndex()), response.subSections);
                     if (response.errorMessage != null) {
-                        token.attachedNotices.add(new Notice(NoticeType.ERROR, response.errorMessage, "\b" + file.getAbsolutePath() + "\b" + (getLookingIndexTrimmed() + response.errorIndex) + "\b" + response.errorLength));
+                        token.attachedNotices.add(new Notice(NoticeType.ERROR, response.errorMessage, token));
                     }
                     return token;
                 }
@@ -110,13 +109,13 @@ public class LazyLexer extends Lexer {
         }
         if (type == TokenType.END_OF_FILE) {
             if(getLookingIndexTrimmed() == fileContents.length()) {
-                return new Token("", TokenType.END_OF_FILE, file, lineCache.getLocationForOffset(fileContents.length()));
+                return new Token("", TokenType.END_OF_FILE, source, lineCache.getLocationForOffset(fileContents.length()));
             }
         }
         if(type == TokenType.NEWLINE) {
             int index = currentIndex;
             while(index < fileContents.length() && fileContents.charAt(index) != '\n' && Character.isWhitespace(fileContents.charAt(index))) index++;
-            if(index < fileContents.length() && fileContents.charAt(index) == '\n') return new Token("\n", TokenType.NEWLINE, file, lineCache.getLocationForOffset(index));
+            if(index < fileContents.length() && fileContents.charAt(index) == '\n') return new Token("\n", TokenType.NEWLINE, source, lineCache.getLocationForOffset(index));
         }
         if (type == TokenType.UNKNOWN || type == null) {
             StringBuilder sb = new StringBuilder();
@@ -127,11 +126,11 @@ public class LazyLexer extends Lexer {
                 if (i > 0) lastChar = fileContents.charAt(i - 1);
 
                 if (sb.length() > 0 && lastChar != '\u0000' && !profile.canMerge(lastChar, fileContents.charAt(i))) {
-                    return new Token(sb.toString(), TokenType.UNKNOWN, file, lineCache.getLocationForOffset(getLookingIndexTrimmed()));
+                    return new Token(sb.toString(), TokenType.UNKNOWN, source, lineCache.getLocationForOffset(getLookingIndexTrimmed()));
                 }
                 sb.append(fileContents.charAt(i));
             }
-            if(sb.length() > 0) return new Token(sb.toString(), TokenType.UNKNOWN, file, lineCache.getLocationForOffset(getLookingIndexTrimmed()));
+            if(sb.length() > 0) return new Token(sb.toString(), TokenType.UNKNOWN, source, lineCache.getLocationForOffset(getLookingIndexTrimmed()));
         }
         return null;
     }
@@ -147,19 +146,19 @@ public class LazyLexer extends Lexer {
                             currentIndex,
                     profile);
             if (response.success && !response.value.isEmpty()) {
-                Token token = new Token(response.value, response.tokenType, file, lineCache.getLocationForOffset(
+                Token token = new Token(response.value, response.tokenType, source, lineCache.getLocationForOffset(
                         context.ignoreLeadingWhitespace() ?
                                 getLookingIndexTrimmed() :
                                 getCurrentIndex()
                 ), response.subSections);
                 if (response.errorMessage != null) {
-                    token.attachedNotices.add(new Notice(NoticeType.ERROR, response.errorMessage, "\b" + file.getAbsolutePath() + "\b" + (getLookingIndexTrimmed() + response.errorIndex) + "\b" + response.errorLength));
+                    token.attachedNotices.add(new Notice(NoticeType.ERROR, response.errorMessage, token));
                 }
                 return token;
             }
         }
         if(getLookingIndexTrimmed() == fileContents.length()) {
-            return new Token("", TokenType.END_OF_FILE, file, lineCache.getLocationForOffset(fileContents.length()));
+            return new Token("", TokenType.END_OF_FILE, source, lineCache.getLocationForOffset(fileContents.length()));
         }
         {
             StringBuilder sb = new StringBuilder();
@@ -170,12 +169,12 @@ public class LazyLexer extends Lexer {
                 if (i > 0) lastChar = fileContents.charAt(i - 1);
 
                 if (sb.length() > 0 && lastChar != '\u0000' && !profile.canMerge(lastChar, fileContents.charAt(i))) {
-                    return new Token(sb.toString(), TokenType.UNKNOWN, file, lineCache.getLocationForOffset(getLookingIndexTrimmed()));
+                    return new Token(sb.toString(), TokenType.UNKNOWN, source, lineCache.getLocationForOffset(getLookingIndexTrimmed()));
                 }
                 sb.append(fileContents.charAt(i));
             }
             if(sb.length() > 0) {
-                return new Token(sb.toString(), TokenType.UNKNOWN, file, lineCache.getLocationForOffset(getLookingIndexTrimmed()));
+                return new Token(sb.toString(), TokenType.UNKNOWN, source, lineCache.getLocationForOffset(getLookingIndexTrimmed()));
             }
         }
         return null;

@@ -1,13 +1,13 @@
 package com.energyxxer.enxlex.pattern_matching.structures;
 
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
+import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 import com.energyxxer.enxlex.pattern_matching.matching.lazy.TokenListMatch;
 import com.energyxxer.util.StringBounds;
 import com.energyxxer.util.StringLocation;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -123,11 +123,11 @@ public class TokenList extends TokenPattern<TokenPattern<?>[]> {
 	}
 
 	@Override
-	public File getFile() {
+	public TokenSource getSource() {
 		if(patterns == null) return null;
 		for(TokenPattern pattern : patterns) {
-			File file = pattern.getFile();
-			if(file != null) return file;
+			TokenSource source = pattern.getSource();
+			if(source != null) return source;
 		}
 		return null;
 	}

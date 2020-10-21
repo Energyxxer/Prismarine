@@ -1,17 +1,17 @@
 package com.energyxxer.prismarine.expressions;
 
+import com.energyxxer.enxlex.lexical_analysis.token.Token;
+import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
+import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
+import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
+import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.prismarine.operators.BinaryOperator;
 import com.energyxxer.prismarine.operators.Operator;
 import com.energyxxer.prismarine.operators.TernaryOperator;
 import com.energyxxer.prismarine.operators.UnaryOperator;
-import com.energyxxer.enxlex.lexical_analysis.token.Token;
-import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
-import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
-import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.util.StringBounds;
 import com.energyxxer.util.StringLocation;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -173,11 +173,11 @@ public abstract class TokenExpression extends TokenPattern<TokenPattern<?>[]> {
     }
 
     @Override
-    public File getFile() {
+    public TokenSource getSource() {
         for(TokenPattern pattern : getContents()) {
-            File file = pattern.getFile();
-            if(file != null) {
-                return file;
+            TokenSource source = pattern.getSource();
+            if(source != null) {
+                return source;
             }
         }
         return null;
