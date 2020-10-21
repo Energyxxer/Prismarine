@@ -3,6 +3,8 @@ package com.energyxxer.prismarine.typesystem.functions;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.prismarine.reporting.PrismarineException;
 import com.energyxxer.prismarine.state.CallStack;
+import com.energyxxer.prismarine.symbols.Symbol;
+import com.energyxxer.prismarine.symbols.SymbolVisibility;
 import com.energyxxer.prismarine.symbols.contexts.ISymbolContext;
 
 import java.util.stream.Collectors;
@@ -62,6 +64,29 @@ public class PrismarineFunction implements PrimitivePrismarineFunction {
         @Override
         public Object call(Object[] params, TokenPattern<?>[] patterns, TokenPattern<?> pattern, ISymbolContext ctx, Object thisObject) {
             return function.call(params, patterns, pattern, ctx, this.thisObject);
+        }
+    }
+
+    public static class FixedThisFunctionSymbol extends Symbol {
+        private PrismarineFunction pickedOverload;
+        private Object thisObject;
+
+        public FixedThisFunctionSymbol(String name, PrismarineFunction pickedOverload, Object thisObject) {
+            super(name, SymbolVisibility.GLOBAL);
+            this.pickedOverload = pickedOverload;
+            this.thisObject = thisObject;
+        }
+
+        public PrismarineFunction getPickedOverload() {
+            return pickedOverload;
+        }
+
+        public Object getThisObject() {
+            return thisObject;
+        }
+
+        public Object safeCall(Object[] params, TokenPattern<?>[] patterns, TokenPattern<?> pattern, ISymbolContext ctx) {
+            return pickedOverload.safeCall(params, patterns, pattern, ctx, this.thisObject);
         }
     }
 }

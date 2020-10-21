@@ -43,7 +43,7 @@ public class Notice {
 
     public Notice(String group, NoticeType type, String message, String extendedMessage, TokenPattern<?> pattern) {
         this(group, type, message, extendedMessage);
-        setSourceLocation(pattern);
+        if(pattern != null) setSourceLocation(pattern);
     }
 
     public Notice(NoticeType type, String message, Token token) {
@@ -52,7 +52,7 @@ public class Notice {
 
     public Notice(String group, NoticeType type, String message, Token token) {
         this(group, type, message);
-        setSourceLocation(token);
+        if(token != null) setSourceLocation(token);
     }
 
     public Notice(String group, NoticeType type, String message, String extendedMessage) {

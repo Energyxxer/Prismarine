@@ -4,6 +4,7 @@ import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenGroup;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.prismarine.PrismarineProductions;
+import com.energyxxer.prismarine.operators.OperatorManager;
 import com.energyxxer.prismarine.reporting.PrismarineException;
 import com.energyxxer.prismarine.symbols.contexts.ISymbolContext;
 import com.energyxxer.util.logger.Debug;
@@ -338,4 +339,6 @@ public abstract class PrismarineTypeSystem {
             userDefinedTypeListeners.remove(type.getTypeIdentifier());
         }
     }
+
+    public abstract OperatorManager getOperatorManager();
 }
