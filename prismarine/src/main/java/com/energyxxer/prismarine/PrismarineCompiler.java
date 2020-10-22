@@ -202,8 +202,8 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
         //pass 0 (instantiation)
         for(Map.Entry<PrismarineLanguageUnitConfiguration, ArrayList<ProjectReader.Result>> entry : unitReadResults.entrySet()) {
             PrismarineLanguageUnitConfiguration unitConfig = entry.getKey();
-            ArrayList<PrismarineLanguageUnit> unitsForType = new ArrayList<>();
-            unitsList.put(unitConfig, unitsForType);
+            ArrayList<PrismarineLanguageUnit> unitsForType = this.unitsList.computeIfAbsent(unitConfig, k -> new ArrayList<>());
+
             for(ProjectReader.Result readResult : entry.getValue()) {
                 try {
                     PrismarineLanguageUnit unit = unitConfig.createUnit(this, readResult);

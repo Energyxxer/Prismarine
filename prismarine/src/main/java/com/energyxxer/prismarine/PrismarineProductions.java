@@ -162,6 +162,10 @@ public class PrismarineProductions {
         installedProviderSets.put(providerSet.getClass(), providerSet);
     }
 
+    public PrismarineProjectWorker getWorker() {
+        return worker;
+    }
+
     public <T extends PatternProviderSet> T getProviderSet(Class<T> cls) {
         return ((T) installedProviderSets.get(cls));
     }
