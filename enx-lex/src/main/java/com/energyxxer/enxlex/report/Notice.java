@@ -26,7 +26,7 @@ public class Notice {
     }
 
     public Notice(String group, NoticeType type, String message) {
-        this(group, type, message, (String) null);
+        this(group, type, message, message);
     }
 
     public Notice(NoticeType type, String message, TokenPattern<?> pattern) {

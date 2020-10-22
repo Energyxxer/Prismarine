@@ -26,6 +26,8 @@ import java.util.function.Function;
 
 @SuppressWarnings("FieldCanBeLocal")
 public class PrismarineProductions {
+    private final HashMap<Class, PatternProviderSet> installedProviderSets = new HashMap<>();
+
     private final HashMap<String, TokenStructureMatch> providedStructures = new HashMap<>();
     private final HashMap<String, TokenPatternMatch> providedSingleMatches = new HashMap<>();
 
@@ -157,6 +159,11 @@ public class PrismarineProductions {
 
     public void installProviderSet(PatternProviderSet providerSet) {
         providerSet.install(this);
+        installedProviderSets.put(providerSet.getClass(), providerSet);
+    }
+
+    public <T extends PatternProviderSet> T getProviderSet(Class<T> cls) {
+        return ((T) installedProviderSets.get(cls));
     }
 
     private ArrayList<PrismarinePluginUnit> pluginUnits;
