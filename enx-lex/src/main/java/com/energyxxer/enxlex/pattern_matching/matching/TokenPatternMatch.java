@@ -18,6 +18,7 @@ import java.util.function.Consumer;
 public abstract class TokenPatternMatch {
     public String name = "";
     public boolean optional;
+    public boolean recessive = false;
     public List<String> tags = new ArrayList<>();
     protected List<BiConsumer<TokenPattern<?>, Lexer>> processors = new ArrayList<>();
     protected List<BiConsumer<TokenPattern<?>, Lexer>> failProcessors = new ArrayList<>();
@@ -70,6 +71,19 @@ public abstract class TokenPatternMatch {
 
     public TokenPatternMatch setOptional(boolean optional) {
         this.optional = optional;
+        return this;
+    }
+
+    public boolean isRecessive() {
+        return recessive;
+    }
+
+    public TokenPatternMatch setRecessive() {
+        return setRecessive(true);
+    }
+
+    public TokenPatternMatch setRecessive(boolean recessive) {
+        this.recessive = recessive;
         return this;
     }
 

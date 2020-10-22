@@ -53,6 +53,8 @@ public class TokenGroupMatch extends TokenPatternMatch {
         int longestFailedMatchLength = -1;
         TokenMatchResponse longestFailedMatch = null;
 
+        boolean[] itemsMatched = new boolean[items.size()];
+
         itemLoop: for (int i = 0; i < items.size(); i++) {
 
             if (currentIndex > lexer.getFileLength() && !items.get(i).optional) {
@@ -92,6 +94,7 @@ public class TokenGroupMatch extends TokenPatternMatch {
                     if(itemMatch.pattern != null) group.add(itemMatch.pattern);
                     currentIndex += itemMatch.length;
                     length += itemMatch.length;
+                    itemsMatched[i] = true;
                 }
             }
         }
@@ -104,6 +107,21 @@ public class TokenGroupMatch extends TokenPatternMatch {
             length = longestFailedMatchLength;
             expected = longestFailedMatch.expected;
         }
+
+        if(!hasMatched && length > 0) {
+            //check for recessive matches
+            boolean allRecessive = true;
+            for(int i = 0; i < items.size(); i++) {
+                if(itemsMatched[i] && !items.get(i).isRecessive()) {
+                    allRecessive = false;
+                    break;
+                }
+            }
+            if(allRecessive) {
+                length = 0;
+            }
+        }
+
         TokenMatchResponse response = new TokenMatchResponse(hasMatched, faultyToken, length, expected, group);
         if(hasMatched) {
             invokeProcessors(group, lexer);

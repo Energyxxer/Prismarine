@@ -9,7 +9,7 @@ import java.util.List;
 
 public class PrismarineMetaLexerProfile extends LexerProfile {
 
-    private static final List<String> functionNames = Arrays.asList("ofType", "stringMatch", "literal", "group", "optional", "list", "choice", "name", "hint", "storeVar", "storeFlat", "noToken", "brace");
+    private static final List<String> functionNames = Arrays.asList("ofType", "stringMatch", "literal", "group", "optional", "recessive", "list", "choice", "name", "hint", "storeVar", "storeFlat", "noToken", "brace");
     private static final List<String> keywords = Arrays.asList("return", "define");
     private static final List<String> booleans = Arrays.asList("true", "false");
 

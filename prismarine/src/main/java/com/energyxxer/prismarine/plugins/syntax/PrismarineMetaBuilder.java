@@ -134,6 +134,23 @@ public class PrismarineMetaBuilder {
             }
             return value;
         });
+        registerFunction("recessive", (value, args) -> {
+            boolean recessive = true;
+            if(args.size() >= 1) {
+                if(args.get(0) instanceof BooleanValue) {
+                    recessive = ((BooleanValue) args.get(0)).boolValue;
+
+                } else {
+                    throw new IllegalArgumentException("Function 'recessive' only accepts Boolean values at argument 0, found " + args.get(0).getClass().getSimpleName());
+                }
+            }
+            if(((TokenMatchValue) value).patternMatch.tags.contains(PLUGIN_CREATED_TAG)) {
+                ((TokenMatchValue) value).patternMatch.setRecessive(recessive);
+            } else {
+                throw new IllegalArgumentException("Function 'recessive' can only be performed on plugin-created patterns");
+            }
+            return value;
+        });
         registerFunction("storeVar", TokenMatchValue.class, (value, args) -> {
             if(args.size() >= 1) {
                 if(args.get(0) instanceof StringLiteralValue) {
