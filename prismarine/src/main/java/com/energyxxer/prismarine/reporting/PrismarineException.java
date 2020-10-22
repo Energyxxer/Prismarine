@@ -23,6 +23,7 @@ public class PrismarineException extends RuntimeException {
     }
 
     private PrismarineException(Type type, String message, @NotNull TokenPattern<?> cause, StackTrace stackTrace) {
+        super(message);
         this.type = type;
 
         if(type == Type.IMPOSSIBLE) {
@@ -43,6 +44,7 @@ public class PrismarineException extends RuntimeException {
             notice.pointToSource(source);
         }
         this.cause = cause;
+
     }
 
     public Type getType() {
