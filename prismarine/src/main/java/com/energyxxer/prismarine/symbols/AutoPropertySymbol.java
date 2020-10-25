@@ -22,14 +22,14 @@ public class AutoPropertySymbol<T> extends Symbol {
     private final Setter<T> setter;
 
     public AutoPropertySymbol(String name, @NotNull Class<T> cls, Getter<T> getter, Setter<T> setter) {
-        super(name, SymbolVisibility.GLOBAL);
+        super(name, SymbolVisibility.PUBLIC);
         this.cls = cls;
         this.getter = getter;
         this.setter = setter;
     }
 
     public AutoPropertySymbol(String name, PrismarineTypeSystem typeSystem, @NotNull Class<T> cls, boolean nullable, Getter<T> getter, Setter<T> setter) {
-        super(name, SymbolVisibility.GLOBAL);
+        super(name, SymbolVisibility.PUBLIC);
         this.cls = cls;
         this.getter = getter;
         this.setter = setter;

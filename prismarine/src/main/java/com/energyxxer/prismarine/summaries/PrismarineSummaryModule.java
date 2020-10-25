@@ -76,7 +76,7 @@ public class PrismarineSummaryModule extends SummaryModule {
         ArrayList<SummarySymbol> list = new ArrayList<>();
         if(parentSummary != null) {
             for(SummarySymbol globalSymbol : parentSummary.getGlobalSymbols()) {
-                if(!Objects.equals(((PrismarineSummaryModule) globalSymbol.getParentFileSummary()).getFileLocation(), this.getFileLocation())) {
+                if(globalSymbol.getParentFileSummary() == null || !Objects.equals(((PrismarineSummaryModule) globalSymbol.getParentFileSummary()).getFileLocation(), this.getFileLocation())) {
                     list.add(globalSymbol);
                 }
             }

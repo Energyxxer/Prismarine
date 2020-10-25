@@ -3,6 +3,7 @@ package com.energyxxer.prismarine.typesystem;
 import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenGroup;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
+import com.energyxxer.prismarine.PrismarineCompiler;
 import com.energyxxer.prismarine.PrismarineProductions;
 import com.energyxxer.prismarine.operators.OperatorManager;
 import com.energyxxer.prismarine.reporting.PrismarineException;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 public abstract class PrismarineTypeSystem {
     public static final PrismarineException.Type TYPE_ERROR = new PrismarineException.Type("Type Error");
 
+    protected final PrismarineCompiler compiler;
     protected final ISymbolContext globalCtx;
 
     private final LinkedHashMap<String, TypeHandler<?>> primitiveHandlers = new LinkedHashMap<>();
@@ -26,7 +28,8 @@ public abstract class PrismarineTypeSystem {
 
     private TypeHandler<?> metaTypeHandler;
 
-    public PrismarineTypeSystem(ISymbolContext globalCtx) {
+    public PrismarineTypeSystem(PrismarineCompiler compiler, ISymbolContext globalCtx) {
+        this.compiler = compiler;
         this.globalCtx = globalCtx;
 
         registerTypes();
@@ -341,4 +344,8 @@ public abstract class PrismarineTypeSystem {
     }
 
     public abstract OperatorManager getOperatorManager();
+
+    public ISymbolContext getGlobalContext() {
+        return globalCtx;
+    }
 }

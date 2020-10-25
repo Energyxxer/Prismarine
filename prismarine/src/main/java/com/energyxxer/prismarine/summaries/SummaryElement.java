@@ -1,6 +1,5 @@
 package com.energyxxer.prismarine.summaries;
 
-import com.energyxxer.enxlex.lexical_analysis.summary.SummaryModule;
 import com.energyxxer.prismarine.symbols.SymbolVisibility;
 
 import java.nio.file.Path;
@@ -14,7 +13,7 @@ public interface SummaryElement {
 
     void putElement(SummaryElement element);
 
-    SummaryModule getParentFileSummary();
+    PrismarineSummaryModule getParentFileSummary();
 
     void collectGlobalSymbols(ArrayList<SummarySymbol> list);
 

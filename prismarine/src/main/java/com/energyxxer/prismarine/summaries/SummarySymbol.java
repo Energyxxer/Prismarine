@@ -1,13 +1,12 @@
 package com.energyxxer.prismarine.summaries;
 
-import com.energyxxer.enxlex.lexical_analysis.summary.SummaryModule;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.prismarine.symbols.SymbolVisibility;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.function.Function;
 
 public class SummarySymbol implements SummaryElement {
@@ -17,8 +16,6 @@ public class SummarySymbol implements SummaryElement {
     private SymbolVisibility visibility;
     private HashSet<String> suggestionTags = new HashSet<>();
     private SummaryBlock subBlock = null;
-    private boolean isMember = false;
-    private boolean isStaticField = false;
     private boolean isInstanceField = false;
     private TokenPattern<?> declarationPattern;
 
@@ -26,7 +23,7 @@ public class SummarySymbol implements SummaryElement {
     private SummarySymbol returnType;
 
     public SummarySymbol(PrismarineSummaryModule parentSummary, String name, int declarationIndex) {
-        this(parentSummary, name, SymbolVisibility.GLOBAL, declarationIndex);
+        this(parentSummary, name, SymbolVisibility.PUBLIC, declarationIndex);
     }
 
     public SummarySymbol(PrismarineSummaryModule parentSummary, String name, SymbolVisibility visibility, int declarationIndex) {
@@ -68,7 +65,8 @@ public class SummarySymbol implements SummaryElement {
 
     @Override
     public void putElement(SummaryElement element) {
-        throw new UnsupportedOperationException();
+        if(subBlock != null) subBlock.putElement(element);
+        else throw new UnsupportedOperationException();
     }
 
     @Override
@@ -95,7 +93,7 @@ public class SummarySymbol implements SummaryElement {
 
     @Override
     public void collectSymbolsVisibleAt(int index, ArrayList<SummarySymbol> list, Path fromPath) {
-        if(!isMember && (index < 0 || visibility.isVisibleFromSummaryBlock(this, fromPath, index))) {
+        if(index < 0 || visibility.isVisibleFromSummaryBlock(this, fromPath, index)) {
             list.removeIf(e -> e.getName().equals(name));
             list.add(this);
         }
@@ -103,7 +101,7 @@ public class SummarySymbol implements SummaryElement {
 
     @Override
     public void collectGlobalSymbols(ArrayList<SummarySymbol> list) {
-        if(!isMember && getVisibility() == SymbolVisibility.GLOBAL) {
+        if(getVisibility() == SymbolVisibility.GLOBAL) {
             list.removeIf(e -> e.getName().equals(this.getName()));
             list.add(this);
         }
@@ -126,16 +124,8 @@ public class SummarySymbol implements SummaryElement {
         this.subBlock = subBlock;
     }
 
-    public boolean isMember() {
-        return isMember;
-    }
-
-    public void setMember(boolean member) {
-        isMember = member;
-    }
-
-    public void setStaticField(boolean staticField) {
-        isStaticField = staticField;
+    public SummaryBlock getSubBlock() {
+        return subBlock;
     }
 
     public void setInstanceField(boolean instanceField) {
@@ -143,17 +133,13 @@ public class SummarySymbol implements SummaryElement {
     }
 
     @Override
-    public SummaryModule getParentFileSummary() {
+    public PrismarineSummaryModule getParentFileSummary() {
         return parentSummary;
-    }
-
-    public boolean isField() {
-        return isInstanceField || isStaticField;
     }
 
     private int scopeStart, scopeEnd;
 
-    public void setFieldScope(int start, int end) {
+    public void setScope(int start, int end) {
         this.scopeStart = start;
         this.scopeEnd = end;
     }
@@ -167,7 +153,7 @@ public class SummarySymbol implements SummaryElement {
         return declarationPattern;
     }
 
-    public Collection<SummarySymbol> getSubSymbols(Path fromFile, int inFileIndex) {
+    public List<SummarySymbol> getSubSymbols(Path fromFile, int inFileIndex) {
         ArrayList<SummarySymbol> list = new ArrayList<>();
         if(subBlock != null) {
             subBlock.collectStaticSubSymbols(null, fromFile, inFileIndex, list);
@@ -178,7 +164,7 @@ public class SummarySymbol implements SummaryElement {
         return list;
     }
 
-    public Collection<SummarySymbol> getSubSymbolsByName(String name, Path fromFile, int inFileIndex) {
+    public List<SummarySymbol> getSubSymbolsByName(String name, Path fromFile, int inFileIndex) {
         ArrayList<SummarySymbol> list = new ArrayList<>();
         if(subBlock != null) {
             subBlock.collectStaticSubSymbols(name, fromFile, inFileIndex, list);
@@ -189,16 +175,13 @@ public class SummarySymbol implements SummaryElement {
         return list;
     }
 
-    boolean isMemberOrStaticFieldAndVisible(String name, Path fromFile, int inFileIndex) {
-        if(name != null && !this.getName().equals(name)) return false;
-        return isMember || (isStaticField && visibility.isVisibleFromSummaryBlock(this, fromFile, inFileIndex));
+    public boolean isVisible(Path fromFile, int inFileIndex) {
+        return visibility.isVisibleFromSummaryBlock(this, fromFile, inFileIndex);
     }
 
-    public boolean isInstanceFieldAndVisible(String name, Path fromFile, int inFileIndex) {
-        if(name != null && !this.getName().equals(name)) return false;
-        return isInstanceField && visibility.isVisibleFromSummaryBlock(this, fromFile, inFileIndex);
+    public boolean isInstanceField() {
+        return isInstanceField;
     }
-
 
     public int getScopeStart() {
         return scopeStart;

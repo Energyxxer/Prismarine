@@ -20,11 +20,11 @@ public class Symbol {
     private TypeConstraints typeConstraints = null;
 
     private Symbol() {
-        visibility = SymbolVisibility.GLOBAL;
+        visibility = SymbolVisibility.PUBLIC;
     }
 
     public Symbol(String name) {
-        this(name, SymbolVisibility.GLOBAL);
+        this(name, SymbolVisibility.PUBLIC);
     }
 
     public Symbol(String name, SymbolVisibility visibility) {

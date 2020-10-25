@@ -14,7 +14,7 @@ public class TypedFunction {
     protected final TokenPattern<?> definingPattern;
     protected final PrismarineFunction function;
     protected List<FormalParameter> formalParameters;
-    protected @NotNull SymbolVisibility visibility = SymbolVisibility.GLOBAL;
+    protected @NotNull SymbolVisibility visibility = SymbolVisibility.PUBLIC;
 
     public TypedFunction(String name) {
         this.name = name;

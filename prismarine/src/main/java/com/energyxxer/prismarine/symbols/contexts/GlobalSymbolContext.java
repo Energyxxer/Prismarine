@@ -11,6 +11,7 @@ import java.util.Map;
 
 public class GlobalSymbolContext implements ISymbolContext {
     private final PrismarineCompiler compiler;
+    private ISymbolContext parent;
     private HashMap<String, Symbol> map = new HashMap<>();
 
     public GlobalSymbolContext(PrismarineCompiler compiler) {
@@ -24,7 +25,14 @@ public class GlobalSymbolContext implements ISymbolContext {
 
     @Override
     public Symbol search(@NotNull String name, ISymbolContext from, ActualParameterList params) {
-        return map.get(name);
+        Symbol existing = map.get(name);
+        if(existing != null) {
+            return existing;
+        }
+        if(parent != null) {
+            return parent.search(name, from, params);
+        }
+        return null;
     }
 
     @Override
@@ -47,10 +55,17 @@ public class GlobalSymbolContext implements ISymbolContext {
     }
 
     @Override
-    public HashMap<String, Symbol> collectVisibleSymbols(HashMap<String, Symbol> list, ISymbolContext from) {
-        for(Map.Entry<String, Symbol> entry : map.entrySet()) {
-            list.putIfAbsent(entry.getKey(), entry.getValue());
+    public HashMap<String, Symbol> collectVisibleSymbols(HashMap<String, Symbol> map, ISymbolContext from) {
+        for(Map.Entry<String, Symbol> entry : this.map.entrySet()) {
+            map.putIfAbsent(entry.getKey(), entry.getValue());
         }
-        return map;
+        if(parent != null) {
+            parent.collectVisibleSymbols(map, from);
+        }
+        return this.map;
+    }
+
+    public void setParent(ISymbolContext parent) {
+        this.parent = parent;
     }
 }

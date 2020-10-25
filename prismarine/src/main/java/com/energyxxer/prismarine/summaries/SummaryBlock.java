@@ -1,11 +1,12 @@
 package com.energyxxer.prismarine.summaries;
 
-import com.energyxxer.enxlex.lexical_analysis.summary.SummaryModule;
 import com.energyxxer.prismarine.symbols.SymbolVisibility;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class SummaryBlock implements SummaryElement {
     private boolean fixed = false;
@@ -14,6 +15,8 @@ public class SummaryBlock implements SummaryElement {
     private int startIndex;
     private int endIndex;
     private ArrayList<SummaryElement> subElements = new ArrayList<>();
+    @NotNull
+    private RepeatPolicy repeatPolicy = RepeatPolicy.DUPLICATE;
 
     public SummaryBlock(PrismarineSummaryModule parentSummary) {
         this(parentSummary, 0, Integer.MAX_VALUE);
@@ -40,6 +43,17 @@ public class SummaryBlock implements SummaryElement {
     @Override
     public void putElement(SummaryElement element) {
         clearEmptyBlocks();
+        if(repeatPolicy != RepeatPolicy.DUPLICATE) {
+            SummaryElement existing = getElementByName(element.getName());
+            if(existing != null) {
+                if (repeatPolicy == RepeatPolicy.REPLACE) {
+                    subElements.remove(existing);
+                } else {
+                    return; //keep
+                }
+            }
+        }
+
         int i = subElements.size();
         while(i > 0) {
             if(element.getStartIndex() >= subElements.get(i-1).getStartIndex()) break;
@@ -84,8 +98,8 @@ public class SummaryBlock implements SummaryElement {
             SummaryElement elem = subElements.get(i);
             if(elem.getStartIndex() < start) continue;
             if(elem.getStartIndex() >= end) break;
-            if(elem instanceof SummarySymbol && ((SummarySymbol) elem).isField()) {
-                ((SummarySymbol) elem).setFieldScope(start, end);
+            if(elem instanceof SummarySymbol) {
+                ((SummarySymbol) elem).setScope(start, end);
             }
             if(sub == null) sub = new SummaryBlock(parentSummary, start, end, associatedSymbol);
             sub.putElement(elem);
@@ -120,6 +134,13 @@ public class SummaryBlock implements SummaryElement {
         }
     }
 
+    public SummaryElement getElementByName(String name) {
+        for(SummaryElement elem : subElements) {
+            if(elem.getName().equals(name)) return elem;
+        }
+        return null;
+    }
+
     @Override
     public void collectGlobalSymbols(ArrayList<SummarySymbol> list) {
         if(associatedSymbol != null) associatedSymbol.collectGlobalSymbols(list);
@@ -145,19 +166,23 @@ public class SummaryBlock implements SummaryElement {
     }
 
     @Override
-    public SummaryModule getParentFileSummary() {
+    public PrismarineSummaryModule getParentFileSummary() {
         return parentSummary;
     }
 
     @Override
     public SymbolVisibility getVisibility() {
-        return associatedSymbol != null ? associatedSymbol.getVisibility() : SymbolVisibility.GLOBAL;
+        return associatedSymbol != null ? associatedSymbol.getVisibility() : SymbolVisibility.PUBLIC;
     }
 
     void collectStaticSubSymbols(String name, Path fromFile, int inFileIndex, ArrayList<SummarySymbol> list) {
         for(SummaryElement element : subElements) {
             if(element instanceof SummarySymbol) {
-                if(((SummarySymbol) element).isMemberOrStaticFieldAndVisible(name, fromFile, inFileIndex)) {
+                if(
+                        (name == null || name.equals(element.getName()))
+                                && !((SummarySymbol) element).isInstanceField()
+                                && ((SummarySymbol) element).isVisible(fromFile, inFileIndex)
+                ) {
                     list.add((SummarySymbol) element);
                 }
             }
@@ -167,10 +192,31 @@ public class SummaryBlock implements SummaryElement {
     void collectInstanceSubSymbols(String name, Path fromFile, int inFileIndex, ArrayList<SummarySymbol> list) {
         for(SummaryElement element : subElements) {
             if(element instanceof SummarySymbol) {
-                if(((SummarySymbol) element).isInstanceFieldAndVisible(name, fromFile, inFileIndex)) {
+                if(
+                        (name == null || name.equals(element.getName()))
+                                && ((SummarySymbol) element).isInstanceField()
+                                && ((SummarySymbol) element).isVisible(fromFile, inFileIndex)
+                ) {
                     list.add((SummarySymbol) element);
                 }
             }
         }
+    }
+
+    @NotNull
+    public RepeatPolicy getRepeatPolicy() {
+        return repeatPolicy;
+    }
+
+    public void setRepeatPolicy(@NotNull RepeatPolicy repeatPolicy) {
+        this.repeatPolicy = repeatPolicy;
+    }
+
+    public void removeIf(Predicate<SummaryElement> filter) {
+        subElements.removeIf(filter);
+    }
+
+    public enum RepeatPolicy {
+        KEEP, DUPLICATE, REPLACE
     }
 }

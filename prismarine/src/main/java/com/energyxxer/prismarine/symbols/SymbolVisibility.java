@@ -7,6 +7,7 @@ import java.nio.file.Path;
 
 public abstract class SymbolVisibility {
 
+    //Special. Visible from any context.
     public static final SymbolVisibility GLOBAL = new SymbolVisibility(999) {
         @Override
         public boolean isVisibleFromContext(Symbol symbol, ISymbolContext containingContext, ISymbolContext accessingContext) {
@@ -21,6 +22,24 @@ public abstract class SymbolVisibility {
         @Override
         public String toString() {
             return "GLOBAL";
+        }
+    };
+
+    //Accessible from anywhere, so long as it's accessed from the parent
+    public static final SymbolVisibility PUBLIC = new SymbolVisibility(998) {
+        @Override
+        public boolean isVisibleFromContext(Symbol symbol, ISymbolContext containingContext, ISymbolContext accessingContext) {
+            return true;
+        }
+
+        @Override
+        public boolean isVisibleFromSummaryBlock(SummarySymbol symbol, Path fromPath, int inFileIndex) {
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return "PUBLIC";
         }
     };
 

@@ -72,7 +72,7 @@ public class PrismarineFunction implements PrimitivePrismarineFunction {
         private Object thisObject;
 
         public FixedThisFunctionSymbol(String name, PrismarineFunction pickedOverload, Object thisObject) {
-            super(name, SymbolVisibility.GLOBAL);
+            super(name, SymbolVisibility.PUBLIC);
             this.pickedOverload = pickedOverload;
             this.thisObject = thisObject;
         }
