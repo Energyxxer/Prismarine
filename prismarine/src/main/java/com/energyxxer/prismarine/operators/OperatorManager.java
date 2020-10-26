@@ -150,8 +150,9 @@ public class OperatorManager<T extends TypedFunction> {
             }
         }
 
-        PrismarineFunction function = family.pickOverload(new ActualParameterList(Arrays.asList(operands), Arrays.asList(operandPatterns), expr), expr, ctx);
-        return function.safeCall(operands, operandPatterns, expr, ctx, null);
+        ActualParameterList params = new ActualParameterList(operands, operandPatterns, expr);
+        PrismarineFunction function = family.pickOverload(params, ctx);
+        return function.safeCall(params, ctx, null);
     }
 
     public Object evaluateUnaryLeft(String symbol, Object[] operands, TokenExpression expr, ISymbolContext ctx) {

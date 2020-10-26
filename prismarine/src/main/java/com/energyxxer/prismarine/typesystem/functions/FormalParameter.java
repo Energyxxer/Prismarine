@@ -1,38 +1,43 @@
 package com.energyxxer.prismarine.typesystem.functions;
 
 import com.energyxxer.prismarine.typesystem.TypeConstraints;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
 
 public class FormalParameter {
+    @NotNull
     private String name;
+    @NotNull
     private TypeConstraints constraints;
 
-    public FormalParameter(String name, TypeConstraints constraints) {
+    public FormalParameter(@NotNull String name, @NotNull TypeConstraints constraints) {
         this.name = name;
         this.constraints = constraints;
     }
 
+    @NotNull
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(@NotNull String name) {
         this.name = name;
     }
 
+    @NotNull
     public TypeConstraints getConstraints() {
         return constraints;
     }
 
-    public void setConstraints(TypeConstraints constraints) {
+    public void setConstraints(@NotNull TypeConstraints constraints) {
         this.constraints = constraints;
     }
 
     @Override
     public String toString() {
-        return name + (constraints != null ? " : " + constraints : "");
+        return name + " : " + constraints;
     }
 
     @Override

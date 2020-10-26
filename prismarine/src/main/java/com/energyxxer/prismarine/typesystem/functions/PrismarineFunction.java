@@ -21,15 +21,15 @@ public class PrismarineFunction implements PrimitivePrismarineFunction {
     }
 
     @Override
-    public Object call(Object[] params, TokenPattern<?>[] patterns, TokenPattern<?> pattern, ISymbolContext ctx, Object thisObject) {
+    public Object call(ActualParameterList params, ISymbolContext ctx, Object thisObject) {
         TokenPattern<?> functionPattern = branch.getFunctionPattern();
 
-        if(declaringContext != null) ctx.getCompiler().getCallStack().push(new CallStack.Call(functionName, functionPattern, declaringContext.getStaticParentUnit(), pattern));
+        if(declaringContext != null) ctx.getCompiler().getCallStack().push(new CallStack.Call(functionName, functionPattern, declaringContext.getStaticParentUnit(), params.getPattern()));
 
         try {
-            return branch.call(params, patterns, pattern, declaringContext, ctx, thisObject);
+            return branch.call(params, declaringContext, ctx, thisObject);
         } catch(StackOverflowError x) {
-            throw new PrismarineException(PrismarineException.Type.INTERNAL_EXCEPTION, "Stack Overflow Error", pattern, ctx);
+            throw new PrismarineException(PrismarineException.Type.INTERNAL_EXCEPTION, "Stack Overflow Error", params.getPattern(), ctx);
         } finally {
             if(declaringContext != null) ctx.getCompiler().getCallStack().pop();
         }
@@ -62,8 +62,8 @@ public class PrismarineFunction implements PrimitivePrismarineFunction {
         }
 
         @Override
-        public Object call(Object[] params, TokenPattern<?>[] patterns, TokenPattern<?> pattern, ISymbolContext ctx, Object thisObject) {
-            return function.call(params, patterns, pattern, ctx, this.thisObject);
+        public Object call(ActualParameterList params, ISymbolContext ctx, Object thisObject) {
+            return function.call(params, ctx, this.thisObject);
         }
     }
 
@@ -85,8 +85,8 @@ public class PrismarineFunction implements PrimitivePrismarineFunction {
             return thisObject;
         }
 
-        public Object safeCall(Object[] params, TokenPattern<?>[] patterns, TokenPattern<?> pattern, ISymbolContext ctx) {
-            return pickedOverload.safeCall(params, patterns, pattern, ctx, this.thisObject);
+        public Object safeCall(ActualParameterList params, ISymbolContext ctx) {
+            return pickedOverload.safeCall(params, ctx, this.thisObject);
         }
     }
 }

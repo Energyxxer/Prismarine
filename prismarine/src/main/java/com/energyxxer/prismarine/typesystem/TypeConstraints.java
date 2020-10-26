@@ -81,19 +81,19 @@ public class TypeConstraints {
 
     //6: exact match
     //5: subtype match
-    //4: any type match
-    //3: coercion match
-    //2: null match
-    //1: overfill match
+    //4: coercion match
+    //3: any type match
+    //2: null-explicit match
+    //1: null-implicit match
     //0: no match
     public int rateMatch(Object value, ISymbolContext ctx) {
         if(value == null && nullable) return 2;
-        if(handler == null && value != null) return 4;
+        if(handler == null && value != null) return 3;
         if(!verify(value, ctx)) return 0;
         TypeHandler objectTypeHandler = typeSystem.getHandlerForObject(value);
         if(objectTypeHandler == handler) return 6;
         if(handler.isInstance(value)) return 5;
-        if(objectTypeHandler.canCoerce(value, handler, ctx)) return 3;
+        if(objectTypeHandler.canCoerce(value, handler, ctx)) return 4;
         return 0;
     }
 

@@ -1,7 +1,11 @@
 package com.energyxxer.prismarine.typesystem.functions.typed;
 
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
+import com.energyxxer.prismarine.reporting.PrismarineException;
 import com.energyxxer.prismarine.symbols.SymbolVisibility;
+import com.energyxxer.prismarine.symbols.contexts.ISymbolContext;
+import com.energyxxer.prismarine.typesystem.PrismarineTypeSystem;
+import com.energyxxer.prismarine.typesystem.functions.ActualParameterList;
 import com.energyxxer.prismarine.typesystem.functions.FormalParameter;
 import com.energyxxer.prismarine.typesystem.functions.PrismarineFunction;
 import org.jetbrains.annotations.NotNull;
@@ -66,5 +70,35 @@ public class TypedFunction {
     public String toString() {
         String formalParams = formalParameters.toString();
         return name + "(" + formalParams.substring(1, formalParams.length()-1) + ")";
+    }
+
+
+    public static Object[] getActualParameterByFormalIndex(int formalIndex, List<FormalParameter> formalParams, ActualParameterList actualParams, ISymbolContext ctx) {
+        FormalParameter formalParameter = formalParams.get(formalIndex);
+        int actualIndex = actualParams.getIndexOfName(formalParameter.getName());
+        if(actualIndex == -1) {
+            //in position
+            actualIndex = formalIndex;
+
+            if(actualParams.getNameForIndex(formalIndex) != null) {
+                throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "There is no argument given that corresponds to the required formal parameter '" + formalParameter.getName() + "'", actualParams.getPattern(formalIndex), ctx);
+            }
+        } else if(actualIndex != formalIndex) {
+            //out of position
+            if(actualParams.getNameForIndex(formalIndex) == null) {
+                throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "Named argument '" + formalParameter.getName() + "' is used out-of-position but its formal position (index " + formalIndex + ") is not named", actualParams.getPattern(formalIndex), ctx);
+            }
+        }
+        Object actualValue;
+        if(actualIndex < actualParams.size()) {
+            actualValue = actualParams.getValue(actualIndex);
+        } else {
+            actualValue = null;
+        }
+
+        formalParameter.getConstraints().validate(actualValue, actualIndex < actualParams.size() ? actualParams.getPattern(actualIndex) : actualParams.getPattern(), ctx);
+        actualValue = formalParameter.getConstraints().adjustValue(actualValue, actualIndex < actualParams.size() ? actualParams.getPattern(actualIndex) : actualParams.getPattern(), ctx);
+
+        return new Object[] {actualValue, actualIndex};
     }
 }

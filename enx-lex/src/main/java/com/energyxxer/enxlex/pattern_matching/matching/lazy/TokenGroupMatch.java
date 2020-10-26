@@ -54,6 +54,7 @@ public class TokenGroupMatch extends TokenPatternMatch {
         TokenMatchResponse longestFailedMatch = null;
 
         boolean[] itemsMatched = new boolean[items.size()];
+        boolean anyItemsMatched = false;
 
         itemLoop: for (int i = 0; i < items.size(); i++) {
 
@@ -95,6 +96,7 @@ public class TokenGroupMatch extends TokenPatternMatch {
                     currentIndex += itemMatch.length;
                     length += itemMatch.length;
                     itemsMatched[i] = true;
+                    anyItemsMatched = true;
                 }
             }
         }
@@ -108,7 +110,7 @@ public class TokenGroupMatch extends TokenPatternMatch {
             expected = longestFailedMatch.expected;
         }
 
-        if(!hasMatched && length > 0) {
+        if(!hasMatched && length > 0 && anyItemsMatched) {
             //check for recessive matches
             boolean allRecessive = true;
             for(int i = 0; i < items.size(); i++) {

@@ -25,7 +25,7 @@ public abstract class PrismarineFunctionBranch {
 
     public abstract TokenPattern<?> getFunctionPattern();
 
-    public abstract Object call(Object[] params, TokenPattern<?>[] patterns, TokenPattern<?> pattern, ISymbolContext declaringCtx, ISymbolContext callingCtx, Object thisObject);
+    public abstract Object call(ActualParameterList pattern, ISymbolContext declaringCtx, ISymbolContext callingCtx, Object thisObject);
 
     public TypeConstraints getReturnConstraints() {
         return returnConstraints;
