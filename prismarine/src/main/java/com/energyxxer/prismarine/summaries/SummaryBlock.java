@@ -175,7 +175,7 @@ public class SummaryBlock implements SummaryElement {
         return associatedSymbol != null ? associatedSymbol.getVisibility() : SymbolVisibility.PUBLIC;
     }
 
-    void collectStaticSubSymbols(String name, Path fromFile, int inFileIndex, ArrayList<SummarySymbol> list) {
+    public void collectStaticSubSymbols(String name, Path fromFile, int inFileIndex, ArrayList<SummarySymbol> list) {
         for(SummaryElement element : subElements) {
             if(element instanceof SummarySymbol) {
                 if(
@@ -189,7 +189,7 @@ public class SummaryBlock implements SummaryElement {
         }
     }
 
-    void collectInstanceSubSymbols(String name, Path fromFile, int inFileIndex, ArrayList<SummarySymbol> list) {
+    public void collectInstanceSubSymbols(String name, Path fromFile, int inFileIndex, ArrayList<SummarySymbol> list) {
         for(SummaryElement element : subElements) {
             if(element instanceof SummarySymbol) {
                 if(
@@ -214,6 +214,10 @@ public class SummaryBlock implements SummaryElement {
 
     public void removeIf(Predicate<SummaryElement> filter) {
         subElements.removeIf(filter);
+    }
+
+    public SummarySymbol getAssociatedSymbol() {
+        return associatedSymbol;
     }
 
     public enum RepeatPolicy {

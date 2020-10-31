@@ -47,7 +47,7 @@ public class PrismarineLibrary {
             //input is null because we avoid calling performQuery(), and instead pass the string contents ourselves.
 
             for(PrismarineLibraryUnit unit : libraryUnits) {
-                ProjectReader.Query query = reader.startQuery(unit.getRelativePath()).needsPattern(unit.getUnitConfig()).needsSummary(unit.getUnitConfig(), true);
+                ProjectReader.Query query = reader.startQuery(unit.getRelativePath()).needsPattern(unit.getUnitConfig()).needsSummary(unit.getUnitConfig(), null,true);
                 ProjectReader.Result result = reader.populateParseResult(query, new LibrarySource(name, unit.getRelativePath()), reader.createResultFromString(unit.getContent()));
 
                 if(!result.matchResponse.matched) {

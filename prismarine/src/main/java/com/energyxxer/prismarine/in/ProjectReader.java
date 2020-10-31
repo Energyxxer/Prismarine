@@ -9,6 +9,7 @@ import com.energyxxer.enxlex.pattern_matching.TokenMatchResponse;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.enxlex.report.Report;
 import com.energyxxer.prismarine.PrismarineLanguageUnitConfiguration;
+import com.energyxxer.prismarine.summaries.PrismarineProjectSummary;
 import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
 import com.energyxxer.prismarine.util.FileUtil;
 import com.energyxxer.prismarine.worker.PrismarineProjectWorker;
@@ -91,6 +92,7 @@ public class ProjectReader {
 
         protected boolean skipIfNotChanged = false;
 
+        protected PrismarineProjectSummary parentSummary = null;
         protected boolean skipSummaryIfMatchFailed = false;
 
         protected Query(ProjectReader reader, Path relativePath) {
@@ -122,11 +124,16 @@ public class ProjectReader {
             return this;
         }
 
-        public Query needsSummary(PrismarineLanguageUnitConfiguration unitConfig, boolean skipIfMatchFailed) {
+        public Query needsSummary(PrismarineLanguageUnitConfiguration unitConfig, PrismarineProjectSummary parentSummary, boolean skipIfMatchFailed) {
             this.needsPattern(unitConfig);
             this.needsSummary = true;
+            this.parentSummary = parentSummary;
             this.skipSummaryIfMatchFailed = skipIfMatchFailed;
             return this;
+        }
+
+        public PrismarineProjectSummary getParentSummary() {
+            return parentSummary;
         }
 
         public Query skipIfNotChanged() {
@@ -189,7 +196,7 @@ public class ProjectReader {
 
             PrismarineSummaryModule summary = null;
             if(query.needsSummary) {
-                summary = query.unitConfig.createSummaryModule(source, query.relativePath);
+                summary = query.unitConfig.createSummaryModule(source, query.relativePath, query.parentSummary);
                 summary.setFileLocation(query.relativePath);
                 lexer.setSummaryModule(summary);
             }

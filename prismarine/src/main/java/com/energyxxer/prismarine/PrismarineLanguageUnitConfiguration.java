@@ -4,6 +4,7 @@ import com.energyxxer.enxlex.lexical_analysis.profiles.LexerProfile;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
 import com.energyxxer.prismarine.in.ProjectReader;
 import com.energyxxer.prismarine.operators.OperatorPool;
+import com.energyxxer.prismarine.summaries.PrismarineProjectSummary;
 import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
 
 import java.nio.file.Path;
@@ -22,7 +23,7 @@ public abstract class PrismarineLanguageUnitConfiguration<T extends PrismarineLa
 
     public abstract LexerProfile createLexerProfile();
 
-    public abstract PrismarineSummaryModule createSummaryModule(TokenSource source, Path relativePath);
+    public abstract PrismarineSummaryModule createSummaryModule(TokenSource source, Path relativePath, PrismarineProjectSummary parentSummary);
 
     public abstract T createUnit(PrismarineCompiler compiler, ProjectReader.Result readResult);
 

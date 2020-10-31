@@ -63,6 +63,14 @@ public class PrismarineSummaryModule extends SummaryModule {
     }
 
     public SummarySymbol getSymbolForName(String name, int index) {
+        //First search symbol stack
+        for(int i = subSymbolStack.size()-1; i >= 0; i--) {
+            SummarySymbol element = subSymbolStack.get(i);
+            if(element != null && element.getName().equals(name)) {
+                return element;
+            }
+        }
+        //If not found, search the rest.
         Collection<SummarySymbol> rootSymbols = getSymbolsVisibleAt(index);
         for(SummarySymbol sym : rootSymbols) {
             if(sym.getName().equals(name)) {
@@ -76,7 +84,7 @@ public class PrismarineSummaryModule extends SummaryModule {
         ArrayList<SummarySymbol> list = new ArrayList<>();
         if(parentSummary != null) {
             for(SummarySymbol globalSymbol : parentSummary.getGlobalSymbols()) {
-                if(globalSymbol.getParentFileSummary() == null || !Objects.equals(((PrismarineSummaryModule) globalSymbol.getParentFileSummary()).getFileLocation(), this.getFileLocation())) {
+                if(globalSymbol.getParentFileSummary() == null || !Objects.equals(globalSymbol.getParentFileSummary().getFileLocation(), this.getFileLocation())) {
                     list.add(globalSymbol);
                 }
             }
@@ -178,6 +186,10 @@ public class PrismarineSummaryModule extends SummaryModule {
 
     public void addTodo(Token token, String text) {
         todos.add(new Todo(token, text));
+    }
+
+    public SummaryBlock getFileBlock() {
+        return fileBlock;
     }
 
     public static class SymbolUsage {

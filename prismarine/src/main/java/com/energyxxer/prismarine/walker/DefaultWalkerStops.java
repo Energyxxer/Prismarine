@@ -55,7 +55,7 @@ public class DefaultWalkerStops {
 
                     ProjectReader.Result result = walker.getReader()
                             .startQuery(relativePath)
-                            .needsSummary(unitConfig, true)
+                            .needsSummary(unitConfig, walker.getSubject(), true)
                             .perform();
 
                     if(result.getSummary() != null) {
