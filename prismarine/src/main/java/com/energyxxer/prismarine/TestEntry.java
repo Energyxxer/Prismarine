@@ -1,6 +1,6 @@
 package com.energyxxer.prismarine;
 
-import com.energyxxer.prismarine.util.FileUtil;
+import com.energyxxer.util.FileUtil;
 
 import java.io.File;
 import java.io.InputStream;

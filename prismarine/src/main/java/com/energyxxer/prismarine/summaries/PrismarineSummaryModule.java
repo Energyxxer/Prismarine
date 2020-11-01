@@ -4,7 +4,7 @@ import com.energyxxer.enxlex.lexical_analysis.summary.SummaryModule;
 import com.energyxxer.enxlex.lexical_analysis.summary.Todo;
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
-import com.energyxxer.prismarine.util.SortedList;
+import com.energyxxer.util.SortedList;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -104,8 +104,13 @@ public class PrismarineSummaryModule extends SummaryModule {
                 }
             }
         }
+        collectExternalSymbolsVisibleToFile(list, fromPath);
         fileBlock.collectSymbolsVisibleAt(index, list, fromPath);
         searchingSymbols = false;
+    }
+
+    public void collectExternalSymbolsVisibleToFile(ArrayList<SummarySymbol> list, Path fromPath) {
+
     }
 
     public Collection<SummarySymbol> getGlobalSymbols() {

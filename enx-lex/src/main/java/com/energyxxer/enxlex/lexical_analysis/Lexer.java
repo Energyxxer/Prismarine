@@ -1,5 +1,6 @@
 package com.energyxxer.enxlex.lexical_analysis;
 
+import com.energyxxer.enxlex.lexical_analysis.inspections.InspectionModule;
 import com.energyxxer.enxlex.lexical_analysis.profiles.LexerProfile;
 import com.energyxxer.enxlex.lexical_analysis.summary.SummaryModule;
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
@@ -19,6 +20,7 @@ public abstract class Lexer {
 
     protected SuggestionModule suggestionModule = null;
     protected SummaryModule summaryModule = null;
+    protected InspectionModule inspectionModule = null;
 
     protected int currentIndex = 0;
 
@@ -57,6 +59,13 @@ public abstract class Lexer {
         this.summaryModule = summaryModule;
     }
 
+    public InspectionModule getInspectionModule() {
+        return inspectionModule;
+    }
+
+    public void setInspectionModule(InspectionModule inspectionModule) {
+        this.inspectionModule = inspectionModule;
+    }
 
 
 

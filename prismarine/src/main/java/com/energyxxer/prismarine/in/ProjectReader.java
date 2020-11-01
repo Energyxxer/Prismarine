@@ -11,7 +11,7 @@ import com.energyxxer.enxlex.report.Report;
 import com.energyxxer.prismarine.PrismarineLanguageUnitConfiguration;
 import com.energyxxer.prismarine.summaries.PrismarineProjectSummary;
 import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
-import com.energyxxer.prismarine.util.FileUtil;
+import com.energyxxer.util.FileUtil;
 import com.energyxxer.prismarine.worker.PrismarineProjectWorker;
 import com.energyxxer.prismarine.worker.tasks.SetupProductionsTask;
 import com.google.gson.Gson;
