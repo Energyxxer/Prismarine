@@ -77,15 +77,15 @@ public class Report {
     public HashMap<String, ArrayList<Notice>> group() {
         HashMap<String, ArrayList<Notice>> map = new HashMap<>();
 
-        for(Notice n : getInfo()) {
-            if(!map.containsKey(n.getGroup())) map.put(n.getGroup(), new ArrayList<>());
-            map.get(n.getGroup()).add(n);
-        }
         for(Notice n : getWarnings()) {
             if(!map.containsKey(n.getGroup())) map.put(n.getGroup(), new ArrayList<>());
             map.get(n.getGroup()).add(n);
         }
         for(Notice n : getErrors()) {
+            if(!map.containsKey(n.getGroup())) map.put(n.getGroup(), new ArrayList<>());
+            map.get(n.getGroup()).add(n);
+        }
+        for(Notice n : getInfo()) {
             if(!map.containsKey(n.getGroup())) map.put(n.getGroup(), new ArrayList<>());
             map.get(n.getGroup()).add(n);
         }
