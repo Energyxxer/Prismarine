@@ -3,6 +3,8 @@ package com.energyxxer.prismarine.typesystem;
 import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenGroup;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
+import com.energyxxer.enxlex.report.Notice;
+import com.energyxxer.enxlex.report.NoticeType;
 import com.energyxxer.prismarine.PrismarineCompiler;
 import com.energyxxer.prismarine.PrismarineProductions;
 import com.energyxxer.prismarine.operators.OperatorManager;
@@ -326,10 +328,8 @@ public abstract class PrismarineTypeSystem {
             listener.accept(userDefinedTypes.get(typeIdentifier));
             return;
         }
-        if(!userDefinedTypeListeners.containsKey(typeIdentifier)) {
-            userDefinedTypeListeners.put(typeIdentifier, new ArrayList<>());
-        }
-        userDefinedTypeListeners.get(typeIdentifier).add(listener);
+        userDefinedTypeListeners.computeIfAbsent(typeIdentifier, k -> new ArrayList<>())
+                .add(listener);
     }
 
     public void registerUserDefinedType(TypeHandler<?> type) {
@@ -340,6 +340,12 @@ public abstract class PrismarineTypeSystem {
                 listener.accept(type);
             }
             userDefinedTypeListeners.remove(type.getTypeIdentifier());
+        }
+    }
+
+    public void reportUnfulfilledUserDefinedTypes() {
+        for(String typeIdentifier : userDefinedTypeListeners.keySet()) {
+            compiler.getReport().addNotice(new Notice(NoticeType.ERROR, "Unfulfilled user-defined type constraint: " + typeIdentifier));
         }
     }
 

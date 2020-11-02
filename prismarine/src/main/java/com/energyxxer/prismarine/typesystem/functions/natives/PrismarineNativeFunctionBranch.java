@@ -141,10 +141,10 @@ public class PrismarineNativeFunctionBranch extends PrismarineFunctionBranch {
 
         if(returnConstraints != null) {
             if(shouldCoerceReturn) {
-                returnConstraints.validate(returnValue, null, callingCtx);
+                returnConstraints.validate(returnValue, actualParams.getPattern(), callingCtx);
                 returnValue = returnConstraints.adjustValue(returnValue, actualParams.getPattern(), callingCtx);
             } else {
-                returnConstraints.validateExact(returnValue, null, callingCtx);
+                returnConstraints.validateExact(returnValue, actualParams.getPattern(), callingCtx);
             }
         }
         return returnValue;

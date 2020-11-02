@@ -8,6 +8,7 @@ import com.energyxxer.util.SortedList;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class PrismarineSummaryModule extends SummaryModule {
@@ -16,6 +17,8 @@ public class PrismarineSummaryModule extends SummaryModule {
     protected SummaryBlock fileBlock = new SummaryBlock(this);
     protected ArrayList<Path> requires = new ArrayList<>();
     protected ArrayList<Todo> todos = new ArrayList<>();
+
+    public ArrayList<Consumer<PrismarineSummaryModule>> fileAwareProcessors = new ArrayList<>();
 
     private boolean searchingSymbols = false;
 
@@ -207,5 +210,16 @@ public class PrismarineSummaryModule extends SummaryModule {
             this.pattern = pattern;
             index = pattern.getStringLocation().index;
         }
+    }
+
+    public void addFileAwareProcessor(Consumer<PrismarineSummaryModule> r) {
+        fileAwareProcessors.add(r);
+    }
+
+    public void runFileAwareProcessors() {
+        for(Consumer<PrismarineSummaryModule> r : fileAwareProcessors) {
+            r.accept(this);
+        }
+        fileAwareProcessors.clear();
     }
 }

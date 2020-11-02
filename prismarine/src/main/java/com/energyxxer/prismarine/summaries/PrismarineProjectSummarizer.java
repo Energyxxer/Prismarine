@@ -117,6 +117,12 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
             return;
         }
 
+        if(parentSummarizer == null) {
+            for(PrismarineSummaryModule fileSummary : summary.fileSummaries) {
+                fileSummary.runFileAwareProcessors();
+            }
+        }
+
         for(java.lang.Runnable r : completionListeners) {
             r.run();
         }
