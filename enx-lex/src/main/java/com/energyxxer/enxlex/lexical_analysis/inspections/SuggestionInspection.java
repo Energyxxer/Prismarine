@@ -1,15 +1,14 @@
 package com.energyxxer.enxlex.lexical_analysis.inspections;
 
+import java.util.ArrayList;
+
 public class SuggestionInspection implements Inspection {
     private String description;
 
     private int startIndex;
     private int endIndex;
 
-    private String replacementText;
-
-    private int replacementStartIndex;
-    private int replacementEndIndex;
+    private ArrayList<InspectionAction> actions = new ArrayList<>();
 
     public SuggestionInspection(String description) {
         this.description = description;
@@ -31,18 +30,6 @@ public class SuggestionInspection implements Inspection {
         return endIndex;
     }
 
-    public String getReplacementText() {
-        return replacementText;
-    }
-
-    public int getReplacementStartIndex() {
-        return replacementStartIndex;
-    }
-
-    public int getReplacementEndIndex() {
-        return replacementEndIndex;
-    }
-
 
     public SuggestionInspection setDescription(String description) {
         this.description = description;
@@ -59,18 +46,12 @@ public class SuggestionInspection implements Inspection {
         return this;
     }
 
-    public SuggestionInspection setReplacementText(String replacementText) {
-        this.replacementText = replacementText;
-        return this;
+    public ArrayList<InspectionAction> getActions() {
+        return actions;
     }
 
-    public SuggestionInspection setReplacementStartIndex(int replacementStartIndex) {
-        this.replacementStartIndex = replacementStartIndex;
-        return this;
-    }
-
-    public SuggestionInspection setReplacementEndIndex(int replacementEndIndex) {
-        this.replacementEndIndex = replacementEndIndex;
+    public SuggestionInspection addAction(InspectionAction action) {
+        actions.add(action);
         return this;
     }
 }
