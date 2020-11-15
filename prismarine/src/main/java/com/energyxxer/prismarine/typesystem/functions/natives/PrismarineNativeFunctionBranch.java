@@ -44,7 +44,6 @@ public class PrismarineNativeFunctionBranch extends PrismarineFunctionBranch {
         String userDefinedIdentifier = null;
         if(userDefinedConstraintAnnot != null) {
             userDefinedIdentifier = userDefinedConstraintAnnot.typeIdentifier();
-            nullable = false;
         }
 
         if(userDefinedIdentifier == null) {

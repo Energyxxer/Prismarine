@@ -85,8 +85,7 @@ public class TokenItem extends TokenPattern<Token> {
 	}
 
     @Override
-    public ArrayList<Token> flattenTokens() {
-	    ArrayList<Token> list = new ArrayList<>();
+    public ArrayList<Token> flattenTokens(ArrayList<Token> list) {
 	    list.add(token);
         return list;
     }

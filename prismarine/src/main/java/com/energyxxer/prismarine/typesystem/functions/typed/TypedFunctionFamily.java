@@ -42,10 +42,13 @@ public class TypedFunctionFamily<T extends TypedFunction> implements PrimitivePr
                 FormalParameter formalParam = formalParams.get(i);
 
                 int actualIndex = actualParams.getIndexOfName(formalParam.getName());
-                if(actualIndex == -1) actualIndex = i;
+                boolean foundByName = actualIndex != -1;
+                if(!foundByName) actualIndex = i;
 
                 Object actualParam = null;
-                if(actualIndex < actualParams.size()) actualParam = actualParams.getValue(actualIndex);
+                if(actualIndex < actualParams.size() && (foundByName || actualParams.getNameForIndex(actualIndex) == null)) {
+                    actualParam = actualParams.getValue(actualIndex);
+                }
 
                 int paramScore = formalParam.getConstraints().rateMatch(actualParam, ctx);
 
@@ -97,25 +100,35 @@ public class TypedFunctionFamily<T extends TypedFunction> implements PrimitivePr
             }
             throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "Overload not found for parameter types: (" + sb.toString() + ")\nValid overloads are:" + overloads.toString(), actualParams.getPattern(), ctx);
         }
-        T bestMatch = bestScoreBranchMatches.get(0);
+        T bestMatch;
         if(bestScoreBranchMatches.size() > 1) {
-            int sameLengthMatches = 0;
-            for(T branch : bestScoreBranchMatches) {
-                if(branch.getFormalParameters().size() == actualParams.size()) {
-                    bestMatch = branch;
-                    sameLengthMatches++;
-                }
-            }
-            if(sameLengthMatches > 1) {
-                throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "Ambiguous call between: " + bestScoreBranchMatches.stream().filter(b->b.getFormalParameters().size() == actualParams.size()).map(b -> b.getFormalParameters().toString()).collect(Collectors.joining(", ")), actualParams.getPattern(), ctx);
-            } else if(sameLengthMatches < 1) {
-                throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "Ambiguous call between: " + bestScoreBranchMatches.stream().map(b -> b.getFormalParameters().toString()).collect(Collectors.joining(", ")), actualParams.getPattern(), ctx);
-            }
+            bestMatch = breakTies(bestScoreBranchMatches, actualParams, ctx);
+        } else {
+            bestMatch = bestScoreBranchMatches.get(0);
         }
 
         this.validatePickedOverload(bestMatch, actualParams, ctx);
 
         return bestMatch.getFunction();
+    }
+
+    protected T breakTies(ArrayList<T> bestScoreBranchMatches, ActualParameterList actualParams, ISymbolContext ctx) {
+        int sameLengthMatches = 0;
+        T bestMatch = bestScoreBranchMatches.get(0);
+        for(T branch : bestScoreBranchMatches) {
+            if(branch.getFormalParameters().size() == actualParams.size()) {
+                bestMatch = branch;
+                sameLengthMatches++;
+            }
+        }
+
+        if(sameLengthMatches > 1) {
+            throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "Ambiguous call between: " + bestScoreBranchMatches.stream().filter(b->b.getFormalParameters().size() == actualParams.size()).map(b -> b.getFormalParameters().toString()).collect(Collectors.joining(", ")), actualParams.getPattern(), ctx);
+        } else if(sameLengthMatches < 1) {
+            throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "Ambiguous call between: " + bestScoreBranchMatches.stream().map(b -> b.getFormalParameters().toString()).collect(Collectors.joining(", ")), actualParams.getPattern(), ctx);
+        }
+
+        return bestMatch;
     }
 
     protected void validatePickedOverload(T bestMatch, ActualParameterList params, ISymbolContext ctx) {

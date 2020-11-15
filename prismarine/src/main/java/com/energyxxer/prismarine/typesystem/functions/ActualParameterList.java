@@ -79,7 +79,7 @@ public class ActualParameterList {
     }
 
     public String getNameForIndex(int index) {
-        if(names == null) return null;
+        if(names == null || index < 0 || index >= names.length) return null;
         return names[index];
     }
 

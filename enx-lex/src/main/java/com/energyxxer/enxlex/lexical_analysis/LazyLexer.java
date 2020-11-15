@@ -15,6 +15,8 @@ import com.energyxxer.enxlex.suggestions.SuggestionModule;
 import com.energyxxer.util.StringLocation;
 import com.energyxxer.util.StringLocationCache;
 
+import java.util.ArrayList;
+
 public class LazyLexer extends Lexer {
 
     private TokenPatternMatch pattern;
@@ -53,7 +55,7 @@ public class LazyLexer extends Lexer {
 
         if(matchResponse.matched) {
             matchResponse.pattern.validate();
-            for(Token token : matchResponse.pattern.flattenTokens()) {
+            for(Token token : matchResponse.pattern.flattenTokens(new ArrayList<>())) {
                 notices.addAll(token.attachedNotices);
                 stream.write(token);
             }

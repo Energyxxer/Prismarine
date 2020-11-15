@@ -56,7 +56,7 @@ public abstract class TokenPattern<T> {
 	public abstract StringBounds getStringBounds();
 
 	public int getCharLength() {
-		ArrayList<Token> tokens = flattenTokens();
+		ArrayList<Token> tokens = flattenTokens(new ArrayList<>());
 		if(tokens.size() == 0) return 0;
 		int start = tokens.get(0).loc.index;
 		Token lastToken = tokens.get(tokens.size()-1);
@@ -64,7 +64,7 @@ public abstract class TokenPattern<T> {
 		return end - start;
 	}
 
-	public abstract ArrayList<Token> flattenTokens();
+	public abstract ArrayList<Token> flattenTokens(ArrayList<Token> list);
 
 	public abstract String getType();
 

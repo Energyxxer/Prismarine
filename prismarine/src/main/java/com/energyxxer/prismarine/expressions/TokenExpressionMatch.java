@@ -64,7 +64,7 @@ public class TokenExpressionMatch extends TokenPatternMatch {
 
                         if(op == null) {
                             hasMatched = false;
-                            faultyToken = itemMatch.pattern.flattenTokens().get(0);
+                            faultyToken = itemMatch.pattern.flattenTokens(new ArrayList<>()).get(0);
                             expected = this.operatorMatch;
                             break itemLoop;
                         }

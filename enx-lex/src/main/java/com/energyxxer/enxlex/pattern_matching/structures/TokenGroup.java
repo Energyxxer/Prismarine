@@ -170,10 +170,9 @@ public class TokenGroup extends TokenPattern<TokenPattern<?>[]> {
 	}
 
 	@Override
-	public ArrayList<Token> flattenTokens() {
-		ArrayList<Token> list = new ArrayList<>();
+	public ArrayList<Token> flattenTokens(ArrayList<Token> list) {
 		for(TokenPattern<?> pattern : patterns) {
-		    list.addAll(pattern.flattenTokens());
+			pattern.flattenTokens(list);
         }
         return list;
 	}

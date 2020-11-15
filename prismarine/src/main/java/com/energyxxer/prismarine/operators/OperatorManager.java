@@ -21,8 +21,10 @@ import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class OperatorManager<T extends TypedFunction> {
+    private Function<String, TypedFunctionFamily<T>> familyConstructor = TypedFunctionFamily::new;
 
     private PrismarineTypeSystem typeSystem;
 
@@ -36,6 +38,11 @@ public class OperatorManager<T extends TypedFunction> {
     public final HashMap<String, BiFunction<TokenBinaryExpression, ISymbolContext, Object>> specialBinaryOperators = new HashMap<>();
     public final HashMap<String, BiFunction<TokenTernaryExpression, ISymbolContext, Object>> specialTernaryOperators = new HashMap<>();
 
+    public OperatorManager(PrismarineTypeSystem typeSystem, Function<String, TypedFunctionFamily<T>> familyConstructor) {
+        this.familyConstructor = familyConstructor;
+        this.typeSystem = typeSystem;
+    }
+
     public OperatorManager(PrismarineTypeSystem typeSystem) {
         this.typeSystem = typeSystem;
     }
@@ -47,7 +54,7 @@ public class OperatorManager<T extends TypedFunction> {
     public void addOperator(String symbol, HashMap<String, TypedFunctionFamily<T>> map, T function) {
         TypedFunctionFamily<T> family = map.get(symbol);
         if(family == null) {
-            map.put(symbol, family = new TypedFunctionFamily<>(symbol));
+            map.put(symbol, family = familyConstructor.apply(symbol));
         }
         family.putOverload(function);
     }

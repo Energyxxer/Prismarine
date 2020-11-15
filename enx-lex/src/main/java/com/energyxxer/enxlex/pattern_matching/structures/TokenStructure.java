@@ -87,8 +87,8 @@ public class TokenStructure extends TokenPattern<TokenPattern<?>> {
 	public StringBounds getStringBounds() { return group.getStringBounds(); }
 
     @Override
-    public ArrayList<Token> flattenTokens() {
-        return group.flattenTokens();
+    public ArrayList<Token> flattenTokens(ArrayList<Token> list) {
+        return group.flattenTokens(list);
     }
 
 	@Override
