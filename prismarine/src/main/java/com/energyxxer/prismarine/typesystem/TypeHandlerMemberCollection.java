@@ -74,7 +74,7 @@ public class TypeHandlerMemberCollection<T> {
             return found;
         }
         if(notFoundPolicy == MemberNotFoundPolicy.THROW_EXCEPTION) {
-            return new MemberNotFoundException();
+            throw new MemberNotFoundException();
         } else {
             return null;
         }
