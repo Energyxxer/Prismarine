@@ -23,10 +23,10 @@ public class TypedFunctionFamily<T extends TypedFunction> implements PrimitivePr
     }
 
     public PrismarineFunction.FixedThisFunctionSymbol pickOverloadSymbol(ActualParameterList params, ISymbolContext ctx, Object thisObject) {
-        return new PrismarineFunction.FixedThisFunctionSymbol(name, pickOverload(params, ctx), thisObject);
+        return new PrismarineFunction.FixedThisFunctionSymbol(name, pickOverload(params, ctx, thisObject), thisObject);
     }
 
-    public PrismarineFunction pickOverload(ActualParameterList actualParams, ISymbolContext ctx) {
+    public PrismarineFunction pickOverload(ActualParameterList actualParams, ISymbolContext ctx, Object thisObject) {
         ArrayList<T> bestScoreBranchMatches = new ArrayList<>();
         double bestScore = -1;
 

@@ -3,6 +3,7 @@ package com.energyxxer.prismarine.walker;
 import com.energyxxer.commodore.util.io.CompoundInput;
 import com.energyxxer.commodore.util.io.DirectoryCompoundInput;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
+import com.energyxxer.enxlex.report.Report;
 import com.energyxxer.prismarine.in.ProjectReader;
 import com.energyxxer.prismarine.util.PathMatcher;
 import com.energyxxer.prismarine.worker.PrismarineProjectWorker;
@@ -27,12 +28,15 @@ public class FileWalker<T> {
 
     private ArrayList<FileWalkerStop<T>> stops = new ArrayList<>();
 
+    private Report report;
+
     public FileWalker(CompoundInput input, Function<Path, TokenSource> sourceFunction, @Nullable PrismarineProjectWorker worker, T subject) {
         this.input = input;
         this.worker = worker;
         this.subject = subject;
 
         this.reader = new ProjectReader(input, sourceFunction, worker);
+        this.report = new Report();
     }
 
     public void walk() throws IOException {
@@ -113,4 +117,7 @@ public class FileWalker<T> {
         this.stops.addAll(stops);
     }
 
+    public Report getReport() {
+        return report;
+    }
 }

@@ -92,6 +92,7 @@ public abstract class PrismarineSuiteConfiguration {
     public abstract PrismarineLibrary getStandardLibrary();
 
     public abstract void runSummaryPreFileTree(PrismarineProjectSummarizer<?> summarizer);
+    public abstract void runSummaryPostFileTree(PrismarineProjectSummarizer<?> summarizer);
 
     public enum UnitPassStrategy {
         /**

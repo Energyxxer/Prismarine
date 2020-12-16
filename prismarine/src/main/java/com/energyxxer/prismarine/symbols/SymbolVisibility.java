@@ -68,4 +68,8 @@ public abstract class SymbolVisibility {
     public abstract boolean isVisibleFromContext(Symbol symbol, ISymbolContext containingContext, ISymbolContext accessingContext);
 
     public abstract boolean isVisibleFromSummaryBlock(SummarySymbol symbol, Path fromPath, int inFileIndex);
+
+    public boolean isVisibleMemberFromSummaryBlock(SummarySymbol symbol, Path fromPath, int inFileIndex) {
+        return isVisibleFromSummaryBlock(symbol, fromPath, inFileIndex);
+    }
 }

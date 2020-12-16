@@ -132,7 +132,9 @@ public class PrismarineProductions {
     public static <T extends Enum> TokenStructureMatch enumChoice(Class<T> enumClass) {
         TokenStructureMatch choice = struct("CHOICE");
         for(Object enumConstant : enumClass.getEnumConstants()) {
-            choice.add(literal(((T) enumConstant).name().toLowerCase(Locale.ENGLISH)).setEvaluator((p, d) -> enumConstant));
+            String lit = ((T) enumConstant).name().toLowerCase(Locale.ENGLISH);
+            if(lit.startsWith("_")) lit = lit.substring(1);
+            choice.add(literal(lit).setEvaluator((p, d) -> enumConstant));
         }
         return choice;
     }
@@ -140,7 +142,9 @@ public class PrismarineProductions {
     public static <T extends Enum> TokenStructureMatch enumChoice(T... enumConstants) {
         TokenStructureMatch choice = struct("CHOICE");
         for(T enumConstant : enumConstants) {
-            choice.add(literal(((T) enumConstant).name().toLowerCase(Locale.ENGLISH)).setEvaluator((p, d) -> enumConstant));
+            String lit = enumConstant.name().toLowerCase(Locale.ENGLISH);
+            if(lit.startsWith("_")) lit = lit.substring(1);
+            choice.add(literal(lit).setEvaluator((p, d) -> enumConstant));
         }
         return choice;
     }

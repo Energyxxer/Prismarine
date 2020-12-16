@@ -175,8 +175,8 @@ public class SummarySymbol implements SummaryElement {
         return list;
     }
 
-    public boolean isVisible(Path fromFile, int inFileIndex) {
-        return visibility.isVisibleFromSummaryBlock(this, fromFile, inFileIndex);
+    public boolean isVisibleMember(Path fromFile, int inFileIndex) {
+        return visibility.isVisibleMemberFromSummaryBlock(this, fromFile, inFileIndex);
     }
 
     public boolean isInstanceField() {

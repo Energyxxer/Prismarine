@@ -1,15 +1,16 @@
 package com.energyxxer.prismarine.expressions;
 
-import com.energyxxer.prismarine.operators.Operator;
-import com.energyxxer.prismarine.operators.OperatorPool;
-import com.energyxxer.prismarine.operators.UnaryOperator;
 import com.energyxxer.enxlex.lexical_analysis.Lexer;
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
 import com.energyxxer.enxlex.pattern_matching.TokenMatchResponse;
 import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
+import com.energyxxer.prismarine.operators.Operator;
+import com.energyxxer.prismarine.operators.OperatorPool;
+import com.energyxxer.prismarine.operators.UnaryOperator;
 
 import java.util.ArrayList;
+import java.util.function.Predicate;
 
 import static com.energyxxer.enxlex.pattern_matching.TokenMatchResponse.*;
 
@@ -20,10 +21,22 @@ public class TokenExpressionMatch extends TokenPatternMatch {
 
     private OperatorPool operatorPool;
 
+    private Predicate<Operator> operatorFilter;
+
     public TokenExpressionMatch(TokenPatternMatch valueMatch, OperatorPool operatorPool, TokenPatternMatch operatorMatch) {
         this.valueMatch = valueMatch;
         this.operatorMatch = operatorMatch;
         this.operatorPool = operatorPool;
+    }
+
+    public Predicate<Operator> getOperatorFilter() {
+        return operatorFilter;
+    }
+
+    public TokenExpressionMatch setOperatorFilter(Predicate<Operator> operatorFilter) {
+        this.operatorFilter = operatorFilter;
+
+        return this;
     }
 
     @Override
@@ -62,6 +75,10 @@ public class TokenExpressionMatch extends TokenPatternMatch {
                         String flattenedOperator = itemMatch.pattern.flatten(false);
                         Operator op = operatorPool.getBinaryOrTernaryOperatorForSymbol(flattenedOperator);
 
+                        if(operatorFilter != null && op != null && !operatorFilter.test(op)) {
+                            break itemLoop;
+                        }
+
                         if(op == null) {
                             hasMatched = false;
                             faultyToken = itemMatch.pattern.flattenTokens(new ArrayList<>()).get(0);
@@ -96,6 +113,9 @@ public class TokenExpressionMatch extends TokenPatternMatch {
                         String symbol = operatorMatch.pattern.flatten(false);
                         op = operatorPool.getUnaryLeftOperatorForSymbol(symbol);
                     } else {
+                        op = null;
+                    }
+                    if(operatorFilter != null && op != null && !operatorFilter.test(op)) {
                         op = null;
                     }
                     if(op == null) {
@@ -151,6 +171,9 @@ public class TokenExpressionMatch extends TokenPatternMatch {
                         symbol = operatorMatch.pattern.flatten(false);
                         op = operatorPool.getUnaryRightOperatorForSymbol(symbol);
                     } else {
+                        op = null;
+                    }
+                    if(operatorFilter != null && op != null && !operatorFilter.test(op)) {
                         op = null;
                     }
                     if(op == null) {

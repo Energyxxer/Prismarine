@@ -149,6 +149,7 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
             logException(x);
             return;
         }
+        this.report.addNotices(walker.getReport().getAllNotices());
 
         walker.getReader().dumpNotices(report);
         if(report.hasErrors()) {

@@ -181,7 +181,7 @@ public class SummaryBlock implements SummaryElement {
                 if(
                         (name == null || name.equals(element.getName()))
                                 && !((SummarySymbol) element).isInstanceField()
-                                && ((SummarySymbol) element).isVisible(fromFile, inFileIndex)
+                                && ((SummarySymbol) element).isVisibleMember(fromFile, inFileIndex)
                 ) {
                     list.add((SummarySymbol) element);
                 }
@@ -195,7 +195,7 @@ public class SummaryBlock implements SummaryElement {
                 if(
                         (name == null || name.equals(element.getName()))
                                 && ((SummarySymbol) element).isInstanceField()
-                                && ((SummarySymbol) element).isVisible(fromFile, inFileIndex)
+                                && ((SummarySymbol) element).isVisibleMember(fromFile, inFileIndex)
                 ) {
                     list.add((SummarySymbol) element);
                 }
