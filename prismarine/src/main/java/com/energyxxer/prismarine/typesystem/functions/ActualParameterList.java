@@ -4,16 +4,21 @@ import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.prismarine.reporting.PrismarineException;
 import com.energyxxer.prismarine.symbols.contexts.ISymbolContext;
 import com.energyxxer.prismarine.typesystem.PrismarineTypeSystem;
+import com.energyxxer.prismarine.typesystem.TypeHandler;
+import com.energyxxer.prismarine.typesystem.generics.GenericSupplier;
+import com.energyxxer.prismarine.typesystem.generics.GenericSupplierImplementer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
-public class ActualParameterList {
+public class ActualParameterList implements GenericSupplierImplementer {
     private @Nullable String[] names;
     private Object[] values;
     private TokenPattern<?>[] patterns;
     private @NotNull TokenPattern<?> pattern;
+
+    private GenericSupplier genericSupplier;
 
     public ActualParameterList(@NotNull TokenPattern<?> pattern) {
         this(new Object[0], new TokenPattern<?>[0], pattern);
@@ -104,5 +109,19 @@ public class ActualParameterList {
                 }
             }
         }
+    }
+
+    @Override
+    public GenericSupplier getGenericSupplier() {
+        return genericSupplier;
+    }
+
+    public void setGenericSupplier(GenericSupplier genericSupplier) {
+        this.genericSupplier = genericSupplier;
+    }
+
+    public void putGenericInfo(Object binding, TypeHandler[] types) {
+        if(genericSupplier == null) genericSupplier = new GenericSupplier();
+        genericSupplier.put(binding, types);
     }
 }

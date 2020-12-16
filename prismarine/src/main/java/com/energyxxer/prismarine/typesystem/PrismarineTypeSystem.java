@@ -10,6 +10,8 @@ import com.energyxxer.prismarine.PrismarineProductions;
 import com.energyxxer.prismarine.operators.OperatorManager;
 import com.energyxxer.prismarine.reporting.PrismarineException;
 import com.energyxxer.prismarine.symbols.contexts.ISymbolContext;
+import com.energyxxer.prismarine.typesystem.generics.GenericSupplierImplementer;
+import com.energyxxer.prismarine.typesystem.generics.GenericWrapperType;
 import com.energyxxer.util.logger.Debug;
 import org.jetbrains.annotations.Contract;
 
@@ -88,6 +90,18 @@ public abstract class PrismarineTypeSystem {
         return superHandler;
     }
 
+    public TypeHandler<?> getPublicFacingHandlerForObject(Object obj) {
+        while(obj instanceof GenericSupplierImplementer && ((GenericSupplierImplementer) obj).isGenericSupplier()) {
+            TypeHandler<?> returned = ((GenericSupplierImplementer) obj).getGenericWrapper();
+            if(returned != null) {
+                obj = returned;
+            } else {
+                return getHandlerForObject(obj);
+            }
+        }
+        return getHandlerForObject(obj);
+    }
+
     public <T extends TypeHandler> T getHandlerForHandlerClass(Class handlerClass) {
         if(handlerClass == null) return null;
         for(TypeHandler<?> handler : primitiveHandlers.values()) {
@@ -127,7 +141,11 @@ public abstract class PrismarineTypeSystem {
 
     //region Getting type identifiers
     public String getTypeIdentifierForObject(Object param) {
-        return (!(param instanceof TypeHandler<?>) || !((TypeHandler) param).isStaticHandler()) ? getHandlerForObject(param).getTypeIdentifier() : "type_definition<" + ((TypeHandler) param).getTypeIdentifier() + ">";
+        if (param instanceof TypeHandler<?> && ((TypeHandler) param).isStaticHandler()) {
+            return "type_definition<" + ((TypeHandler) param).getTypeIdentifier() + ">";
+        } else {
+            return typeHandlerToString(getPublicFacingHandlerForObject(param));
+        }
     }
 
     public String getTypeIdentifierForType(TypeHandler<?> handler) {
@@ -136,7 +154,7 @@ public abstract class PrismarineTypeSystem {
 
     public String getInternalTypeIdentifierForType(TypeHandler handler) {
         if(handler.isPrimitive()) {
-            return "primitive(" + handler.getTypeIdentifier() + ")";
+            return "primitive(" + typeHandlerToString(handler) + ")";
         } else {
             return "user_defined(" + handler + ")";
         }
@@ -184,9 +202,9 @@ public abstract class PrismarineTypeSystem {
             }
             if(failureException) {
                 if(x.getMessage() != null) {
-                    throw new PrismarineException(TYPE_ERROR, "Couldn't cast '" + obj + "' to type " + targetType.getTypeIdentifier() + ": " + x.getMessage(), pattern, ctx);
+                    throw new PrismarineException(TYPE_ERROR, "Couldn't cast '" + obj + "' to type " + typeHandlerToString(targetType) + ": " + x.getMessage(), pattern, ctx);
                 } else {
-                    throw new PrismarineException(TYPE_ERROR, "Unable to cast " + getTypeIdentifierForObject(obj) + " to type " + targetType.getTypeIdentifier(), pattern, ctx);
+                    throw new PrismarineException(TYPE_ERROR, "Unable to cast " + getTypeIdentifierForObject(obj) + " to type " + typeHandlerToString(targetType), pattern, ctx);
                 }
             }
             return null;
@@ -209,7 +227,7 @@ public abstract class PrismarineTypeSystem {
             return sourceType.coerce(obj, targetType, pattern, ctx);
         }
         if(failureException) {
-            throw new PrismarineException(TYPE_ERROR, "Unable to cast or coerce " + getTypeIdentifierForObject(obj) + " to type " + targetType.getTypeIdentifier(), pattern, ctx);
+            throw new PrismarineException(TYPE_ERROR, "Unable to cast or coerce " + getTypeIdentifierForObject(obj) + " to type " + typeHandlerToString(targetType), pattern, ctx);
         }
         return null;
     }
@@ -223,6 +241,24 @@ public abstract class PrismarineTypeSystem {
             return ((ContextualToString) obj).contextualToString(pattern, ctx);
         } else {
             return String.valueOf(obj);
+        }
+    }
+
+    public String typeHandlerToString(TypeHandler<?> handler) {
+        if(handler instanceof GenericWrapperType) {
+            StringBuilder sb = new StringBuilder(handler.getTypeIdentifier());
+            sb.append("<");
+            TypeHandler<?>[] parameterTypes = ((GenericWrapperType) handler).getGenericSupplier().get(((GenericWrapperType) handler).getSourceType());
+            for(int i = 0; i < parameterTypes.length; i++) {
+                sb.append(typeHandlerToString(parameterTypes[i]));
+                if(i < parameterTypes.length-1) {
+                    sb.append(", ");
+                }
+            }
+            sb.append(">");
+            return sb.toString();
+        } else {
+            return handler.getTypeIdentifier();
         }
     }
     //endregion
@@ -253,9 +289,9 @@ public abstract class PrismarineTypeSystem {
         }
 
         if(expected.length > 1) {
-            throw new PrismarineException(TYPE_ERROR, "Expected value of one of the following types: " + Arrays.stream(expected).map(TypeHandler::getTypeIdentifier).collect(Collectors.joining(", ")) + "; Instead got " + ctx.getTypeSystem().getTypeIdentifierForObject(value), pattern, ctx);
+            throw new PrismarineException(TYPE_ERROR, "Expected value of one of the following types: " + Arrays.stream(expected).map(h -> ctx.getTypeSystem().typeHandlerToString(h)).collect(Collectors.joining(", ")) + "; Instead got " + ctx.getTypeSystem().getTypeIdentifierForObject(value), pattern, ctx);
         } else {
-            throw new PrismarineException(TYPE_ERROR, "Expected value of type " + expected[0].getTypeIdentifier() + "; Instead got " + ctx.getTypeSystem().getTypeIdentifierForObject(value), pattern, ctx);
+            throw new PrismarineException(TYPE_ERROR, "Expected value of type " + ctx.getTypeSystem().typeHandlerToString(expected[0]) + "; Instead got " + ctx.getTypeSystem().getTypeIdentifierForObject(value), pattern, ctx);
         }
     }
 

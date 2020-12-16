@@ -3,7 +3,11 @@ package com.energyxxer.prismarine.typesystem;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.prismarine.reporting.PrismarineException;
 import com.energyxxer.prismarine.symbols.contexts.ISymbolContext;
+import com.energyxxer.prismarine.typesystem.functions.ActualParameterList;
+import com.energyxxer.prismarine.typesystem.generics.GenericStandInType;
+import com.energyxxer.prismarine.typesystem.generics.GenericUtils;
 import org.jetbrains.annotations.NotNull;
+import sun.plugin.dom.exception.InvalidStateException;
 
 import java.util.Objects;
 
@@ -21,10 +25,19 @@ public class TypeConstraints {
     @SuppressWarnings({"FieldCanBeLocal", "unused"}) //This field is extremely useful in the debugger
     private String userDefinedIdentifier = null;
 
+    private TypeHandler<?> genericInfo = null;
+    private boolean genericSubstituted = false;
+
     public TypeConstraints(PrismarineTypeSystem typeSystem, TypeHandler<?> handler, boolean nullable) {
         this.typeSystem = typeSystem;
-        this.handler = handler;
         this.nullable = nullable;
+
+        if(GenericUtils.hasStandIns(handler)) {
+            this.genericInfo = handler;
+            this.handler = null;
+        } else {
+            this.handler = handler;
+        }
     }
 
     public TypeConstraints(PrismarineTypeSystem typeSystem, @NotNull String userDefinedIdentifier, boolean nullable) {
@@ -36,33 +49,38 @@ public class TypeConstraints {
     }
 
     public Object adjustValue(Object value, TokenPattern<?> pattern, ISymbolContext ctx) {
+        if(isGeneric() && !genericSubstituted) throw new IllegalStateException("Cannot use this generic handler without starting a generic substitution");
         if(handler != null) value = convertToType(value, pattern, ctx, nullable, handler);
         return value;
     }
 
     public void validate(Object value, TokenPattern<?> pattern, ISymbolContext ctx) {
+        if(isGeneric() && !genericSubstituted) throw new IllegalStateException("Cannot use this generic handler without starting a generic substitution");
         if(value == null && !nullable) {
             throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "Expected a non-null value, Found null", pattern, ctx);
         }
         if(value != null && handler != null && !handler.isInstance(value) && !typeSystem.getHandlerForObject(value).canCoerce(value, handler, ctx)) {
-            throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "Incompatible types. Expected '" + handler.getTypeIdentifier() + "', Found '" + typeSystem.getTypeIdentifierForObject(value) + "'", pattern, ctx);
+            throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "Incompatible types. Expected '" + typeSystem.typeHandlerToString(handler) + "', Found '" + typeSystem.getTypeIdentifierForObject(value) + "'", pattern, ctx);
         }
     }
 
     public void validateExact(Object value, TokenPattern<?> pattern, ISymbolContext ctx) {
+        if(isGeneric() && !genericSubstituted) throw new IllegalStateException("Cannot use this generic handler without starting a generic substitution");
         if(value == null && !nullable) {
             throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "Expected a non-null value, Found null", pattern, ctx);
         }
         if(value != null && handler != null && !handler.isInstance(value)) {
-            throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "Incompatible types. Expected '" + handler.getTypeIdentifier() + "', Found '" + typeSystem.getTypeIdentifierForObject(value) + "'", pattern, ctx);
+            throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "Incompatible types. Expected '" + typeSystem.typeHandlerToString(handler) + "', Found '" + typeSystem.getTypeIdentifierForObject(value) + "'", pattern, ctx);
         }
     }
 
     public boolean verify(Object value, ISymbolContext ctx) {
+        if(isGeneric() && !genericSubstituted) throw new IllegalStateException("Cannot use this generic handler without starting a generic substitution");
         return (value != null || nullable) && (value == null || handler == null || handler.isInstance(value) || ctx.getTypeSystem().getHandlerForObject(value).canCoerce(value, handler, ctx));
     }
 
     public TypeHandler<?> getHandler() {
+        if(isGeneric() && !genericSubstituted) throw new IllegalStateException("Cannot use this generic handler without starting a generic substitution");
         return handler;
     }
 
@@ -71,12 +89,13 @@ public class TypeConstraints {
     }
 
     public boolean isNullConstraint() {
+        if(isGeneric() && !genericSubstituted) throw new IllegalStateException("Cannot use this generic handler without starting a generic substitution");
         return handler == null && nullable;
     }
 
     @Override
     public String toString() {
-        return (handler != null ? typeSystem.getTypeIdentifierForType(handler) : "*") + (nullable ? "?" : "");
+        return (genericInfo instanceof GenericStandInType ? "<" + ((GenericStandInType) genericInfo).getTypeParamName() + ">" : (handler != null ? typeSystem.typeHandlerToString(handler) : "*")) + (nullable ? "?" : "");
     }
 
     //6: exact match
@@ -87,6 +106,7 @@ public class TypeConstraints {
     //1: null-implicit match
     //0: no match
     public int rateMatch(Object value, ISymbolContext ctx) {
+        if(isGeneric() && !genericSubstituted) throw new IllegalStateException("Cannot use this generic handler without starting a generic substitution"); //TODO generic parameter rating
         if(value == null && nullable) return 2;
         if(handler == null && value != null) return 3;
         if(!verify(value, ctx)) return 0;
@@ -139,5 +159,38 @@ public class TypeConstraints {
         if(b == null) return false;
 
         return a.isSubType(b);
+    }
+
+    public PrismarineTypeSystem getTypeSystem() {
+        return typeSystem;
+    }
+
+    public boolean isGeneric() {
+        return genericInfo != null;
+    }
+
+    public TypeHandler<?> getGenericHandler() { //TODO better name
+        return genericInfo;
+    }
+
+    public void startGenericSubstitution(TypeHandler handler) {
+        if(!isGeneric()) throw new InvalidStateException("Cannot start generic substitution on a non-generic type constraint");
+        if(genericSubstituted) throw new InvalidStateException("Cannot start generic substitution; one is already in progress!");
+        genericSubstituted = true;
+        this.handler = handler;
+    }
+
+    public void startGenericSubstitution(Object thisObject, ActualParameterList actualParams, ISymbolContext ctx) {
+        if(!isGeneric()) throw new InvalidStateException("Cannot start generic substitution on a non-generic type constraint");
+        if(genericSubstituted) throw new InvalidStateException("Cannot start generic substitution; one is already in progress!");
+        genericSubstituted = true;
+        this.handler = GenericUtils.resolveStandIns(genericInfo, thisObject, actualParams, ctx);
+    }
+
+    public void endGenericSubstitution() {
+        if(!isGeneric()) throw new InvalidStateException("Cannot end generic substitution on a non-generic type constraint");
+//        if(!genericSubstituted) throw new InvalidStateException("Cannot end generic substitution; none has been started!");
+        genericSubstituted = false;
+        this.handler = null;
     }
 }

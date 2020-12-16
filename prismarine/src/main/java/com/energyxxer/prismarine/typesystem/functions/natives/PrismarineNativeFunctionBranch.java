@@ -122,7 +122,7 @@ public class PrismarineNativeFunctionBranch extends PrismarineFunctionBranch {
                 continue;
             }
 
-            methodParams[methodIndex] = TypedFunction.getActualParameterByFormalIndex(formalIndex, formalParameters, actualParams, callingCtx)[0];
+            methodParams[methodIndex] = TypedFunction.getActualParameterByFormalIndex(formalIndex, formalParameters, actualParams, callingCtx, thisObject)[0];
         }
 
         Object returnValue;

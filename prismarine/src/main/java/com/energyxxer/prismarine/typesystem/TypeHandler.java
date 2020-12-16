@@ -3,6 +3,7 @@ package com.energyxxer.prismarine.typesystem;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.prismarine.symbols.contexts.ISymbolContext;
 import com.energyxxer.prismarine.typesystem.functions.PrimitivePrismarineFunction;
+import com.energyxxer.prismarine.typesystem.generics.GenericSupplier;
 
 import java.util.Iterator;
 
@@ -23,7 +24,7 @@ public interface TypeHandler<T> {
         return false;
     }
 
-    default Iterator<?> getIterator(T object, ISymbolContext ctx) {
+    default Iterator<?> getIterator(T object, TokenPattern<?> pattern, ISymbolContext ctx) {
         return null;
     }
 
@@ -44,7 +45,7 @@ public interface TypeHandler<T> {
         return null;
     }
 
-    default PrimitivePrismarineFunction getConstructor(TokenPattern<?> pattern, ISymbolContext ctx) {
+    default PrimitivePrismarineFunction getConstructor(TokenPattern<?> pattern, ISymbolContext ctx, GenericSupplier genericSupplier) {
         return null;
     }
 

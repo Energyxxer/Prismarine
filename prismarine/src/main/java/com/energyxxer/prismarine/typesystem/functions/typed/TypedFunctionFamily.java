@@ -8,6 +8,7 @@ import com.energyxxer.prismarine.typesystem.functions.ActualParameterList;
 import com.energyxxer.prismarine.typesystem.functions.FormalParameter;
 import com.energyxxer.prismarine.typesystem.functions.PrimitivePrismarineFunction;
 import com.energyxxer.prismarine.typesystem.functions.PrismarineFunction;
+import com.energyxxer.prismarine.typesystem.generics.GenericUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +51,15 @@ public class TypedFunctionFamily<T extends TypedFunction> implements PrimitivePr
                     actualParam = actualParams.getValue(actualIndex);
                 }
 
-                int paramScore = formalParam.getConstraints().rateMatch(actualParam, ctx);
+                TypeConstraints formalConstraints = formalParam.getConstraints();
+
+                if(formalConstraints.isGeneric()) {
+                    formalConstraints.startGenericSubstitution(GenericUtils.nonGeneric(formalConstraints.getGenericHandler(), thisObject, actualParams, ctx));
+                }
+                int paramScore = formalConstraints.rateMatch(actualParam, ctx);
+                if(formalConstraints.isGeneric()) {
+                    formalConstraints.endGenericSubstitution();
+                }
 
                 if(paramScore == 0) {
                     branchMatched = false;
