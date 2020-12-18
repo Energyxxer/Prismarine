@@ -7,7 +7,6 @@ import com.energyxxer.prismarine.typesystem.functions.ActualParameterList;
 import com.energyxxer.prismarine.typesystem.generics.GenericStandInType;
 import com.energyxxer.prismarine.typesystem.generics.GenericUtils;
 import org.jetbrains.annotations.NotNull;
-import sun.plugin.dom.exception.InvalidStateException;
 
 import java.util.Objects;
 
@@ -174,22 +173,22 @@ public class TypeConstraints {
     }
 
     public void startGenericSubstitution(TypeHandler handler) {
-        if(!isGeneric()) throw new InvalidStateException("Cannot start generic substitution on a non-generic type constraint");
-        if(genericSubstituted) throw new InvalidStateException("Cannot start generic substitution; one is already in progress!");
+        if(!isGeneric()) throw new IllegalStateException("Cannot start generic substitution on a non-generic type constraint");
+        if(genericSubstituted) throw new IllegalStateException("Cannot start generic substitution; one is already in progress!");
         genericSubstituted = true;
         this.handler = handler;
     }
 
     public void startGenericSubstitution(Object thisObject, ActualParameterList actualParams, ISymbolContext ctx) {
-        if(!isGeneric()) throw new InvalidStateException("Cannot start generic substitution on a non-generic type constraint");
-        if(genericSubstituted) throw new InvalidStateException("Cannot start generic substitution; one is already in progress!");
+        if(!isGeneric()) throw new IllegalStateException("Cannot start generic substitution on a non-generic type constraint");
+        if(genericSubstituted) throw new IllegalStateException("Cannot start generic substitution; one is already in progress!");
         genericSubstituted = true;
         this.handler = GenericUtils.resolveStandIns(genericInfo, thisObject, actualParams, ctx);
     }
 
     public void endGenericSubstitution() {
-        if(!isGeneric()) throw new InvalidStateException("Cannot end generic substitution on a non-generic type constraint");
-//        if(!genericSubstituted) throw new InvalidStateException("Cannot end generic substitution; none has been started!");
+        if(!isGeneric()) throw new IllegalStateException("Cannot end generic substitution on a non-generic type constraint");
+//        if(!genericSubstituted) throw new IllegalStateException("Cannot end generic substitution; none has been started!");
         genericSubstituted = false;
         this.handler = null;
     }
