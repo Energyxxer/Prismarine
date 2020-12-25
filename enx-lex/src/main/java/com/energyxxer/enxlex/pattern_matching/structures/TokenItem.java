@@ -103,6 +103,7 @@ public class TokenItem extends TokenPattern<Token> {
 
 	@Override
 	public void validate() {
+		this.validated = true;
 		if(this.name != null && this.name.length() > 0) this.tags.add(name);
 		for(String tag : this.tags) {
 			if(!tag.startsWith("__")) this.token.tags.add(tag);

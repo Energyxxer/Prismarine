@@ -18,7 +18,7 @@ public class PrismarineSummaryModule extends SummaryModule {
     protected ArrayList<Path> requires = new ArrayList<>();
     protected ArrayList<Todo> todos = new ArrayList<>();
 
-    public ArrayList<Consumer<PrismarineSummaryModule>> fileAwareProcessors = new ArrayList<>();
+    public SortedList<FileAwareProcessor> fileAwareProcessors = new SortedList<>(p -> p.priority);
 
     private boolean searchingSymbols = false;
 
@@ -162,6 +162,10 @@ public class PrismarineSummaryModule extends SummaryModule {
         subSymbolStack.push(sym);
     }
 
+    public Stack<SummarySymbol> getSubSymbolStack() {
+        return subSymbolStack;
+    }
+
     public void addSymbolUsage(TokenPattern<?> pattern) {
         addSymbolUsage(new SymbolUsage(pattern, pattern.flatten(false)));
     }
@@ -212,14 +216,37 @@ public class PrismarineSummaryModule extends SummaryModule {
         }
     }
 
-    public void addFileAwareProcessor(Consumer<PrismarineSummaryModule> r) {
-        fileAwareProcessors.add(r);
+    public void addFileAwareProcessor(int priority, Consumer<PrismarineSummaryModule> r) {
+        fileAwareProcessors.add(new FileAwareProcessor(priority, r));
     }
 
-    public void runFileAwareProcessors() {
-        for(Consumer<PrismarineSummaryModule> r : fileAwareProcessors) {
-            r.accept(this);
+    public boolean runFileAwareProcessors(int pass) {
+        boolean any = !fileAwareProcessors.isEmpty();
+        for(int i = 0; i < fileAwareProcessors.size();) {
+            FileAwareProcessor processor = fileAwareProcessors.get(i);
+
+            if(processor.priority > pass) break;
+            processor.getConsumer().accept(this);
+            fileAwareProcessors.remove(0);
         }
-        fileAwareProcessors.clear();
+        return any;
+    }
+
+    public static class FileAwareProcessor {
+        private final int priority;
+        private final Consumer<PrismarineSummaryModule> consumer;
+
+        public FileAwareProcessor(int priority, Consumer<PrismarineSummaryModule> consumer) {
+            this.priority = priority;
+            this.consumer = consumer;
+        }
+
+        public int getPriority() {
+            return priority;
+        }
+
+        public Consumer<PrismarineSummaryModule> getConsumer() {
+            return consumer;
+        }
     }
 }

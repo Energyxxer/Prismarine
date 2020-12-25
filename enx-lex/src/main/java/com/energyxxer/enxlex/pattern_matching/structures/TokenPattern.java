@@ -20,6 +20,7 @@ public abstract class TokenPattern<T> {
 	protected String name = "";
 	protected ArrayList<String> tags = new ArrayList<>();
 	public final TokenPatternMatch source;
+	protected boolean validated = false;
 
 	public TokenPattern(TokenPatternMatch source) {
 		this.source = source;
@@ -91,6 +92,10 @@ public abstract class TokenPattern<T> {
 	}
 
 	public abstract void validate();
+
+	public boolean isValidated() {
+		return validated;
+	}
 
 	public Object findThenEvaluate(String path, Object defaultValue, Object... data) {
 		TokenPattern<?> found = find(path);

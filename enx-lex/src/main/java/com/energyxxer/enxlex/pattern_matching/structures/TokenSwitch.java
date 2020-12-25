@@ -32,7 +32,7 @@ public class TokenSwitch extends TokenPattern<TokenPattern<?>> {
 
 	@Override
 	public String toString() {
-		return "(S)" + name + ": {" + group.toString() + "}";
+		return "(Sw)" + name + ": {" + group.toString() + "}";
 	}
 
 	@Override
@@ -93,7 +93,7 @@ public class TokenSwitch extends TokenPattern<TokenPattern<?>> {
 
 	@Override
 	public String getType() {
-		return "STRUCTURE";
+		return "SWITCH";
 	}
 
 	@Override
@@ -104,6 +104,7 @@ public class TokenSwitch extends TokenPattern<TokenPattern<?>> {
 
 	@Override
 	public void validate() {
+		this.validated = true;
 		if(this.name != null && this.name.length() > 0) this.tags.add(name);
 		for(String tag : this.tags) {
 			if(!tag.startsWith("__")) group.addTag(tag);

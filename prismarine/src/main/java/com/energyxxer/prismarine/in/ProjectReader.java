@@ -58,8 +58,15 @@ public class ProjectReader {
             result.pattern = null;
             result.summary = null;
             result.matchResponse = null;
+            result.changedSinceCached = false;
         }
         lexers.clear();
+    }
+
+    public void startCache() {
+        for(Result result : cache.values()) {
+            result.changedSinceCached = false;
+        }
     }
 
     public PrismarineProjectWorker getWorker() {
@@ -174,6 +181,7 @@ public class ProjectReader {
         result.hashCode = hashCode;
         result.bytes = bytes;
         result.skippableIfNotChanged = query.skipIfNotChanged;
+        result.changedSinceCached = existing == null || existing.hashCode != hashCode;
         if(query.needsString) result.string = new String(bytes, DEFAULT_CHARSET);
         if(query.needsJSON) {
             result.jsonObject = new Gson().fromJson(result.string, JsonObject.class);
@@ -259,7 +267,9 @@ public class ProjectReader {
         protected JsonObject jsonObject;
         protected TokenPattern<?> pattern;
         protected PrismarineSummaryModule summary;
+
         protected boolean skippableIfNotChanged = true;
+        protected boolean changedSinceCached = true;
 
         public TokenMatchResponse matchResponse;
 
@@ -302,6 +312,10 @@ public class ProjectReader {
 
         public boolean isSkippableIfNotChanged() {
             return skippableIfNotChanged;
+        }
+
+        public boolean wasChangedSinceCached() {
+            return changedSinceCached;
         }
 
         public TokenMatchResponse getMatchResponse() {

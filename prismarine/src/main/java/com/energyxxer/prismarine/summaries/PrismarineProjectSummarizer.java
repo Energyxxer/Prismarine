@@ -120,8 +120,16 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
         suiteConfig.runSummaryPostFileTree(this);
 
         if(parentSummarizer == null) {
-            for(PrismarineSummaryModule fileSummary : summary.fileSummaries) {
-                fileSummary.runFileAwareProcessors();
+            int pass = 0;
+            while(true) {
+                boolean anyRan = false;
+                for(PrismarineSummaryModule fileSummary : summary.fileSummaries) {
+                    if(fileSummary.runFileAwareProcessors(pass)) {
+                        anyRan = true;
+                    }
+                }
+                pass++;
+                if(!anyRan) break;
             }
         }
 

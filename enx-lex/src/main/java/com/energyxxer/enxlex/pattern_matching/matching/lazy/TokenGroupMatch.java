@@ -81,7 +81,7 @@ public class TokenGroupMatch extends TokenPatternMatch {
                         longestFailedMatch = itemMatch;
                         longestFailedMatchLength = totalLengthUpToNow;
                     }
-                    if(!(items.get(i).optional && i+1 < items.size() && items.get(i+1).match(currentIndex, lexer).matched)) {
+                    if(!(items.get(i).optional && i+1 < items.size() && items.get(i+1).match(currentIndex, lexer).matched)) { //TODO check if this is right. Looks weird
                         hasMatched = false;
                         length += itemMatch.length;
                         faultyToken = itemMatch.faultyToken;

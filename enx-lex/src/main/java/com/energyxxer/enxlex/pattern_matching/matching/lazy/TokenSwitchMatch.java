@@ -73,7 +73,7 @@ public class TokenSwitchMatch extends TokenPatternMatch {
             return new TokenMatchResponse(true, null, branchResponse.length, result);
         } else if(branchResponse != null) {
             invokeFailProcessors(branchResponse.pattern, lexer);
-            return new TokenMatchResponse(false, null, 0, this, null);
+            return new TokenMatchResponse(false, branchResponse.faultyToken, branchResponse.length, branchResponse.expected, null);
         } else {
             invokeFailProcessors(null, lexer);
             return new TokenMatchResponse(false, null, 0, this, null);

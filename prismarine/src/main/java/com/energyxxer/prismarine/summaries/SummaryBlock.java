@@ -92,7 +92,11 @@ public class SummaryBlock implements SummaryElement {
 
     public void surroundBlock(int start, int end, SummarySymbol associatedSymbol) {
         clearEmptyBlocks();
-        SummaryBlock sub = null;
+        SummaryBlock sub = associatedSymbol != null ? associatedSymbol.getSubBlock() : null;
+        if(sub != null) {
+            sub.startIndex = start;
+            sub.endIndex = end;
+        }
         int i = 0;
         for(; i < subElements.size(); i++) {
             SummaryElement elem = subElements.get(i);
@@ -107,7 +111,7 @@ public class SummaryBlock implements SummaryElement {
             i--;
         }
         if(sub == null) sub = new SummaryBlock(parentSummary, start, end, associatedSymbol);
-        subElements.add(i, sub);
+        if(!subElements.contains(sub)) subElements.add(i, sub);
     }
 
     public void putLateElement(SummaryElement elem) {
