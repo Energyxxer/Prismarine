@@ -176,11 +176,12 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
             } else {
                 suiteConfig.incorporateDependency(this, subCompiler);
 
-                for(Map.Entry<PrismarineLanguageUnitConfiguration, ArrayList<PrismarineLanguageUnit>> dependencyEntry : subCompiler.unitsList.entrySet()) {
-                    if(!this.unitsList.containsKey(dependencyEntry.getKey())) {
-                        this.unitsList.put(dependencyEntry.getKey(), new ArrayList<>());
+                if(dependencyWorker.getDependencyInfo().mode == Dependency.Mode.COMBINE) {
+                    for(Map.Entry<PrismarineLanguageUnitConfiguration, ArrayList<PrismarineLanguageUnit>> dependencyEntry : subCompiler.unitsList.entrySet()) {
+                        this.unitsList.computeIfAbsent(dependencyEntry.getKey(), k -> new ArrayList<>());
+                        this.unitsList.get(dependencyEntry.getKey()).addAll(dependencyEntry.getValue());
                     }
-                    this.unitsList.get(dependencyEntry.getKey()).addAll(dependencyEntry.getValue());
+                    this.pathToUnitMap.putAll(subCompiler.pathToUnitMap);
                 }
 
                 global.join(subCompiler.global);
