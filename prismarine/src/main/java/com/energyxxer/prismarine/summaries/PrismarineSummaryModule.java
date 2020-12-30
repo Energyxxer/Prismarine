@@ -8,6 +8,7 @@ import com.energyxxer.util.SortedList;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -179,6 +180,18 @@ public class PrismarineSummaryModule extends SummaryModule {
         symbolUsages.add(usage);
     }
 
+    public SymbolUsage getSymbolUsageAtIndex(int index) {
+        int foundIndex = symbolUsages.findIndexForKey(index);
+        while(foundIndex >= 0 && foundIndex < symbolUsages.size() && symbolUsages.get(foundIndex).index >= index) {
+            foundIndex--;
+        }
+        if(foundIndex >= 0 && foundIndex < symbolUsages.size()-1) {
+            foundIndex++;
+            return symbolUsages.get(foundIndex);
+        }
+        return null;
+    }
+
     public List<SymbolUsage> getSymbolUsages() {
         return symbolUsages;
     }
@@ -205,14 +218,21 @@ public class PrismarineSummaryModule extends SummaryModule {
     }
 
     public static class SymbolUsage {
+        public static final BiFunction<PrismarineSummaryModule, SymbolUsage, SummarySymbol> ROOT_SYMBOL_GETTER = (fs, usage) -> fs.getSymbolForName(usage.symbolName, usage.index);
+
         public final String symbolName;
         public TokenPattern<?> pattern;
         public int index;
+        public BiFunction<PrismarineSummaryModule, SymbolUsage, SummarySymbol> symbolGetter = ROOT_SYMBOL_GETTER;
 
         public SymbolUsage(TokenPattern<?> pattern, String symbolName) {
             this.symbolName = symbolName;
             this.pattern = pattern;
             index = pattern.getStringLocation().index;
+        }
+
+        public SummarySymbol fetchSymbol(PrismarineSummaryModule fileSummary) {
+            return symbolGetter.apply(fileSummary, this);
         }
     }
 

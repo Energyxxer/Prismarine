@@ -17,29 +17,30 @@ public class SortedList<T> extends ArrayList<T> {
 
     @Override
     public boolean add(T t) {
-        super.add(findIndexForTokenList(sortingKeyFunction.apply(t)), t);
+        super.add(findIndexForKey(sortingKeyFunction.apply(t)), t);
         return true;
     }
 
     public T getByKey(int key) {
-        int index = findIndexForTokenList(key);
+        int index = findIndexForKey(key);
         if(index < 0 || index >= size()) return null;
         T element = this.get(index);
         if(sortingKeyFunction.apply(element) != key) return null;
         return element;
     }
     public T getClosestByKey(int key) {
-        int index = findIndexForTokenList(key);
+        int index = findIndexForKey(key);
         if(index < 0 || index >= size()) return null;
         return this.get(index);
     }
+
 
     @Override
     public void add(int index, T element) {
         throw new UnsupportedOperationException();
     }
 
-    private int findIndexForTokenList(int key)
+    public int findIndexForKey(int key)
     {
         if (this.isEmpty()) return 0;
 
