@@ -46,8 +46,10 @@ public class PrismarineLibrary {
             ProjectReader reader = new ProjectReader(worker);
             //input is null because we avoid calling performQuery(), and instead pass the string contents ourselves.
 
+            PrismarineProjectSummary projectSummary = suiteConfig.createSummary();
+
             for(PrismarineLibraryUnit unit : libraryUnits) {
-                ProjectReader.Query query = reader.startQuery(unit.getRelativePath()).needsPattern(unit.getUnitConfig()).needsSummary(unit.getUnitConfig(), null,true);
+                ProjectReader.Query query = reader.startQuery(unit.getRelativePath()).needsPattern(unit.getUnitConfig()).needsSummary(unit.getUnitConfig(), projectSummary,true);
                 ProjectReader.Result result = reader.populateParseResult(query, new LibrarySource(name, unit.getRelativePath()), reader.createResultFromString(unit.getContent()));
 
                 if(!result.matchResponse.matched) {
@@ -55,6 +57,19 @@ public class PrismarineLibrary {
                 }
 
                 unit.setParseResult(result);
+                projectSummary.store(null, unit.getParseResult().getSummary());
+            }
+
+            int pass = 0;
+            while(true) {
+                boolean anyRan = false;
+                for(PrismarineLibraryUnit unit : libraryUnits) {
+                    if(unit.getParseResult().getSummary().runFileAwareProcessors(pass)) {
+                        anyRan = true;
+                    }
+                }
+                pass++;
+                if(!anyRan) break;
             }
         }
         return this;
