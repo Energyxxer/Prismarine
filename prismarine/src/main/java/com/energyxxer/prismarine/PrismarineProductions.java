@@ -115,6 +115,10 @@ public class PrismarineProductions {
         return g;
     }
 
+    public static TokenFailMatch fail(TokenPatternMatch inner) {
+        return (TokenFailMatch) new TokenFailMatch("__FAIL", inner).setOptional();
+    }
+
     public static TokenListMatch list(TokenPatternMatch pattern) {
         return list(pattern, null);
     }

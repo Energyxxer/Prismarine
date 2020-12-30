@@ -22,4 +22,8 @@ public class InspectionModule {
         }
         return collected;
     }
+
+    public List<Inspection> getInspections() {
+        return inspections;
+    }
 }
