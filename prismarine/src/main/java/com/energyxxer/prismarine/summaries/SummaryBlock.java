@@ -15,6 +15,7 @@ public class SummaryBlock implements SummaryElement {
     private int startIndex;
     private int endIndex;
     private ArrayList<SummaryElement> subElements = new ArrayList<>();
+    private ArrayList<SummarySymbol> fallbackSymbols = null;
     @NotNull
     private RepeatPolicy repeatPolicy = RepeatPolicy.DUPLICATE;
 
@@ -60,6 +61,11 @@ public class SummaryBlock implements SummaryElement {
             i--;
         }
         subElements.add(i, element);
+    }
+
+    public void addFallbackSymbol(SummarySymbol symbol) {
+        if(fallbackSymbols == null) fallbackSymbols = new ArrayList<>();
+        fallbackSymbols.add(symbol);
     }
 
     @Override
@@ -114,6 +120,14 @@ public class SummaryBlock implements SummaryElement {
         if(!subElements.contains(sub)) subElements.add(i, sub);
     }
 
+    public void rescopeElements() {
+        for(SummaryElement element : subElements) {
+            if(element instanceof SummarySymbol) {
+                ((SummarySymbol) element).setScope(startIndex, endIndex);
+            }
+        }
+    }
+
     public void putLateElement(SummaryElement elem) {
         boolean inserted = false;
         for(SummaryElement sub : subElements) {
@@ -129,11 +143,43 @@ public class SummaryBlock implements SummaryElement {
     @Override
     public void collectSymbolsVisibleAt(int index, ArrayList<SummarySymbol> list, Path fromPath) {
         if(associatedSymbol != null) associatedSymbol.collectSymbolsVisibleAt(index, list, fromPath);
-        if(subElements.isEmpty()) return;
 
         for(SummaryElement elem : subElements) {
             if((index < 0 && fixed) || (startIndex <= index && index <= endIndex) || (elem instanceof SummarySymbol && ((SummarySymbol) elem).getDeclarationPattern().getStringLocation().index == index)) {
                 elem.collectSymbolsVisibleAt(index, list, fromPath);
+            }
+        }
+
+        if(fallbackSymbols != null && ((index < 0 && fixed) || (startIndex <= index && index <= endIndex)) && !checkingFallbackSymbol) {
+            this.checkingFallbackSymbol = true;
+            try {
+                for (SummarySymbol fallbackSymbol : fallbackSymbols) {
+                    if (fallbackSymbol.hasSubBlock()) {
+                        fallbackSymbol.getSubBlock().collectSymbolsFromOutside(index, list, fromPath);
+                    }
+                }
+            } finally {
+                this.checkingFallbackSymbol = false;
+            }
+        }
+    }
+    private boolean checkingFallbackSymbol = false;
+
+    private void collectSymbolsFromOutside(int index, ArrayList<SummarySymbol> list, Path fromPath) {
+        for(SummaryElement elem : subElements) {
+            elem.collectSymbolsVisibleAt(index, list, fromPath);
+        }
+
+        if(fallbackSymbols != null && !checkingFallbackSymbol) {
+            this.checkingFallbackSymbol = true;
+            try {
+                for (SummarySymbol fallbackSymbol : fallbackSymbols) {
+                    if (fallbackSymbol.hasSubBlock()) {
+                        fallbackSymbol.getSubBlock().collectSymbolsFromOutside(index, list, fromPath);
+                    }
+                }
+            } finally {
+                this.checkingFallbackSymbol = false;
             }
         }
     }
@@ -191,6 +237,12 @@ public class SummaryBlock implements SummaryElement {
                 }
             }
         }
+
+//        if(fallbackSymbols != null) { TODO
+//            for(SummarySymbol fallbackSymbol : fallbackSymbols) {
+//                fallbackSymbol.collect(name, fromFile, inFileIndex, list);
+//            }
+//        }
     }
 
     public void collectInstanceSubSymbols(String name, Path fromFile, int inFileIndex, ArrayList<SummarySymbol> list) {
@@ -203,6 +255,17 @@ public class SummaryBlock implements SummaryElement {
                 ) {
                     list.add((SummarySymbol) element);
                 }
+            }
+        }
+
+        if(fallbackSymbols != null && !checkingFallbackSymbol) {
+            this.checkingFallbackSymbol = true;
+            try {
+                for(SummarySymbol fallbackSymbol : fallbackSymbols) {
+                    fallbackSymbol.collectInstanceSubSymbols(name, fromFile, inFileIndex, list);
+                }
+            } finally {
+                this.checkingFallbackSymbol = false;
             }
         }
     }

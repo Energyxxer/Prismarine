@@ -157,6 +157,7 @@ public class TokenListMatch extends TokenPatternMatch {
         }
         if(hasMatched && length == 0) { //EOF
             hasMatched = false;
+            expected = this;
         }
         if(!hasMatched) {
             invokeFailProcessors(list, lexer);

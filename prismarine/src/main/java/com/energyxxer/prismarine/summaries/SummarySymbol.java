@@ -158,8 +158,8 @@ public class SummarySymbol implements SummaryElement {
         if(subBlock != null) {
             subBlock.collectStaticSubSymbols(null, fromFile, inFileIndex, list);
         }
-        if(type != null && type.subBlock != null) {
-            type.subBlock.collectInstanceSubSymbols(null, fromFile, inFileIndex, list);
+        if(type != null) {
+            type.collectInstanceSubSymbols(null, fromFile, inFileIndex, list);
         }
         return list;
     }
@@ -169,10 +169,16 @@ public class SummarySymbol implements SummaryElement {
         if(subBlock != null) {
             subBlock.collectStaticSubSymbols(name, fromFile, inFileIndex, list);
         }
-        if(type != null && type.subBlock != null) {
-            type.subBlock.collectInstanceSubSymbols(name, fromFile, inFileIndex, list);
+        if(type != null) {
+            type.collectInstanceSubSymbols(name, fromFile, inFileIndex, list);
         }
         return list;
+    }
+
+    public void collectInstanceSubSymbols(String name, Path fromFile, int inFileIndex, ArrayList<SummarySymbol> list) {
+        if(subBlock != null) {
+            subBlock.collectInstanceSubSymbols(name, fromFile, inFileIndex, list);
+        }
     }
 
     public boolean isVisibleMember(Path fromFile, int inFileIndex) {
