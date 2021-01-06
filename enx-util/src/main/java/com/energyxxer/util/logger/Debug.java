@@ -17,7 +17,7 @@ public class Debug {
 
     private static ArrayList<OutputStream> streams = new ArrayList<>();
 
-    private static void logRaw(String message) {
+    private static synchronized void logRaw(String message) {
         for(OutputStream stream : streams) {
             try {
                 if(stream instanceof PrintStream) {
