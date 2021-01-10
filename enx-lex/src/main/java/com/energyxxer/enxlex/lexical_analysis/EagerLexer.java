@@ -41,9 +41,12 @@ public class EagerLexer extends Lexer {
 
 	private HashMap<TokenSection, String> subSections = null;
 
+	private String fileContents;
+
 	@Override
 	public void start(TokenSource source, String str, LexerProfile profile) {
 		this.source = source;
+		this.fileContents = str;
 		stream.setProfile(profile);
 		profile.setStream(stream);
 		line = column = index = tokenLine = tokenColumn = tokenIndex = 0;
@@ -163,7 +166,10 @@ public class EagerLexer extends Lexer {
 		return stream;
 	}
 
-
+	@Override
+	public String getFullText() {
+		return fileContents;
+	}
 
 	private static int findIndexForTokenList(int index, List<Token> list)
 	{

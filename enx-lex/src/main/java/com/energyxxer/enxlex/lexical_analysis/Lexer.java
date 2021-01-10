@@ -68,6 +68,7 @@ public abstract class Lexer {
     }
 
 
+    public abstract String getFullText();
 
     public abstract int getLookingIndexTrimmed();
 

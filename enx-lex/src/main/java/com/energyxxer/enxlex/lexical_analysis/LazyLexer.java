@@ -71,7 +71,7 @@ public class LazyLexer extends Lexer {
         if(getSummaryModule() != null) getSummaryModule().onEnd();
     }
 
-    public String getCurrentReadingString() {
+    public String getFullText() {
         return fileContents;
     }
 
