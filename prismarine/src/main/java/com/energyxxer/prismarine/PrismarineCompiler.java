@@ -164,8 +164,10 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
             PrismarineCompiler subCompiler = dependencyWorker.createCompiler();
             subCompiler.setParentCompiler(this);
             subCompiler.addProgressListener((process) -> this.updateStatus(process.getStatus()));
+            subCompiler.setCachedReader(this.cachedReader);
             try {
                 subCompiler.runCompilation();
+                walker.getReader().populateWithCachedReader(subCompiler.getProjectReader());
             } catch(Exception ex) {
                 logException(ex);
                 return;

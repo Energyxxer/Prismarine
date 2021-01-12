@@ -3,7 +3,6 @@ package com.energyxxer.prismarine.summaries;
 import com.energyxxer.commodore.util.io.DirectoryCompoundInput;
 import com.energyxxer.enxlex.lexical_analysis.summary.ProjectSummarizer;
 import com.energyxxer.enxlex.lexical_analysis.token.SourceFile;
-import com.energyxxer.enxlex.pattern_matching.ParsingSignature;
 import com.energyxxer.prismarine.PrismarineSuiteConfiguration;
 import com.energyxxer.prismarine.in.ProjectReader;
 import com.energyxxer.prismarine.libraries.PrismarineLibrary;
@@ -11,11 +10,11 @@ import com.energyxxer.prismarine.walker.DefaultWalkerStops;
 import com.energyxxer.prismarine.walker.FileWalker;
 import com.energyxxer.prismarine.worker.PrismarineProjectWorker;
 import com.energyxxer.prismarine.worker.PrismarineProjectWorkerTask;
+import com.energyxxer.util.logger.Debug;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummary> implements ProjectSummarizer {
 
@@ -33,6 +32,11 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
     FileWalker<PrismarineProjectSummary> walker;
 
     private ProjectReader cachedReader;
+
+    private long startTime;
+    private long previousStageTime;
+
+    private boolean logTimes = false;
 
     public PrismarineProjectSummarizer(PrismarineSuiteConfiguration suiteConfig, File rootFile) {
         this.suiteConfig = suiteConfig;
@@ -58,6 +62,12 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
         thread.start();
     }
 
+    private void logTime(String description) {
+        long now = System.currentTimeMillis();
+        if(logTimes) Debug.log("Prismarine-Summarizer[" + rootFile.getName() + "] | " + description + " | This Segment Time: " + (now - previousStageTime) + " ms | Total Elapsed Time: " + (now - startTime) + " ms");
+        previousStageTime = now;
+    }
+
     private void runSummary() {
 
         if(parentSummarizer != null) {
@@ -69,8 +79,12 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
                 next = next.parentSummarizer;
             }
         }
+        startTime = System.currentTimeMillis();
+        previousStageTime = startTime;
 
         suiteConfig.setupWorkerForSummary(worker);
+
+        logTime("Worker Setup");
 
         try {
             worker.work();
@@ -79,26 +93,34 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
             return;
         }
 
+        logTime("Workers");
+
         for(PrismarineProjectWorker subWorker : worker.output.getDependencies()) {
             PrismarineProjectSummarizer subSummarizer = suiteConfig.createSummarizer(subWorker);
             subSummarizer.setParentSummarizer(this);
-            subSummarizer.setSourceCache(this.getSourceCache());
+            subSummarizer.setCachedReader(cachedReader);
             try {
                 subSummarizer.runSummary();
             } catch(Exception ex) {
                 logException(ex);
                 return;
             }
-            this.setSourceCache(subSummarizer.getSourceCache());
+            this.setCachedReader(subSummarizer.getProjectReader());
             this.summary.join(subSummarizer.summary);
         }
+
+        logTime("Sub-Summaries");
 
         PrismarineLibrary standardLibrary = suiteConfig.getStandardLibrary();
         if(standardLibrary != null) {
             standardLibrary.populateSummary(summary);
         }
 
+        logTime("Populating with Standard Library");
+
         suiteConfig.runSummaryPreFileTree(this);
+
+        logTime("Suite Pre-Walkers");
 
         walker = new FileWalker<>(
                 new DirectoryCompoundInput(rootFile),
@@ -109,6 +131,8 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
         walker.addStops(DefaultWalkerStops.createSummaryWalkerStops(suiteConfig));
         suiteConfig.setupWalkerForSummary(walker);
 
+        logTime("Walker Setup");
+
         if(cachedReader != null) walker.getReader().populateWithCachedReader(cachedReader);
         try {
             walker.walk();
@@ -117,7 +141,11 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
             return;
         }
 
+        logTime("Walkers");
+
         suiteConfig.runSummaryPostFileTree(this);
+
+        logTime("Suite Post-Walkers");
 
         if(parentSummarizer == null) {
             int pass = 0;
@@ -133,9 +161,13 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
             }
         }
 
+        logTime("File-Aware Processors");
+
         for(java.lang.Runnable r : completionListeners) {
             r.run();
         }
+
+        logTime("Completion Listeners");
     }
 
     public PrismarineProjectSummarizer<T> getParentSummarizer() {
@@ -181,16 +213,7 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
         this.cachedReader = cachedReader;
     }
 
-
-    @Override
-    public void setSourceCache(HashMap<String, ParsingSignature> hashMap) {
-
-    }
-
-    private static final HashMap<String, ParsingSignature> TEMP_SOURCE_CACHE = new HashMap<>();
-
-    @Override
-    public HashMap<String, ParsingSignature> getSourceCache() {
-        return TEMP_SOURCE_CACHE;
+    public void setLogTimes(boolean logTimes) {
+        this.logTimes = logTimes;
     }
 }
