@@ -1,5 +1,6 @@
 package com.energyxxer.prismarine.typesystem.generics;
 
+import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.prismarine.reporting.PrismarineException;
 import com.energyxxer.prismarine.symbols.contexts.ISymbolContext;
 import com.energyxxer.prismarine.typesystem.PrismarineTypeSystem;
@@ -28,8 +29,10 @@ public class GenericUtils {
         }
     }
 
+    private static final ThreadLocal<HashSet<GenericStandInType>> SEEN_STAND_IN_TYPES = ThreadLocal.withInitial(HashSet::new);
+
     public static TypeHandler<?> nonGeneric(TypeHandler<?> handler, Object thisObject, ActualParameterList actualParams, ISymbolContext ctx) {
-        HashSet<GenericStandInType> seenStandInTypes = null;
+        SEEN_STAND_IN_TYPES.get().clear();
 
         TypeHandler genericType = handler;
         while(genericType instanceof GenericStandInType) {
@@ -57,9 +60,34 @@ public class GenericUtils {
             }
 
             if(genericType instanceof GenericStandInType) {
-                if(seenStandInTypes == null) seenStandInTypes = new HashSet<>();
-                if(!seenStandInTypes.add(genericInfo)) {
+                if(!SEEN_STAND_IN_TYPES.get().add(genericInfo)) {
                     throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "Circular generic parameters (how did you even achieve that?)", actualParams.getPattern(), ctx);
+                }
+            }
+        }
+        return genericType;
+    }
+
+    public static TypeHandler<?> nonGeneric(TypeHandler<?> handler, GenericSupplier genericSupplier, TokenPattern<?> pattern, ISymbolContext ctx) {
+        SEEN_STAND_IN_TYPES.get().clear();
+
+        TypeHandler genericType = handler;
+        while(genericType instanceof GenericStandInType) {
+            GenericStandInType genericInfo = (GenericStandInType) genericType;
+            boolean genericTypeFound = false;
+
+            if(genericSupplier.hasBinding(genericInfo.getContext().binding)) {
+                genericType = genericSupplier.get(genericInfo.getContext().binding)[genericInfo.getTypeIndex()];
+                genericTypeFound = true;
+            }
+
+            if(!genericTypeFound) {
+                throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "Could not resolve generic parameter '" + genericInfo.getTypeParamName() + "' (possibly a language error?)", pattern, ctx);
+            }
+
+            if(genericType instanceof GenericStandInType) {
+                if(!SEEN_STAND_IN_TYPES.get().add(genericInfo)) {
+                    throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "Circular generic parameters (how did you even achieve that?)", pattern, ctx);
                 }
             }
         }

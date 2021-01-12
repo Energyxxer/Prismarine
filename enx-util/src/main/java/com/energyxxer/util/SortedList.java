@@ -17,7 +17,12 @@ public class SortedList<T> extends ArrayList<T> {
 
     @Override
     public boolean add(T t) {
-        super.add(findIndexForKey(sortingKeyFunction.apply(t)), t);
+        int key = sortingKeyFunction.apply(t);
+        int index = findIndexForKey(key);
+        while(index >= 0 && index < size() && sortingKeyFunction.apply(this.get(index)) <= key) {
+            index++;
+        }
+        super.add(index, t);
         return true;
     }
 

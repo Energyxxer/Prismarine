@@ -1,5 +1,6 @@
 package com.energyxxer.prismarine.typesystem.functions.typed;
 
+import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.prismarine.reporting.PrismarineException;
 import com.energyxxer.prismarine.symbols.contexts.ISymbolContext;
 import com.energyxxer.prismarine.typesystem.PrismarineTypeSystem;
@@ -8,6 +9,7 @@ import com.energyxxer.prismarine.typesystem.functions.ActualParameterList;
 import com.energyxxer.prismarine.typesystem.functions.FormalParameter;
 import com.energyxxer.prismarine.typesystem.functions.PrimitivePrismarineFunction;
 import com.energyxxer.prismarine.typesystem.functions.PrismarineFunction;
+import com.energyxxer.prismarine.typesystem.generics.GenericSupplier;
 import com.energyxxer.prismarine.typesystem.generics.GenericUtils;
 
 import java.util.ArrayList;
@@ -147,10 +149,29 @@ public class TypedFunctionFamily<T extends TypedFunction> implements PrimitivePr
         return name;
     }
 
-    public T findOverloadForParameters(List<FormalParameter> types) {
+    public T findOverloadForParameters(List<FormalParameter> types, GenericSupplier genericSupplier, TokenPattern<?> pattern, ISymbolContext ctx) {
         for(T method : implementations) {
-            if(FormalParameter.parameterListEquals(method.getFormalParameters(), types)) {
-                return method;
+            if(genericSupplier != null) {
+                for(FormalParameter otherParam : method.getFormalParameters()) {
+                    TypeConstraints constraints = otherParam.getConstraints();
+                    if(constraints.isGeneric()) {
+                        constraints.startGenericSubstitution(genericSupplier, pattern, ctx);
+                    }
+                }
+            }
+            try {
+                if(FormalParameter.parameterListEquals(method.getFormalParameters(), types)) {
+                    return method;
+                }
+            } finally {
+                if(genericSupplier != null) {
+                    for(FormalParameter otherParam : method.getFormalParameters()) {
+                        TypeConstraints constraints = otherParam.getConstraints();
+                        if(constraints.isGeneric()) {
+                            constraints.endGenericSubstitution();
+                        }
+                    }
+                }
             }
         }
         return null;

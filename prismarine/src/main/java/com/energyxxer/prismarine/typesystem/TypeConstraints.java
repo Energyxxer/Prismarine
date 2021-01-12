@@ -5,6 +5,7 @@ import com.energyxxer.prismarine.reporting.PrismarineException;
 import com.energyxxer.prismarine.symbols.contexts.ISymbolContext;
 import com.energyxxer.prismarine.typesystem.functions.ActualParameterList;
 import com.energyxxer.prismarine.typesystem.generics.GenericStandInType;
+import com.energyxxer.prismarine.typesystem.generics.GenericSupplier;
 import com.energyxxer.prismarine.typesystem.generics.GenericUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -184,6 +185,13 @@ public class TypeConstraints {
         if(genericSubstituted) throw new IllegalStateException("Cannot start generic substitution; one is already in progress!");
         genericSubstituted = true;
         this.handler = GenericUtils.resolveStandIns(genericInfo, thisObject, actualParams, ctx);
+    }
+
+    public void startGenericSubstitution(GenericSupplier genericSupplier, TokenPattern<?> pattern, ISymbolContext ctx) {
+        if(!isGeneric()) throw new IllegalStateException("Cannot start generic substitution on a non-generic type constraint");
+        if(genericSubstituted) throw new IllegalStateException("Cannot start generic substitution; one is already in progress!");
+        genericSubstituted = true;
+        this.handler = GenericUtils.nonGeneric(genericInfo, genericSupplier, pattern, ctx);
     }
 
     public void endGenericSubstitution() {
