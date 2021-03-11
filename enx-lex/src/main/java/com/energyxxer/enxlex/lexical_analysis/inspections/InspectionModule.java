@@ -1,15 +1,18 @@
 package com.energyxxer.enxlex.lexical_analysis.inspections;
 
+import com.energyxxer.util.SimpleReadArrayList;
 import com.energyxxer.util.SortedList;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class InspectionModule {
-    private SortedList<Inspection> inspections = new SortedList<>(Inspection::getStartIndex);
+    private final SortedList<Inspection> inspections = new SortedList<>(Inspection::getStartIndex);
+    private List<Inspection> readOnlyInspections;
 
     public void addInspection(Inspection inspection) {
         inspections.add(inspection);
+        readOnlyInspections = null;
     }
 
     public List<Inspection> collectInspectionsForIndex(int index) {
@@ -24,6 +27,9 @@ public class InspectionModule {
     }
 
     public List<Inspection> getInspections() {
-        return inspections;
+        if(readOnlyInspections == null) {
+            readOnlyInspections = new SimpleReadArrayList<>(inspections);
+        }
+        return readOnlyInspections;
     }
 }

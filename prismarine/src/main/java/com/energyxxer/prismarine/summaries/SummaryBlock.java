@@ -1,6 +1,7 @@
 package com.energyxxer.prismarine.summaries;
 
 import com.energyxxer.prismarine.symbols.SymbolVisibility;
+import com.energyxxer.util.SimpleReadArrayList;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
@@ -11,10 +12,10 @@ import java.util.function.Predicate;
 public class SummaryBlock implements SummaryElement {
     private boolean fixed = false;
     private SummarySymbol associatedSymbol = null;
-    private PrismarineSummaryModule parentSummary;
+    private final PrismarineSummaryModule parentSummary;
     private int startIndex;
     private int endIndex;
-    private ArrayList<SummaryElement> subElements = new ArrayList<>();
+    private final ArrayList<SummaryElement> subElements = new SimpleReadArrayList<>();
     private ArrayList<SummarySymbol> fallbackSymbols = null;
     @NotNull
     private RepeatPolicy repeatPolicy = RepeatPolicy.DUPLICATE;

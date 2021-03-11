@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 public class JsonTraverser {
     public static final JsonTraverser INSTANCE = new JsonTraverser(null);
 
-    private JsonElement root;
+    private final JsonElement root;
     private JsonElement neck;
     private JsonElement head;
     boolean createOnTraversal;

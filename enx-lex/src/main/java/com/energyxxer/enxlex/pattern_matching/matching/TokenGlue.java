@@ -8,8 +8,8 @@ import java.util.Arrays;
 
 public class TokenGlue extends TokenPatternMatch {
 
-    private ArrayList<TokenPatternMatch> required = new ArrayList<>();
-    private ArrayList<TokenPatternMatch> ignored = new ArrayList<>();
+    private final ArrayList<TokenPatternMatch> required = new ArrayList<>();
+    private final ArrayList<TokenPatternMatch> ignored = new ArrayList<>();
 
     public TokenGlue(boolean required, TokenPatternMatch... patterns) {
         if(required)

@@ -84,7 +84,7 @@ public class TypeHandlerMemberCollection<T> {
         this.notFoundPolicy = notFoundPolicy;
     }
 
-    public static enum MemberNotFoundPolicy {
+    public enum MemberNotFoundPolicy {
         RETURN_NULL,
         THROW_EXCEPTION
     }

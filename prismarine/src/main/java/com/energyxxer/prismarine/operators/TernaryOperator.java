@@ -1,7 +1,7 @@
 package com.energyxxer.prismarine.operators;
 
 public class TernaryOperator extends Operator {
-    private boolean isLeftOperator;
+    private final boolean isLeftOperator;
     private TernaryOperator counterpart;
 
     private TernaryOperator(String symbol, int precedence, OperationOrder order, boolean isLeftOperator) {

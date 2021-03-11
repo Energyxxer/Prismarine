@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class OperatorPool {
-    private ArrayList<Operator> operators = new ArrayList<>();
+    private final ArrayList<Operator> operators = new ArrayList<>();
 
     public OperatorPool(Operator... operators) {
         this.operators.addAll(Arrays.asList(operators));

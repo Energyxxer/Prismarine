@@ -26,7 +26,7 @@ import java.util.function.Function;
 public class OperatorManager<T extends TypedFunction> {
     private Function<String, TypedFunctionFamily<T>> familyConstructor = TypedFunctionFamily::new;
 
-    private PrismarineTypeSystem typeSystem;
+    private final PrismarineTypeSystem typeSystem;
 
     public final HashMap<String, TypedFunctionFamily<T>> unaryLeftOperators = new HashMap<>();
     public final HashMap<String, TypedFunctionFamily<T>> unaryRightOperators = new HashMap<>();
@@ -203,7 +203,7 @@ public class OperatorManager<T extends TypedFunction> {
     }
 
     public static class SpecialOperatorFailure extends RuntimeException {
-        private Object[] operandsAsEvaluated;
+        private final Object[] operandsAsEvaluated;
 
         public SpecialOperatorFailure(Object[] operandsAsEvaluated) {
             this.operandsAsEvaluated = operandsAsEvaluated;

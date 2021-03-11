@@ -21,14 +21,14 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
     private final PrismarineSuiteConfiguration suiteConfig;
 
     private PrismarineProjectSummarizer<T> parentSummarizer = null;
-    private File rootFile;
+    private final File rootFile;
     private Thread thread;
 
-    private T summary;
+    private final T summary;
 
-    private ArrayList<Runnable> completionListeners = new ArrayList<>();
+    private final ArrayList<Runnable> completionListeners = new ArrayList<>();
 
-    private PrismarineProjectWorker worker;
+    private final PrismarineProjectWorker worker;
     FileWalker<PrismarineProjectSummary> walker;
 
     private ProjectReader cachedReader;

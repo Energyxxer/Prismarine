@@ -23,11 +23,11 @@ public class PrismarineSummaryModule extends SummaryModule {
 
     private boolean searchingSymbols = false;
 
-    private Stack<SummaryBlock> contextStack = new Stack<>();
+    private final Stack<SummaryBlock> contextStack = new Stack<>();
 
-    private Stack<SummarySymbol> subSymbolStack = new Stack<>();
+    private final Stack<SummarySymbol> subSymbolStack = new Stack<>();
 
-    private SortedList<SymbolUsage> symbolUsages = new SortedList<>(u -> u.index);
+    private final SortedList<SymbolUsage> symbolUsages = new SortedList<>(u -> u.index);
 
     public PrismarineSummaryModule() {
         this(null);

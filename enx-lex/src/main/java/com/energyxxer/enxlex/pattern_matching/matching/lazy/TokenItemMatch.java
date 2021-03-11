@@ -10,7 +10,7 @@ import com.energyxxer.enxlex.suggestions.ComplexSuggestion;
 import com.energyxxer.enxlex.suggestions.LiteralSuggestion;
 
 public class TokenItemMatch extends TokenPatternMatch {
-    private TokenType type;
+    private final TokenType type;
     private String stringMatch = null;
 
     private boolean caseSensitive = true;

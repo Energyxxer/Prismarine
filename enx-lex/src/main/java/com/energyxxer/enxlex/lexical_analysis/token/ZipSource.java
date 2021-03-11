@@ -4,8 +4,8 @@ import java.io.File;
 import java.nio.file.Path;
 
 public class ZipSource implements TokenSource {
-    private File root;
-    private Path relativePath;
+    private final File root;
+    private final Path relativePath;
 
     public ZipSource(File root, Path relativePath) {
         this.root = root;

@@ -18,10 +18,10 @@ public class PrismarineLibraryUnit {
         }
     }
 
-    private Path relativePath;
-    private PrismarineLanguageUnitConfiguration unitConfig;
-    private String content;
-    private Availability availability;
+    private final Path relativePath;
+    private final PrismarineLanguageUnitConfiguration unitConfig;
+    private final String content;
+    private final Availability availability;
 
     private ProjectReader.Result parseResult;
 

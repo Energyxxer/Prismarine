@@ -3,8 +3,8 @@ package com.energyxxer.prismarine.controlflow;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 
 public class ReturnException extends RuntimeException {
-    private TokenPattern<?> pattern;
-    private Object value;
+    private final TokenPattern<?> pattern;
+    private final Object value;
 
     public ReturnException(TokenPattern<?> pattern, Object value) {
         this.pattern = pattern;

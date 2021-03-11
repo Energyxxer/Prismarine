@@ -10,8 +10,8 @@ import com.energyxxer.prismarine.symbols.contexts.ISymbolContext;
 import java.util.stream.Collectors;
 
 public class PrismarineFunction implements PrimitivePrismarineFunction {
-    private PrismarineFunctionBranch branch;
-    private ISymbolContext declaringContext;
+    private final PrismarineFunctionBranch branch;
+    private final ISymbolContext declaringContext;
     private String functionName = "<anonymous function>";
 
     public PrismarineFunction(String functionName, PrismarineFunctionBranch branch, ISymbolContext declaringContext) {
@@ -68,8 +68,8 @@ public class PrismarineFunction implements PrimitivePrismarineFunction {
     }
 
     public static class FixedThisFunctionSymbol extends Symbol {
-        private PrismarineFunction pickedOverload;
-        private Object thisObject;
+        private final PrismarineFunction pickedOverload;
+        private final Object thisObject;
 
         public FixedThisFunctionSymbol(String name, PrismarineFunction pickedOverload, Object thisObject) {
             super(name, SymbolVisibility.PUBLIC);

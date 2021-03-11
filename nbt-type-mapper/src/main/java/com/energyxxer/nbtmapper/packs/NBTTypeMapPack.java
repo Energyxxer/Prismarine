@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.function.Function;
 
 public class NBTTypeMapPack {
-    private ArrayList<RawNBTTypeMap> rawFiles = new ArrayList<>();
+    private final ArrayList<RawNBTTypeMap> rawFiles = new ArrayList<>();
 
     private NBTTypeMapPack() {}
 

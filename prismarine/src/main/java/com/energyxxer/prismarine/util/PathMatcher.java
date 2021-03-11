@@ -174,7 +174,7 @@ public class PathMatcher {
         }
     }
 
-    private Pattern pattern;
+    private final Pattern pattern;
     private Matcher matcher;
 
     public PathMatcher(Pattern pattern) {

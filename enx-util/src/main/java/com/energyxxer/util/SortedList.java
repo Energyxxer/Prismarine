@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.function.Function;
 
 public class SortedList<T> extends ArrayList<T> {
-    private Function<T, Integer> sortingKeyFunction;
+    private final Function<T, Integer> sortingKeyFunction;
 
     public SortedList(Function<T, Integer> sortingKeyFunction) {
         this.sortingKeyFunction = sortingKeyFunction;

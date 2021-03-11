@@ -5,22 +5,28 @@ import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 import com.energyxxer.enxlex.pattern_matching.PatternEvaluator;
 import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
+import com.energyxxer.util.ObjectPool;
 import com.energyxxer.util.StringBounds;
 import com.energyxxer.util.StringLocation;
 import com.energyxxer.util.logger.Debug;
 import com.sun.istack.internal.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public abstract class TokenPattern<T> {
+	public static final ThreadLocal<ObjectPool<ArrayList<TokenPattern<?>>>> PATTERN_LIST_POOL = ThreadLocal.withInitial(() -> new ObjectPool<>(ArrayList::new, ArrayList::clear));
 
 	protected String name = "";
 	protected ArrayList<String> tags = new ArrayList<>();
 	public final TokenPatternMatch source;
 	protected boolean validated = false;
+	private ThreadLocal<Object> heldData = null;
+	private ThreadLocal<Boolean> holdsData = null;
+	private HashMap<String, TokenPattern<?>> findCache = null;
 
 	public TokenPattern(TokenPatternMatch source) {
 		this.source = source;
@@ -35,6 +41,18 @@ public abstract class TokenPattern<T> {
 	public abstract List<TokenPattern<?>> deepSearchByName(String name);
 
 	public abstract TokenPattern<?> find(String path);
+
+	protected TokenPattern<?> putFindResult(String path, TokenPattern<?> result) {
+		if(findCache == null) findCache = new HashMap<>();
+		findCache.put(path, result);
+		return result;
+	}
+	protected boolean isPathInCache(String path) {
+		return findCache != null && findCache.containsKey(path);
+	}
+	protected TokenPattern<?> getCachedFindResult(String path) {
+		return findCache.get(path);
+	}
 
 	@NotNull public TokenPattern<?> tryFind(String path) {
 		TokenPattern<?> rv = find(path);
@@ -119,7 +137,7 @@ public abstract class TokenPattern<T> {
     		Debug.log("Missing evaluator for pattern " + simplifiedSource);
     		throw new NullPointerException();
 		}
-    	return evaluator.evaluate(simplified.pattern, simplified.data);
+		return evaluator.evaluate(simplified.pattern, simplified.data);
 	}
 
 	public static Object evaluate(TokenPattern<?> pattern, Object... data) {
@@ -150,12 +168,30 @@ public abstract class TokenPattern<T> {
 		}
 
 		public SimplificationDomain simplifyFully() {
-			TokenPattern previous = null;
+			TokenPattern<?> previous = null;
 			while(pattern != previous) {
 				previous = pattern;
 				simplifyOnce();
 			}
 			return this;
 		}
+	}
+
+	public Object getHeldData() {
+		return isDataHeld() ? heldData.get() : null;
+	}
+
+	public boolean isDataHeld() {
+		return heldData != null && holdsData != null && holdsData.get();
+	}
+
+	public Object setHeldData(Object heldData) {
+		if(!isDataHeld()) {
+			if(this.heldData == null) this.heldData = new ThreadLocal<>();
+			if(this.holdsData == null) this.holdsData = ThreadLocal.withInitial(()->false);
+		}
+		this.heldData.set(heldData);
+		this.holdsData.set(true);
+		return heldData;
 	}
 }

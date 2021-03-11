@@ -10,8 +10,8 @@ import com.energyxxer.enxlex.suggestions.LiteralSuggestion;
 import java.util.HashMap;
 
 public class TokenSwitchMatch extends TokenPatternMatch {
-    private HashMap<String, TokenPatternMatch> entries = new HashMap<>();
-    private TokenItemMatch switchMatch;
+    private final HashMap<String, TokenPatternMatch> entries = new HashMap<>();
+    private final TokenItemMatch switchMatch;
 
     public TokenSwitchMatch(String name, TokenItemMatch switchMatch) {
         this.name = name;

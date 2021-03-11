@@ -3,7 +3,7 @@ package com.energyxxer.util.processes;
 import java.util.ArrayList;
 
 public abstract class AbstractProcess {
-    private String name;
+    private final String name;
     private String status;
     private float progress = -1;
 
@@ -12,9 +12,9 @@ public abstract class AbstractProcess {
     private boolean complete = false;
     private boolean successful = false;
 
-    private ArrayList<StartListener> startListeners = new ArrayList<>();
-    private ArrayList<ProgressListener> progressListeners = new ArrayList<>();
-    private ArrayList<CompletionListener> completionListeners = new ArrayList<>();
+    private final ArrayList<StartListener> startListeners = new ArrayList<>();
+    private final ArrayList<ProgressListener> progressListeners = new ArrayList<>();
+    private final ArrayList<CompletionListener> completionListeners = new ArrayList<>();
 
     public AbstractProcess(String name) {
         this.name = name;

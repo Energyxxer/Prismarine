@@ -22,7 +22,7 @@ public class ConsoleOutputStream extends PrintStream {
                              LENGTH = 3,
                              TEXT = 4;
 
-    private HashMap<String, StringBuilder> hyperLinkElements = new HashMap<>();
+    private final HashMap<String, StringBuilder> hyperLinkElements = new HashMap<>();
 
     private int hyperLinkStage = NONE;
 

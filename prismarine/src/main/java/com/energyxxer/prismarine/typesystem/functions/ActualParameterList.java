@@ -13,10 +13,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 
 public class ActualParameterList implements GenericSupplierImplementer {
-    private @Nullable String[] names;
-    private Object[] values;
-    private TokenPattern<?>[] patterns;
-    private @NotNull TokenPattern<?> pattern;
+    private @Nullable
+    final String[] names;
+    private final Object[] values;
+    private final TokenPattern<?>[] patterns;
+    private @NotNull
+    final TokenPattern<?> pattern;
 
     private GenericSupplier genericSupplier;
 

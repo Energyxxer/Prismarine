@@ -13,7 +13,7 @@ public abstract class PrismarineLanguageUnitConfiguration<T extends PrismarineLa
     public abstract Class<T> getUnitClass();
 
     public abstract int getNumberOfPasses();
-    public abstract void performPass(T unit, PrismarineCompiler compiler, int passNumber);
+    public abstract PrismarineCompiler.PassResult performPass(T unit, PrismarineCompiler compiler, int passNumber);
 
     public abstract OperatorPool getOperatorPool();
 

@@ -12,7 +12,7 @@ public class SuggestionModule {
 
     public enum SuggestionStatus {
         ENABLED,
-        DISABLED;
+        DISABLED
     }
     private Lexer lexer;
 
@@ -20,9 +20,9 @@ public class SuggestionModule {
     private boolean changedSuggestionIndex = false;
     private int suggestionIndex;
     private int caretIndex;
-    private Stack<SuggestionStatus> statusStack = new Stack<>();
+    private final Stack<SuggestionStatus> statusStack = new Stack<>();
 
-    private ArrayList<Suggestion> suggestions = new ArrayList<>();
+    private final ArrayList<Suggestion> suggestions = new ArrayList<>();
 
     private String[] lookingAtMemberPath = null;
 

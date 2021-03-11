@@ -13,9 +13,9 @@ import java.util.Iterator;
 
 public class PrismarineException extends RuntimeException {
 
-    private Type type;
-    private Notice notice;
-    private TokenPattern<?> cause;
+    private final Type type;
+    private final Notice notice;
+    private final TokenPattern<?> cause;
     private boolean breaking = false;
 
     public PrismarineException(Type type, String message, @NotNull TokenPattern<?> cause, ISymbolContext ctx) {
@@ -78,7 +78,7 @@ public class PrismarineException extends RuntimeException {
     }
 
     public static class Grouped extends RuntimeException implements Iterable<PrismarineException> {
-        private ArrayList<PrismarineException> exceptions;
+        private final ArrayList<PrismarineException> exceptions;
 
         public Grouped(ArrayList<PrismarineException> exceptions) {
             this.exceptions = exceptions;

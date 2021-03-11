@@ -15,6 +15,12 @@ import java.util.Map;
 public class GenericUtils {
     private GenericUtils() {}
 
+    /**
+     * Given a type constraint, an object and an actual parameter list, returns a non-generic type constraint
+     * whose handler is non-generic, based on the generic suppliers of the object and parameter list.
+     *
+     * If the passed type constraint is not generic, the same constraint is returned.
+     * */
     public static TypeConstraints nonGeneric(TypeConstraints constraints, Object thisObject, ActualParameterList actualParams, ISymbolContext ctx) {
         if(constraints.isGeneric()) {
             TypeHandler genericType = nonGeneric(constraints.getGenericHandler(), thisObject, actualParams, ctx);
@@ -31,6 +37,10 @@ public class GenericUtils {
 
     private static final ThreadLocal<HashSet<GenericStandInType>> SEEN_STAND_IN_TYPES = ThreadLocal.withInitial(HashSet::new);
 
+    /**
+     * Given a type handler, an object and an actual parameter list, returns a non-generic-stand-in type handler
+     * based on the generic suppliers of the object and parameter list.
+     * */
     public static TypeHandler<?> nonGeneric(TypeHandler<?> handler, Object thisObject, ActualParameterList actualParams, ISymbolContext ctx) {
         SEEN_STAND_IN_TYPES.get().clear();
 
@@ -68,6 +78,10 @@ public class GenericUtils {
         return genericType;
     }
 
+    /**
+     * Given a type handler and a generic supplier, returns a non-generic-stand-in type handler
+     * based on the single generic supplier.
+     * */
     public static TypeHandler<?> nonGeneric(TypeHandler<?> handler, GenericSupplier genericSupplier, TokenPattern<?> pattern, ISymbolContext ctx) {
         SEEN_STAND_IN_TYPES.get().clear();
 
@@ -94,6 +108,11 @@ public class GenericUtils {
         return genericType;
     }
 
+    /**
+     * Given a type handler, an object and an actual parameter list, returns a non-generic-stand-in type handler
+     * based on the generic suppliers of the object and parameter list. Unlike the nonGeneric method, this works
+     * recursively to resolve generics inside type-parameterized wrapper types.
+     * */
     public static TypeHandler<?> resolveStandIns(TypeHandler<?> handler, Object thisObject, ActualParameterList actualParams, ISymbolContext ctx) {
         if(handler instanceof GenericStandInType) {
             return nonGeneric(handler, thisObject, actualParams, ctx); //Trust that generic suppliers never return stand-ins
@@ -109,6 +128,11 @@ public class GenericUtils {
         } else return handler;
     }
 
+    /**
+     * Given a generic supplier, an object and an actual parameter list, returns a generic supplier such that all the
+     * stand-in types it holds (recursively) are replaced with non-generic equivalents, based on the generic suppliers
+     * of the object and actual parameter list.
+     * */
     public static GenericSupplier resolveStandIns(GenericSupplier genericSupplier, Object thisObject, ActualParameterList actualParams, ISymbolContext ctx) {
         IdentityHashMap<Object, TypeHandler[]> genericSupplierCopy = null;
         for(Map.Entry<Object, TypeHandler[]> entry : genericSupplier.entrySet()) {
@@ -121,9 +145,7 @@ public class GenericUtils {
                     if(copy == types) { //actually make copy a copy
                         copy = new TypeHandler[types.length];
                         if(genericSupplierCopy == null) genericSupplierCopy = new IdentityHashMap<>();
-                        for(int j = 0; j < i; i++) {
-                            copy[j] = types[j];
-                        }
+                        System.arraycopy(types, 0, copy, 0, i);
                     }
                 }
 
@@ -148,6 +170,9 @@ public class GenericUtils {
         }
     }
 
+    /**
+     * Recursively scans the given type handler for generic stand-in types.
+     * */
     public static boolean hasStandIns(TypeHandler<?> handler) {
         if(handler instanceof GenericStandInType) {
             return true;

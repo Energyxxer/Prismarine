@@ -33,7 +33,7 @@ public class CallStack {
         }
     }
 
-    private Stack<Call> stack = new Stack<>();
+    private final Stack<Call> stack = new Stack<>();
 
     public Call push(Call item) {
         return stack.push(item);

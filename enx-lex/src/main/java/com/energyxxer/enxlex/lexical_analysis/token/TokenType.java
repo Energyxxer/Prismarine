@@ -12,9 +12,9 @@ public class TokenType {
 			NEWLINE = new TokenType("NEWLINE"), // New line
 			END_OF_FILE = new TokenType("END_OF_FILE"); // End of file
 
-	private String name;
+	private final String name;
 	private String humanReadableName;
-	private boolean significant;
+	private final boolean significant;
 
 	public TokenType(String name) {
 		this(name, true);

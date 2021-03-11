@@ -5,7 +5,7 @@ import java.util.Stack;
 public class TryStack {
     public static final int BREAKING_TRY = 1;
     public static final int RECOVERING_TRY = 2;
-    private Stack<Integer> stack = new Stack<>();
+    private final Stack<Integer> stack = new Stack<>();
 
     public void pushBreaking() {
         stack.push(BREAKING_TRY);

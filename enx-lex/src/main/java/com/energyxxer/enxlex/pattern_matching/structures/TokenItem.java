@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TokenItem extends TokenPattern<Token> {
-	private Token token;
+	private final Token token;
 	
 	public TokenItem(Token token, TokenPatternMatch source) {
 		super(source);

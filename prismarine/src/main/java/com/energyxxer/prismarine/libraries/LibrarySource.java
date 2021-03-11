@@ -6,8 +6,8 @@ import java.io.File;
 import java.nio.file.Path;
 
 public class LibrarySource implements TokenSource {
-    private String libraryName;
-    private Path path;
+    private final String libraryName;
+    private final Path path;
 
     public LibrarySource(String libraryName, Path path) {
         this.libraryName = libraryName;

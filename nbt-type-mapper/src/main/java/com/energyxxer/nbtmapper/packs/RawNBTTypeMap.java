@@ -3,8 +3,8 @@ package com.energyxxer.nbtmapper.packs;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
 
 public class RawNBTTypeMap {
-    private TokenSource source;
-    private String contents;
+    private final TokenSource source;
+    private final String contents;
 
     public RawNBTTypeMap(TokenSource source, String contents) {
         this.source = source;

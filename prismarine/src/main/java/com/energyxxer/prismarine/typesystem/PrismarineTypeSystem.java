@@ -162,7 +162,7 @@ public abstract class PrismarineTypeSystem {
     //endregion
 
     public boolean isStaticPrimitiveHandler(TypeHandler<?> handler) {
-        return primitiveHandlers.values().contains(handler);
+        return primitiveHandlers.containsValue(handler);
     }
 
     //region Sanitization

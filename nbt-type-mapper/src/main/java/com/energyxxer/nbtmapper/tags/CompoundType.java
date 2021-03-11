@@ -15,8 +15,8 @@ import java.util.*;
 
 public class CompoundType extends DataType implements DeepDataType {
     private DataType defaultType;
-    private HashMap<String, DataType> types = new HashMap<>();
-    private HashMap<String, DataType> volatileTypes = new HashMap<>();
+    private final HashMap<String, DataType> types = new HashMap<>();
+    private final HashMap<String, DataType> volatileTypes = new HashMap<>();
 
     public CompoundType(NBTTypeMap parent) {
         super(parent);

@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.function.Function;
 
 public class SummarySymbol implements SummaryElement {
-    private PrismarineSummaryModule parentSummary;
-    private String name;
+    private final PrismarineSummaryModule parentSummary;
+    private final String name;
     private int declarationIndex;
     private SymbolVisibility visibility;
-    private HashSet<String> suggestionTags = new HashSet<>();
+    private HashSet<String> suggestionTags;
     private SummaryBlock subBlock = null;
     private boolean isInstanceField = false;
     private TokenPattern<?> declarationPattern;
@@ -108,12 +108,17 @@ public class SummarySymbol implements SummaryElement {
     }
 
     public SummarySymbol addTag(String tag) {
+        if(suggestionTags == null) suggestionTags = new HashSet<>();
         suggestionTags.add(tag);
         return this;
     }
 
     public HashSet<String> getSuggestionTags() {
         return suggestionTags;
+    }
+
+    public boolean hasSuggestionTag(String tag) {
+        return suggestionTags != null && suggestionTags.contains(tag);
     }
 
     public boolean hasSubBlock() {

@@ -1,11 +1,13 @@
 package com.energyxxer.enxlex.lexical_analysis.token;
 
 import com.energyxxer.enxlex.report.Notice;
+import com.energyxxer.enxlex.report.Report;
 import com.energyxxer.util.StringBounds;
 import com.energyxxer.util.StringLocation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -17,19 +19,18 @@ public class Token {
 	public TokenType type;
 	public TokenSource source;
 	public StringLocation loc;
-	public HashMap<String, Object> attributes;
-	public HashMap<TokenSection, String> subSections;
+
+	private HashMap<String, Object> attributes;
+	private HashMap<TokenSection, String> subSections;
+	private ArrayList<Notice> attachedNotices;
 
 	public ArrayList<String> tags = new ArrayList<>();
-	public ArrayList<Notice> attachedNotices = new ArrayList<>();
 
     public Token(String value, TokenSource source, StringLocation loc) {
 		this.value = value;
 		this.type = TokenType.UNKNOWN;
 		this.source = source;
 		this.loc = loc;
-		this.attributes = new HashMap<>();
-		this.subSections = new HashMap<>();
 	}
 
 	public Token(String value, TokenSource source, StringLocation loc, HashMap<TokenSection, String> subSections) {
@@ -37,8 +38,7 @@ public class Token {
 		this.type = TokenType.UNKNOWN;
 		this.source = source;
 		this.loc = loc;
-		this.attributes = new HashMap<>();
-		this.subSections = (subSections != null) ? subSections : new HashMap<>();
+		this.subSections = subSections;
 	}
 
 	public Token(String value, TokenType tokenType, TokenSource source, StringLocation loc) {
@@ -46,8 +46,6 @@ public class Token {
 		this.type = (tokenType != null) ? tokenType : TokenType.UNKNOWN;
 		this.source = source;
 		this.loc = loc;
-		this.attributes = new HashMap<>();
-		this.subSections = new HashMap<>();
 	}
 
 	public Token(String value, TokenType tokenType, TokenSource source, StringLocation loc, HashMap<TokenSection, String> subSections) {
@@ -55,8 +53,7 @@ public class Token {
 		this.type = (tokenType != null) ? tokenType : TokenType.UNKNOWN;
 		this.source = source;
 		this.loc = loc;
-		this.attributes = new HashMap<>();
-		this.subSections = (subSections != null) ? subSections : new HashMap<>();
+		this.subSections = subSections;
 	}
 
 	public boolean isSignificant() {
@@ -122,5 +119,31 @@ public class Token {
 
 	public StringBounds getStringBounds() {
 		return new StringBounds(loc, new StringLocation(loc.index + value.length(), loc.line, loc.column + value.length()));
+	}
+
+	public void dumpNotices(Report report) {
+		if(attachedNotices != null) report.addNotices(attachedNotices);
+	}
+
+	public void dumpNotices(List<Notice> report) {
+		if(attachedNotices != null) report.addAll(attachedNotices);
+	}
+
+	public void attachNotice(Notice notice) {
+    	if(attachedNotices == null) attachedNotices = new ArrayList<>();
+    	attachedNotices.add(notice);
+	}
+
+	public void putAttribute(String key, Object value) {
+		if(attributes == null) attributes = new HashMap<>();
+		attributes.put(key, value);
+	}
+
+	public Object getAttribute(String key) {
+    	return attributes == null ? null : attributes.get(key);
+	}
+
+	public HashMap<String, Object> getAttributes() {
+		return attributes;
 	}
 }

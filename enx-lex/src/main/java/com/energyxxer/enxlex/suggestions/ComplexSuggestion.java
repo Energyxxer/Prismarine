@@ -3,7 +3,7 @@ package com.energyxxer.enxlex.suggestions;
 import java.util.Objects;
 
 public class ComplexSuggestion extends Suggestion {
-    private String key;
+    private final String key;
 
     public ComplexSuggestion(String key) {
         this.key = key;

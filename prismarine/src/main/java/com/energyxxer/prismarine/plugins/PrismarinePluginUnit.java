@@ -13,7 +13,7 @@ public class PrismarinePluginUnit {
     private final PrismarinePluginUnitConfiguration config;
     private final Path relativePath;
 
-    private HashMap<PluginDataIdentifier<?>, Object> data = new HashMap<>();
+    private final HashMap<PluginDataIdentifier<?>, Object> data = new HashMap<>();
 
     public PrismarinePluginUnit(PrismarinePlugin definingPlugin, PrismarinePluginUnitConfiguration config, Path relativePath) {
         this.definingPlugin = definingPlugin;

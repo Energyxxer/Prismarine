@@ -20,8 +20,8 @@ public abstract class TokenPatternMatch {
     public boolean optional;
     public boolean recessive = false;
     public List<String> tags = new ArrayList<>();
-    protected List<BiConsumer<TokenPattern<?>, Lexer>> processors = new ArrayList<>();
-    protected List<BiConsumer<TokenPattern<?>, Lexer>> failProcessors = new ArrayList<>();
+    private List<BiConsumer<TokenPattern<?>, Lexer>> processors;
+    private List<BiConsumer<TokenPattern<?>, Lexer>> failProcessors;
 
     private Consumer<TokenPattern.SimplificationDomain> simplificationFunction;
     protected PatternEvaluator evaluator;
@@ -37,11 +37,13 @@ public abstract class TokenPatternMatch {
     }
 
     public TokenPatternMatch addProcessor(BiConsumer<TokenPattern<?>, Lexer> processor) {
+        if(processors == null) processors = new ArrayList<>();
         processors.add(processor);
         return this;
     }
 
     public TokenPatternMatch addFailProcessor(BiConsumer<TokenPattern<?>, Lexer> failProcessor) {
+        if(failProcessors == null) failProcessors = new ArrayList<>();
         failProcessors.add(failProcessor);
         return this;
     }
@@ -51,11 +53,11 @@ public abstract class TokenPatternMatch {
     public abstract String toTrimmedString();
 
     protected void invokeProcessors(TokenPattern<?> pattern, Lexer lexer) {
-        processors.forEach(p -> p.accept(pattern, lexer));
+        if(processors != null) processors.forEach(p -> p.accept(pattern, lexer));
     }
 
     protected void invokeFailProcessors(TokenPattern<?> incompletePattern, Lexer lexer) {
-        failProcessors.forEach(p -> p.accept(incompletePattern, lexer));
+        if(failProcessors != null) failProcessors.forEach(p -> p.accept(incompletePattern, lexer));
     }
 
 

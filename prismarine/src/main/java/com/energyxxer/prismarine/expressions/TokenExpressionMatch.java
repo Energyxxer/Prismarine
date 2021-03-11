@@ -16,10 +16,10 @@ import static com.energyxxer.enxlex.pattern_matching.TokenMatchResponse.*;
 
 public class TokenExpressionMatch extends TokenPatternMatch {
 
-    private TokenPatternMatch valueMatch;
-    private TokenPatternMatch operatorMatch;
+    private final TokenPatternMatch valueMatch;
+    private final TokenPatternMatch operatorMatch;
 
-    private OperatorPool operatorPool;
+    private final OperatorPool operatorPool;
 
     private Predicate<Operator> operatorFilter;
 

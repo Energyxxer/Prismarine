@@ -3,8 +3,8 @@ package com.energyxxer.enxlex.suggestions;
 import java.util.Objects;
 
 public class LiteralSuggestion extends Suggestion {
-    private String preview;
-    private String literal;
+    private final String preview;
+    private final String literal;
     private boolean caseSensitive;
 
     public LiteralSuggestion(String literal) {

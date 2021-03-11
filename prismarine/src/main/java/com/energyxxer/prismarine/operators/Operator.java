@@ -1,9 +1,9 @@
 package com.energyxxer.prismarine.operators;
 
 public class Operator {
-    private String symbol;
-    private int precedence;
-    private OperationOrder order;
+    private final String symbol;
+    private final int precedence;
+    private final OperationOrder order;
 
     public Operator(String symbol, int precedence, OperationOrder order) {
         this.symbol = symbol;

@@ -9,7 +9,7 @@ import com.energyxxer.prismarine.typesystem.functions.PrimitivePrismarineFunctio
 import java.util.Iterator;
 
 public class GenericWrapperType<T> implements TypeHandler<T>, GenericSupplierImplementer {
-    private TypeHandler<T> sourceType;
+    private final TypeHandler<T> sourceType;
     private GenericSupplier genericSupplier;
 
     public GenericWrapperType(TypeHandler<T> sourceType) {

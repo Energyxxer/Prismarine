@@ -3,8 +3,8 @@ package com.energyxxer.enxlex.lexical_analysis.inspections;
 import java.util.ArrayList;
 
 public class CodeChainAction implements CodeAction {
-    private String description;
-    private ArrayList<CodeAction> actions = new ArrayList<>();
+    private final String description;
+    private final ArrayList<CodeAction> actions = new ArrayList<>();
 
     public CodeChainAction(CodeAction... actions) {
         this(null, actions);

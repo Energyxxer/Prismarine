@@ -30,11 +30,11 @@ public class PrismarineMetaBuilder {
 
     private final ArrayList<FunctionDefinition> FUNCTIONS = new ArrayList<>();
 
-    private PrismarinePluginUnitConfiguration unitConfig;
-    private TokenPattern<?> filePattern;
-    private PrismarineProductions productions;
+    private final PrismarinePluginUnitConfiguration unitConfig;
+    private final TokenPattern<?> filePattern;
+    private final PrismarineProductions productions;
 
-    private HashMap<String, Value> variables = new HashMap<>();
+    private final HashMap<String, Value> variables = new HashMap<>();
 
     protected TokenPatternMatch returnValue = null;
 
@@ -403,8 +403,8 @@ public class PrismarineMetaBuilder {
     }
 
     public static class PrismarineMetaException extends RuntimeException {
-        private String error;
-        private TokenPattern<?> cause;
+        private final String error;
+        private final TokenPattern<?> cause;
 
         public PrismarineMetaException(String error, TokenPattern<?> cause) {
             this.error = error;

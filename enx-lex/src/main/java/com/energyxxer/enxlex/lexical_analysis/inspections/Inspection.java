@@ -13,7 +13,7 @@ public class Inspection {
 
     private InspectionSeverity severity;
 
-    private ArrayList<CodeAction> actions = new ArrayList<>();
+    private final ArrayList<CodeAction> actions = new ArrayList<>();
 
     public Inspection(String description) {
         this.description = description;

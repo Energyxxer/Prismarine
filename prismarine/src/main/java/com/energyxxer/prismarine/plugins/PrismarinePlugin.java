@@ -23,7 +23,7 @@ public class PrismarinePlugin {
     private final Path sourcePath;
     private boolean loaded;
 
-    private ArrayList<PrismarinePluginUnit> units = new ArrayList<>();
+    private final ArrayList<PrismarinePluginUnit> units = new ArrayList<>();
 
     public PrismarinePlugin(String name, @NotNull CompoundInput source, File sourceFile, PrismarineSuiteConfiguration suiteConfig) {
         this.suiteConfig = suiteConfig;

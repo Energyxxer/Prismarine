@@ -5,6 +5,7 @@ import com.energyxxer.enxlex.lexical_analysis.token.Token;
 import com.energyxxer.enxlex.pattern_matching.TokenMatchResponse;
 import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenGroup;
+import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 
 import java.util.ArrayList;
 
@@ -35,102 +36,108 @@ public class TokenGroupMatch extends TokenPatternMatch {
         return this;
     }
 
-
     @Override
     public TokenMatchResponse match(int index, Lexer lexer) {
         lexer.setCurrentIndex(index);
-        if(items.size() == 0) return new TokenMatchResponse(true, null, 0, null, new TokenGroup(this));
+        if(items.size() == 0) return new TokenMatchResponse(true, null, 0, null, new TokenGroup(this, new TokenPattern<?>[0]));
 
         int popSuggestionStatus = handleSuggestionTags(lexer, index);
 
-        TokenGroup group = new TokenGroup(this).setName(this.name).addTags(this.tags);
-        int currentIndex = index;
-        boolean hasMatched = true;
-        Token faultyToken = null;
-        int length = 0;
-        TokenPatternMatch expected = null;
+        ArrayList<TokenPattern<?>> contents = TokenPattern.PATTERN_LIST_POOL.get().claim();
+        try {
 
-        int longestFailedMatchLength = -1;
-        TokenMatchResponse longestFailedMatch = null;
+            int currentIndex = index;
+            boolean hasMatched = true;
+            Token faultyToken = null;
+            int length = 0;
+            TokenPatternMatch expected = null;
 
-        boolean[] itemsMatched = new boolean[items.size()];
-        boolean anyItemsMatched = false;
+            int longestFailedMatchLength = -1;
+            TokenMatchResponse longestFailedMatch = null;
 
-        itemLoop: for (int i = 0; i < items.size(); i++) {
+            boolean[] itemsMatched = new boolean[items.size()];
+            boolean anyItemsMatched = false;
 
-            if (currentIndex > lexer.getFileLength() && !items.get(i).optional) {
-                hasMatched = false;
-                expected = items.get(i);
-                break;
-            }
+            itemLoop: for (int i = 0; i < items.size(); i++) {
 
-            TokenMatchResponse itemMatch = items.get(i).match(currentIndex, lexer);
-            switch(itemMatch.getMatchType()) {
-                case NO_MATCH: {
-                    if(!items.get(i).optional) {
-                        hasMatched = false;
-                        faultyToken = itemMatch.faultyToken;
-                        expected = itemMatch.expected;
-                        break itemLoop;
-                    }
+                if (currentIndex > lexer.getFileLength() && !items.get(i).optional) {
+                    hasMatched = false;
+                    expected = items.get(i);
                     break;
                 }
-                case PARTIAL_MATCH: {
-                    int totalLengthUpToNow = length + itemMatch.length;
-                    if(totalLengthUpToNow > longestFailedMatchLength) {
-                        longestFailedMatch = itemMatch;
-                        longestFailedMatchLength = totalLengthUpToNow;
+
+                TokenMatchResponse itemMatch = items.get(i).match(currentIndex, lexer);
+                switch(itemMatch.getMatchType()) {
+                    case NO_MATCH: {
+                        if(!items.get(i).optional) {
+                            hasMatched = false;
+                            faultyToken = itemMatch.faultyToken;
+                            expected = itemMatch.expected;
+                            break itemLoop;
+                        }
+                        break;
                     }
-                    if(!(items.get(i).optional && i+1 < items.size() && items.get(i+1).match(currentIndex, lexer).matched)) { //TODO check if this is right. Looks weird
-                        hasMatched = false;
+                    case PARTIAL_MATCH: {
+                        int totalLengthUpToNow = length + itemMatch.length;
+                        if(totalLengthUpToNow > longestFailedMatchLength) {
+                            longestFailedMatch = itemMatch;
+                            longestFailedMatchLength = totalLengthUpToNow;
+                        }
+                        if(!(items.get(i).optional && i+1 < items.size() && items.get(i+1).match(currentIndex, lexer).matched)) { //TODO check if this is right. Looks weird
+                            hasMatched = false;
+                            length += itemMatch.length;
+                            faultyToken = itemMatch.faultyToken;
+                            expected = itemMatch.expected;
+                            break itemLoop;
+                        } else {
+                            break;
+                        }
+                    }
+                    case COMPLETE_MATCH: {
+                        if(itemMatch.pattern != null) contents.add(itemMatch.pattern);
+                        currentIndex += itemMatch.length;
                         length += itemMatch.length;
-                        faultyToken = itemMatch.faultyToken;
-                        expected = itemMatch.expected;
-                        break itemLoop;
-                    } else {
+                        itemsMatched[i] = true;
+                        anyItemsMatched = true;
+                    }
+                }
+            }
+
+            while(--popSuggestionStatus >= 0) {
+                lexer.getSuggestionModule().popStatus();
+            }
+            if(greedy && !hasMatched && longestFailedMatch != null) {
+                faultyToken = longestFailedMatch.faultyToken;
+                length = longestFailedMatchLength;
+                expected = longestFailedMatch.expected;
+            }
+
+            if(!hasMatched && length > 0 && anyItemsMatched) {
+                //check for recessive matches
+                boolean allRecessive = true;
+                for(int i = 0; i < items.size(); i++) {
+                    if(itemsMatched[i] && !items.get(i).isRecessive()) {
+                        allRecessive = false;
                         break;
                     }
                 }
-                case COMPLETE_MATCH: {
-                    if(itemMatch.pattern != null) group.add(itemMatch.pattern);
-                    currentIndex += itemMatch.length;
-                    length += itemMatch.length;
-                    itemsMatched[i] = true;
-                    anyItemsMatched = true;
+                if(allRecessive) {
+                    length = 0;
                 }
             }
-        }
 
-        while(--popSuggestionStatus >= 0) {
-            lexer.getSuggestionModule().popStatus();
-        }
-        if(greedy && !hasMatched && longestFailedMatch != null) {
-            faultyToken = longestFailedMatch.faultyToken;
-            length = longestFailedMatchLength;
-            expected = longestFailedMatch.expected;
-        }
+            TokenGroup group = new TokenGroup(this, contents.toArray(new TokenPattern<?>[0])).setName(this.name).addTags(this.tags);
 
-        if(!hasMatched && length > 0 && anyItemsMatched) {
-            //check for recessive matches
-            boolean allRecessive = true;
-            for(int i = 0; i < items.size(); i++) {
-                if(itemsMatched[i] && !items.get(i).isRecessive()) {
-                    allRecessive = false;
-                    break;
-                }
+            TokenMatchResponse response = new TokenMatchResponse(hasMatched, faultyToken, length, expected, group);
+            if(hasMatched) {
+                invokeProcessors(group, lexer);
+            } else {
+                invokeFailProcessors(group, lexer);
             }
-            if(allRecessive) {
-                length = 0;
-            }
+            return response;
+        } finally {
+            TokenPattern.PATTERN_LIST_POOL.get().free(contents);
         }
-
-        TokenMatchResponse response = new TokenMatchResponse(hasMatched, faultyToken, length, expected, group);
-        if(hasMatched) {
-            invokeProcessors(group, lexer);
-        } else {
-            invokeFailProcessors(group, lexer);
-        }
-        return response;
     }
 
     @Override

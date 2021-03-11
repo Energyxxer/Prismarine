@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public class SummarySymbolAlias extends SummarySymbol {
-    private SummarySymbol real;
+    private final SummarySymbol real;
 
     public SummarySymbolAlias(String name, SymbolVisibility visibility, int declarationIndex, SummarySymbol real) {
         super(real.getParentFileSummary(), name, visibility, declarationIndex);

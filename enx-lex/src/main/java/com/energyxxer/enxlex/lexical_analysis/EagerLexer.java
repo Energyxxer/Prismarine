@@ -28,7 +28,7 @@ public class EagerLexer extends Lexer {
 
 	private TokenSource source;
 
-	private StringBuilder token = new StringBuilder();
+	private final StringBuilder token = new StringBuilder();
 	private int line = 0;
 	private int column = 0;
 	private int index = 0;

@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 public class StringLocationCache {
     //              (line)   (index)
-    private HashMap<Integer, Integer> lineLocations = new HashMap<>();
+    private final HashMap<Integer, Integer> lineLocations = new HashMap<>();
     private int lastKnownLine = 0;
 
     public String text;

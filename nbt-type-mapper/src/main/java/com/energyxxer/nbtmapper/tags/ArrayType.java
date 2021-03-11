@@ -13,9 +13,9 @@ import com.energyxxer.nbtmapper.PathContext;
 import java.util.Objects;
 
 public class ArrayType extends DataType implements DeepDataType {
-    private DataType innerType;
-    private Class<? extends ArrayNBTTag> correspondingType;
-    private String typeName;
+    private final DataType innerType;
+    private final Class<? extends ArrayNBTTag> correspondingType;
+    private final String typeName;
 
     public ArrayType(NBTTypeMap parent, String prefix) {
         super(parent);

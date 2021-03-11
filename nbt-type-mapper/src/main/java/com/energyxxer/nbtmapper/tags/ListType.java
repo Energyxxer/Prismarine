@@ -14,7 +14,7 @@ import com.energyxxer.nbtmapper.PathContext;
 import java.util.Objects;
 
 public class ListType extends DataType implements DeepDataType {
-    private DataType innerType;
+    private final DataType innerType;
 
     public ListType(NBTTypeMap parent, DataType innerType) {
         super(parent);

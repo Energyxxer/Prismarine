@@ -7,7 +7,7 @@ import com.energyxxer.nbtmapper.PathContext;
 
 public class ReferenceType extends DataType implements DeepDataType {
 
-    private String name;
+    private final String name;
 
     public ReferenceType(NBTTypeMap parent, String name) {
         this(parent, name, null);

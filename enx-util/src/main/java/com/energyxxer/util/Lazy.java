@@ -17,7 +17,7 @@ public class Lazy<T> {
         this.accessor = accessor;
     }
 
-    public T getValue() {
+    public synchronized T getValue() {
         if(!hasValue) {
             value = instantiator.createInstance();
             hasValue = true;

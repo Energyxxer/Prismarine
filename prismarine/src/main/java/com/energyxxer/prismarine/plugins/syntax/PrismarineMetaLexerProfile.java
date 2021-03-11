@@ -51,8 +51,8 @@ public class PrismarineMetaLexerProfile extends LexerProfile {
 
     @Override
     public void putHeaderInfo(Token header) {
-        header.attributes.put("TYPE","pmsyntax");
-        header.attributes.put("DESC","Prismarine Syntax File");
+        header.putAttribute("TYPE","pmsyntax");
+        header.putAttribute("DESC","Prismarine Syntax File");
     }
 
     @Override

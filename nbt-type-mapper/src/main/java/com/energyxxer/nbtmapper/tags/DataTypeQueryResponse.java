@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class DataTypeQueryResponse {
-    private ArrayList<DataType> possibleTypes = new ArrayList<>();
-    private ArrayList<Notice> notices = new ArrayList<>();
+    private final ArrayList<DataType> possibleTypes = new ArrayList<>();
+    private final ArrayList<Notice> notices = new ArrayList<>();
 
     public void addLikelyType(DataType type) {
         possibleTypes.remove(type);

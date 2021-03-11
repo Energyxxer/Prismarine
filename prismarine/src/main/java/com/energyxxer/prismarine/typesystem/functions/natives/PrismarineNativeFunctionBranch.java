@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class PrismarineNativeFunctionBranch extends PrismarineFunctionBranch {
-    private Method method;
+    private final Method method;
 
     public PrismarineNativeFunctionBranch(PrismarineTypeSystem typeSystem, Method method) {
         super(typeSystem, createFormalParameters(typeSystem, method));

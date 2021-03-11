@@ -19,7 +19,7 @@ public class NBTTMLexerProfile extends LexerProfile {
     /**
      * Holds the previous token for multi-token analysis.
      * */
-    private Token tokenBuffer = null;
+    private final Token tokenBuffer = null;
 
     public NBTTMLexerProfile(DefinitionPack defPack) {
         ArrayList<String> defcategories = new ArrayList<>();
@@ -79,7 +79,7 @@ public class NBTTMLexerProfile extends LexerProfile {
 
     @Override
     public void putHeaderInfo(Token header) {
-        header.attributes.put("TYPE","nbttm");
-        header.attributes.put("DESC","NBT Type Map File");
+        header.putAttribute("TYPE","nbttm");
+        header.putAttribute("DESC","NBT Type Map File");
     }
 }

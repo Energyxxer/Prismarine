@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MultiOutputStream extends OutputStream {
-	private ArrayList<OutputStream> outputStreams;
+	private final ArrayList<OutputStream> outputStreams;
 
 	public MultiOutputStream(OutputStream... outputStreams) {
 		this.outputStreams = new ArrayList<>(Arrays.asList(outputStreams));

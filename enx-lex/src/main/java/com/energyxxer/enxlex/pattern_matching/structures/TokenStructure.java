@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TokenStructure extends TokenPattern<TokenPattern<?>> {
-	private TokenPattern<?> group;
+	private final TokenPattern<?> group;
 	
 	public TokenStructure(String name, TokenPattern<?> group, TokenPatternMatch source) {
 		super(source);
@@ -60,12 +60,13 @@ public class TokenStructure extends TokenPattern<TokenPattern<?>> {
 
 	@Override
 	public TokenPattern<?> find(String path) {
+		if(isPathInCache(path)) return getCachedFindResult(path);
 
 		String[] subPath = path.split("\\.",2);
 
 		if(subPath.length == 1) return (this.name.equals(path)) ? this : group.find(path);
 
-		return (group.name.equals(subPath[0])) ? group.find(subPath[1]) : group.find(path);
+		return putFindResult(path, (group.name.equals(subPath[0])) ? group.find(subPath[1]) : group.find(path));
 	}
 
 	@Override

@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 public class Using<T> {
     public T using;
     private boolean runIfNull = true;
-    private HashMap<Class<? extends Exception>, Catch<T>> catches = new HashMap<>();
+    private final HashMap<Class<? extends Exception>, Catch<T>> catches = new HashMap<>();
 
     public Using(T using) {
         this.using = using;

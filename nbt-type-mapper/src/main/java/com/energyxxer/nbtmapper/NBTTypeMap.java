@@ -28,10 +28,10 @@ import java.util.function.BiConsumer;
 
 public class NBTTypeMap {
     public final NBTTypeMap.Parsing parsing = this.new Parsing();
-    private CommandModule module;
-    private ArrayList<Notice> notices = new ArrayList<>();
+    private final CommandModule module;
+    private final ArrayList<Notice> notices = new ArrayList<>();
 
-    private HashMap<String, ArrayList<DataType>> rootTypes = new HashMap<>();
+    private final HashMap<String, ArrayList<DataType>> rootTypes = new HashMap<>();
 
     public NBTTypeMap(CommandModule module) {
         this.module = module;

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ public class Debug {
         INFO, ERROR, WARN, PLAIN
     }
 
-    private static ArrayList<OutputStream> streams = new ArrayList<>();
+    private static final ArrayList<OutputStream> streams = new ArrayList<>();
 
     private static synchronized void logRaw(String message) {
         for(OutputStream stream : streams) {
@@ -23,7 +24,7 @@ public class Debug {
                 if(stream instanceof PrintStream) {
                     ((PrintStream) stream).print(message);
                 } else {
-                    stream.write(message.getBytes(Charset.forName("UTF-8")));
+                    stream.write(message.getBytes(StandardCharsets.UTF_8));
                 }
                 stream.flush();
             } catch(IOException x) {

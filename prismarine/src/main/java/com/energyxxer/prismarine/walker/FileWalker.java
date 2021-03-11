@@ -19,16 +19,16 @@ import java.util.Collections;
 import java.util.function.Function;
 
 public class FileWalker<T> {
-    private CompoundInput input;
-    private ProjectReader reader;
+    private final CompoundInput input;
+    private final ProjectReader reader;
 
     @Nullable
-    private PrismarineProjectWorker worker;
-    private T subject;
+    private final PrismarineProjectWorker worker;
+    private final T subject;
 
-    private ArrayList<FileWalkerStop<T>> stops = new ArrayList<>();
+    private final ArrayList<FileWalkerStop<T>> stops = new ArrayList<>();
 
-    private Report report;
+    private final Report report;
 
     public FileWalker(CompoundInput input, Function<Path, TokenSource> sourceFunction, @Nullable PrismarineProjectWorker worker, T subject) {
         this.input = input;

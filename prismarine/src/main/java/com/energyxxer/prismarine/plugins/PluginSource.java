@@ -6,8 +6,8 @@ import java.io.File;
 import java.nio.file.Path;
 
 public class PluginSource implements TokenSource {
-    private File pluginRoot;
-    private Path relativePath;
+    private final File pluginRoot;
+    private final Path relativePath;
 
     public PluginSource(File pluginRoot, Path relativePath) {
         this.pluginRoot = pluginRoot;

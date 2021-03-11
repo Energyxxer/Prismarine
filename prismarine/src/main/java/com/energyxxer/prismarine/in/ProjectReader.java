@@ -30,12 +30,12 @@ import java.util.function.Function;
 import static com.energyxxer.prismarine.Prismarine.DEFAULT_CHARSET;
 
 public class ProjectReader {
-    private CompoundInput input;
-    private Function<Path, TokenSource> sourceFunction;
+    private final CompoundInput input;
+    private final Function<Path, TokenSource> sourceFunction;
     private PrismarineProjectWorker worker;
 
-    private HashMap<Path, Result> cache = new HashMap<>();
-    private HashMap<PrismarineLanguageUnitConfiguration, Lexer> lexers = new HashMap<>();
+    private final HashMap<Path, Result> cache = new HashMap<>();
+    private final HashMap<PrismarineLanguageUnitConfiguration, Lexer> lexers = new HashMap<>();
 
     public ProjectReader(PrismarineProjectWorker worker) {
         this.input = null;

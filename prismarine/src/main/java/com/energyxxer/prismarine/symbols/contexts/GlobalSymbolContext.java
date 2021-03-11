@@ -12,7 +12,7 @@ import java.util.Map;
 public class GlobalSymbolContext implements ISymbolContext {
     private final PrismarineCompiler compiler;
     private ISymbolContext parent;
-    private HashMap<String, Symbol> map = new HashMap<>();
+    private final HashMap<String, Symbol> map = new HashMap<>();
 
     public GlobalSymbolContext(PrismarineCompiler compiler) {
         this.compiler = compiler;

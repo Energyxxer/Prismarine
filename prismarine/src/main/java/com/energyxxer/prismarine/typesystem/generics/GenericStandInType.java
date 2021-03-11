@@ -6,9 +6,9 @@ import com.energyxxer.prismarine.typesystem.PrismarineTypeSystem;
 import com.energyxxer.prismarine.typesystem.TypeHandler;
 
 public class GenericStandInType implements TypeHandler<GenericStandInType> {
-    private PrismarineTypeSystem typeSystem;
-    private GenericContext context;
-    private int typeIndex;
+    private final PrismarineTypeSystem typeSystem;
+    private final GenericContext context;
+    private final int typeIndex;
 
     public GenericStandInType(PrismarineTypeSystem typeSystem, GenericContext context, int typeIndex) {
         this.typeSystem = typeSystem;

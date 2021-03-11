@@ -8,7 +8,7 @@ import com.energyxxer.enxlex.pattern_matching.structures.TokenStructure;
 import java.util.ArrayList;
 
 public class TokenStructureMatch extends TokenPatternMatch {
-    private ArrayList<TokenPatternMatch> entries = new ArrayList<>();
+    private final ArrayList<TokenPatternMatch> entries = new ArrayList<>();
     /**
      * When greedy: false
      * The structure will always try to return a positive match, even if there are longer negative matches.

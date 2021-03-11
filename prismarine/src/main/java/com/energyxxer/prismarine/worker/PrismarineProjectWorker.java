@@ -125,7 +125,7 @@ public class PrismarineProjectWorker {
     }
 
     public class Output {
-        private HashMap<PrismarineProjectWorkerTask, Object> taskOutput = new HashMap<>();
+        private final HashMap<PrismarineProjectWorkerTask, Object> taskOutput = new HashMap<>();
         private final List<PrismarineProjectWorker> dependencies = new ArrayList<>();
 
         public void put(PrismarineProjectWorkerTask task, Object result) {

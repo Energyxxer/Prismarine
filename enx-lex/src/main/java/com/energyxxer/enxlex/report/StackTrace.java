@@ -40,7 +40,7 @@ public class StackTrace {
         }
     }
 
-    private ArrayList<StackTraceElement> elements;
+    private final ArrayList<StackTraceElement> elements;
 
     public StackTrace(List<StackTraceElement> elements) {
         this.elements = new ArrayList<>(elements);

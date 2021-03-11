@@ -19,7 +19,7 @@ import java.util.ArrayList;
 
 public class LazyLexer extends Lexer {
 
-    private TokenPatternMatch pattern;
+    private final TokenPatternMatch pattern;
 
     public LazyLexer(TokenStream stream, TokenPatternMatch pattern) {
         this.stream = stream;
@@ -27,7 +27,7 @@ public class LazyLexer extends Lexer {
     }
 
     private String fileContents = null;
-    private StringLocationCache lineCache = new StringLocationCache();
+    private final StringLocationCache lineCache = new StringLocationCache();
     private LexerProfile profile = null;
 
     private TokenSource source;
@@ -56,7 +56,7 @@ public class LazyLexer extends Lexer {
         if(matchResponse.matched) {
             matchResponse.pattern.validate();
             for(Token token : matchResponse.pattern.flattenTokens(new ArrayList<>())) {
-                notices.addAll(token.attachedNotices);
+                token.dumpNotices(notices);
                 stream.write(token);
             }
         } else {
@@ -103,7 +103,7 @@ public class LazyLexer extends Lexer {
                             getLookingIndexTrimmed() :
                             getCurrentIndex()), response.subSections);
                     if (response.errorMessage != null) {
-                        token.attachedNotices.add(new Notice(NoticeType.ERROR, response.errorMessage, token));
+                        token.attachNotice(new Notice(NoticeType.ERROR, response.errorMessage, token));
                     }
                     return token;
                 }
@@ -154,7 +154,7 @@ public class LazyLexer extends Lexer {
                                 getCurrentIndex()
                 ), response.subSections);
                 if (response.errorMessage != null) {
-                    token.attachedNotices.add(new Notice(NoticeType.ERROR, response.errorMessage, token));
+                    token.attachNotice(new Notice(NoticeType.ERROR, response.errorMessage, token));
                 }
                 return token;
             }

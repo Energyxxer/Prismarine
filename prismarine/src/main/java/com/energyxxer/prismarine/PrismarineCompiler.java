@@ -28,11 +28,11 @@ import java.util.*;
 
 public final class PrismarineCompiler extends AbstractProcess implements Reported {
 
-    private Path rootPath;
+    private final Path rootPath;
 
-    private PrismarineSuiteConfiguration suiteConfig;
+    private final PrismarineSuiteConfiguration suiteConfig;
 
-    private PrismarineProjectWorker worker;
+    private final PrismarineProjectWorker worker;
     private FileWalker<PrismarineCompiler> walker;
     private ProjectReader cachedReader;
 
@@ -41,13 +41,13 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
     private Dependency.Mode dependencyMode;
 
     //File Structure Tracking
-    private HashMap<PrismarineLanguageUnitConfiguration, ArrayList<PrismarineLanguageUnit>> unitsList = new HashMap<>();
-    private HashMap<Path, PrismarineLanguageUnit> pathToUnitMap = new HashMap<>();
+    private final HashMap<PrismarineLanguageUnitConfiguration, ArrayList<PrismarineLanguageUnit>> unitsList = new HashMap<>();
+    private final HashMap<Path, PrismarineLanguageUnit> pathToUnitMap = new HashMap<>();
 
     //Stacks
-    private GlobalSymbolContext global = new GlobalSymbolContext(this);
-    private CallStack callStack = new CallStack();
-    private TryStack tryStack = new TryStack();
+    private final GlobalSymbolContext global = new GlobalSymbolContext(this);
+    private final CallStack callStack = new CallStack();
+    private final TryStack tryStack = new TryStack();
 
     //useful stuff
     private PrismarineTypeSystem typeSystem; //set from prismarine suite config
@@ -286,7 +286,7 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
             pass++;
             anyPasses = false;
 
-            for(Map.Entry<PrismarineLanguageUnitConfiguration, ArrayList<PrismarineLanguageUnit>> entry : unitsList.entrySet()) {
+            passLoop: for(Map.Entry<PrismarineLanguageUnitConfiguration, ArrayList<PrismarineLanguageUnit>> entry : unitsList.entrySet()) {
                 PrismarineLanguageUnitConfiguration unitConfig = entry.getKey();
 
                 if(pass <= unitConfig.getNumberOfPasses()) {
@@ -300,7 +300,12 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
                     anyPasses = true;
 
                     for(PrismarineLanguageUnit unit : entry.getValue()) {
-                        unitConfig.performPass(unit, this, pass);
+                        PassResult result = unitConfig.performPass(unit, this, pass);
+                        if(result == PassResult.SKIP_PASS_OR_UNIT_TYPE) {
+                            break passLoop;
+                        } else if(result == PassResult.END_COMPILATION) {
+                            return !report.hasErrors();
+                        }
 
                         progress += delta;
                         updateProgress(progress);
@@ -317,7 +322,7 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
             PrismarineLanguageUnitConfiguration unitConfig = entry.getKey();
 
             int maxPasses = unitConfig.getNumberOfPasses();
-            for(int pass = 1; pass <= maxPasses; pass++) { //1 indexed because pass 0 is instantiation. sorry.
+            unitTypeLoop: for(int pass = 1; pass <= maxPasses; pass++) { //1 indexed because pass 0 is instantiation. sorry.
                 unitConfig.onPassStart(this, pass);
 
                 updateProgress(0);
@@ -325,7 +330,12 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
                 float progress = 0;
 
                 for(PrismarineLanguageUnit unit : entry.getValue()) {
-                    unitConfig.performPass(unit, this, pass);
+                    PassResult result = unitConfig.performPass(unit, this, pass);
+                    if(result == PassResult.SKIP_PASS_OR_UNIT_TYPE) {
+                        break unitTypeLoop;
+                    } else if(result == PassResult.END_COMPILATION) {
+                        return !report.hasErrors();
+                    }
 
                     progress += delta;
                     updateProgress(progress);
@@ -353,6 +363,14 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
     }
     public void setParentCompiler(PrismarineCompiler parentCompiler) {
         this.parentCompiler = parentCompiler;
+    }
+
+    public PrismarineCompiler getParentCompiler() {
+        return parentCompiler;
+    }
+
+    public boolean isRootCompiler() {
+        return parentCompiler == null;
     }
 
     private void setRerouteRoot(boolean rerouteRoot) {
@@ -436,7 +454,7 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
         return dependencyMode;
     }
 
-    private HashMap<PrismarineLanguageUnitConfiguration, ArrayList<ProjectReader.Result>> unitReadResults = new HashMap<>();
+    private final HashMap<PrismarineLanguageUnitConfiguration, ArrayList<ProjectReader.Result>> unitReadResults = new HashMap<>();
 
     public void putUnitReadResults(PrismarineLanguageUnitConfiguration unitConfig, ProjectReader.Result result) {
         if(!unitReadResults.containsKey(unitConfig)) {
@@ -472,7 +490,7 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
     public static class Dependency {
 
         public enum Mode {
-            PRECOMPILE, COMBINE;
+            PRECOMPILE, COMBINE
         }
 
         PrismarineCompiler compiler;
@@ -482,5 +500,9 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
         public Dependency(PrismarineCompiler compiler) {
             this.compiler = compiler;
         }
+    }
+
+    public enum PassResult {
+        OK, SKIP_PASS_OR_UNIT_TYPE, END_COMPILATION
     }
 }

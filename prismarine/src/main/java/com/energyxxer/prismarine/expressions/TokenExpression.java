@@ -108,12 +108,13 @@ public abstract class TokenExpression extends TokenPattern<TokenPattern<?>[]> {
 
     @Override
     public TokenPattern<?> find(String path) {
+        if(isPathInCache(path)) return getCachedFindResult(path);
         String[] subPath = path.split("\\.",2);
 
         List<TokenPattern<?>> next = searchByName(subPath[0]);
         if(next.size() <= 0) return null;
         if(subPath.length == 1) return next.get(0);
-        return next.get(0).find(subPath[1]);
+        return putFindResult(path, next.get(0).find(subPath[1]));
     }
 
     @Override

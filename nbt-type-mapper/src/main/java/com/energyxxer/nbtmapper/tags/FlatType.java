@@ -8,8 +8,8 @@ import java.util.Objects;
 
 public class FlatType extends DataType {
 
-    private String typeName;
-    private Class<? extends NBTTag> correspondingType;
+    private final String typeName;
+    private final Class<? extends NBTTag> correspondingType;
 
     private static final HashMap<String, Class<? extends NBTTag>> keyToClassMap;
 

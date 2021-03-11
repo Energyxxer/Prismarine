@@ -5,7 +5,7 @@ import com.energyxxer.enxlex.pattern_matching.TokenMatchResponse;
 import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 
 public class TokenFailMatch extends TokenPatternMatch {
-    private TokenPatternMatch sub;
+    private final TokenPatternMatch sub;
 
     public TokenFailMatch(String name, TokenPatternMatch sub) {
         this.name = name;

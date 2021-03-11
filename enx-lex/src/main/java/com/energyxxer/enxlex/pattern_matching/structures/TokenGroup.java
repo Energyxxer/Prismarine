@@ -11,19 +11,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TokenGroup extends TokenPattern<TokenPattern<?>[]> {
-	private ArrayList<TokenPattern<?>> patterns = new ArrayList<>();
-	
-	public TokenGroup(TokenPatternMatch source) {
+	private final TokenPattern<?>[] patterns;
+
+	public TokenGroup(TokenPatternMatch source, TokenPattern<?>[] patterns) {
 		super(source);
-	}
-	
-	public void add(TokenPattern<?> pattern) {
-		patterns.add(pattern);
+		this.patterns = patterns;
 	}
 
 	@Override
 	public TokenPattern<?>[] getContents() {
-		return patterns.toArray(new TokenPattern<?>[0]);
+		return patterns;
 	}
 	
 	@Override
@@ -84,21 +81,22 @@ public class TokenGroup extends TokenPattern<TokenPattern<?>[]> {
 
 	@Override
 	public TokenPattern<?> find(String path) {
+		if(isPathInCache(path)) return getCachedFindResult(path);
 		String[] subPath = path.split("\\.",2);
 
 		List<TokenPattern<?>> next = searchByName(subPath[0]);
 		if(next.size() <= 0) return null;
 		if(subPath.length == 1) return next.get(0);
-		return next.get(0).find(subPath[1]);
+		return putFindResult(path, next.get(0).find(subPath[1]));
 	}
 
 	@Override
 	public String flatten(boolean separate) {
 		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i < patterns.size(); i++) {
-			String str = patterns.get(i).flatten(separate);
+		for(int i = 0; i < patterns.length; i++) {
+			String str = patterns[i].flatten(separate);
 			sb.append(str);
-			if(!str.isEmpty() && i < patterns.size()-1 && separate) sb.append(" ");
+			if(!str.isEmpty() && i < patterns.length-1 && separate) sb.append(" ");
 		}
 		return sb.toString();
 	}
@@ -115,7 +113,7 @@ public class TokenGroup extends TokenPattern<TokenPattern<?>[]> {
 
 	@Override
 	public StringLocation getStringLocation() {
-		if (patterns == null || patterns.size() <= 0) return null;
+		if (patterns == null || patterns.length <= 0) return null;
 		StringLocation l = null;
 		for (TokenPattern<?> pattern : patterns) {
 			StringLocation loc = pattern.getStringLocation();
@@ -132,7 +130,7 @@ public class TokenGroup extends TokenPattern<TokenPattern<?>[]> {
 
 	@Override
 	public StringBounds getStringBounds() {
-		if (patterns == null || patterns.size() <= 0) return null;
+		if (patterns == null || patterns.length <= 0) return null;
 		StringLocation start = null;
 		StringLocation end = null;
 
@@ -192,11 +190,11 @@ public class TokenGroup extends TokenPattern<TokenPattern<?>[]> {
 	public void validate() {
 		this.validated = true;
 		if(this.name != null && this.name.length() > 0) this.tags.add(name);
-		patterns.forEach(p -> {
+		for(TokenPattern<?> p : patterns) {
 			for(String tag : this.tags) {
 				if(!tag.startsWith("__")) p.addTag(tag);
 			}
 			p.validate();
-		});
+		}
 	}
 }

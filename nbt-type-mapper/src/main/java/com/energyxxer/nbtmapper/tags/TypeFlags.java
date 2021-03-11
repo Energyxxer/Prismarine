@@ -8,9 +8,9 @@ import java.util.Iterator;
 import java.util.Objects;
 
 public class TypeFlags {
-    private ArrayList<String> flags = new ArrayList<>();
-    private ArrayList<String> typeCategories = new ArrayList<>();
-    private ArrayList<String> stringOptions = new ArrayList<>();
+    private final ArrayList<String> flags = new ArrayList<>();
+    private final ArrayList<String> typeCategories = new ArrayList<>();
+    private final ArrayList<String> stringOptions = new ArrayList<>();
 
     public boolean hasFlag(String flag) {
         return flags.contains(flag);
