@@ -89,6 +89,8 @@ public class FileWalker<T> {
                                 file = input.getRootFile();
                             }
 
+                            if(!file.isFile()) continue;
+
                             boolean consumed = stop.accept(file, relativePath, result, worker, this);
                             if(consumed) break;
                         } catch(IOException x) {

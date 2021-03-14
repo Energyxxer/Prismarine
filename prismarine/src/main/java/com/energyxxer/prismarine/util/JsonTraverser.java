@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 public class JsonTraverser {
@@ -69,25 +70,45 @@ public class JsonTraverser {
 
     public JsonObject asJsonObject() {
         restoreHead(JsonObject::new);
-        if(head != null && head.isJsonObject()) return (JsonObject) head;
+        if(head != null && head.isJsonObject()) {
+            JsonObject head = (JsonObject) this.head;
+            reset();
+            return head;
+        }
+        reset();
         return null;
     }
 
     public JsonArray asJsonArray() {
         restoreHead(JsonArray::new);
-        if(head != null && head.isJsonArray()) return (JsonArray) head;
+        if(head != null && head.isJsonArray()) {
+            JsonArray head = (JsonArray) this.head;
+            reset();
+            return head;
+        }
+        reset();
         return null;
     }
 
     public Iterable<Map.Entry<String, JsonElement>> iterateAsObject() {
         restoreHead(JsonObject::new);
-        if(head != null && head.isJsonObject()) return head.getAsJsonObject().entrySet();
+        if(head != null && head.isJsonObject()) {
+            Set<Map.Entry<String, JsonElement>> entries = head.getAsJsonObject().entrySet();
+            reset();
+            return entries;
+        }
+        reset();
         return Collections.emptyList();
     }
 
     public Iterable<JsonElement> iterateAsArray() {
         restoreHead(JsonArray::new);
-        if(head != null && head.isJsonArray()) return head.getAsJsonArray();
+        if(head != null && head.isJsonArray()) {
+            JsonArray asJsonArray = head.getAsJsonArray();
+            reset();
+            return asJsonArray;
+        }
+        reset();
         return Collections.emptyList();
     }
 
@@ -97,7 +118,12 @@ public class JsonTraverser {
 
     public String asString(String defaultValue) {
         restoreHead(() -> defaultValue != null ? new JsonPrimitive(defaultValue) : null);
-        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isString()) return head.getAsString();
+        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isString()) {
+            String asString = head.getAsString();
+            reset();
+            return asString;
+        }
+        reset();
         return defaultValue;
     }
 
@@ -107,7 +133,12 @@ public class JsonTraverser {
 
     public String asNonEmptyString(String defaultValue) {
         restoreHead(() -> defaultValue != null ? new JsonPrimitive(defaultValue) : null);
-        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isString() && !head.getAsString().isEmpty()) return head.getAsString();
+        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isString() && !head.getAsString().isEmpty()) {
+            String asString = head.getAsString();
+            reset();
+            return asString;
+        }
+        reset();
         return defaultValue;
     }
 
@@ -117,7 +148,23 @@ public class JsonTraverser {
 
     public boolean asBoolean(boolean defaultValue) {
         restoreHead(() -> new JsonPrimitive(defaultValue));
-        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isBoolean()) return head.getAsBoolean();
+        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isBoolean()) {
+            boolean asBoolean = head.getAsBoolean();
+            reset();
+            return asBoolean;
+        }
+        reset();
+        return defaultValue;
+    }
+
+    public Boolean asBoolean(Boolean defaultValue) {
+        restoreHead(() -> new JsonPrimitive(defaultValue));
+        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isBoolean()) {
+            boolean asBoolean = head.getAsBoolean();
+            reset();
+            return asBoolean;
+        }
+        reset();
         return defaultValue;
     }
 
@@ -127,7 +174,23 @@ public class JsonTraverser {
 
     public byte asByte(byte defaultValue) {
         restoreHead(() -> new JsonPrimitive(defaultValue));
-        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) return head.getAsByte();
+        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) {
+            byte asByte = head.getAsByte();
+            reset();
+            return asByte;
+        }
+        reset();
+        return defaultValue;
+    }
+
+    public Byte asByte(Byte defaultValue) {
+        restoreHead(() -> new JsonPrimitive(defaultValue));
+        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) {
+            byte asByte = head.getAsByte();
+            reset();
+            return asByte;
+        }
+        reset();
         return defaultValue;
     }
 
@@ -137,7 +200,23 @@ public class JsonTraverser {
 
     public short asShort(short defaultValue) {
         restoreHead(() -> new JsonPrimitive(defaultValue));
-        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) return head.getAsShort();
+        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) {
+            short asShort = head.getAsShort();
+            reset();
+            return asShort;
+        }
+        reset();
+        return defaultValue;
+    }
+
+    public Short asShort(Short defaultValue) {
+        restoreHead(() -> new JsonPrimitive(defaultValue));
+        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) {
+            short asShort = head.getAsShort();
+            reset();
+            return asShort;
+        }
+        reset();
         return defaultValue;
     }
 
@@ -147,7 +226,23 @@ public class JsonTraverser {
 
     public int asInt(int defaultValue) {
         restoreHead(() -> new JsonPrimitive(defaultValue));
-        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) return head.getAsInt();
+        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) {
+            int asInt = head.getAsInt();
+            reset();
+            return asInt;
+        }
+        reset();
+        return defaultValue;
+    }
+
+    public Integer asInt(Integer defaultValue) {
+        restoreHead(() -> new JsonPrimitive(defaultValue));
+        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) {
+            int asInt = head.getAsInt();
+            reset();
+            return asInt;
+        }
+        reset();
         return defaultValue;
     }
 
@@ -157,7 +252,23 @@ public class JsonTraverser {
 
     public long asLong(long defaultValue) {
         restoreHead(() -> new JsonPrimitive(defaultValue));
-        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) return head.getAsLong();
+        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) {
+            long asLong = head.getAsLong();
+            reset();
+            return asLong;
+        }
+        reset();
+        return defaultValue;
+    }
+
+    public Long asLong(Long defaultValue) {
+        restoreHead(() -> new JsonPrimitive(defaultValue));
+        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) {
+            long asLong = head.getAsLong();
+            reset();
+            return asLong;
+        }
+        reset();
         return defaultValue;
     }
 
@@ -167,7 +278,23 @@ public class JsonTraverser {
 
     public float asFloat(float defaultValue) {
         restoreHead(() -> new JsonPrimitive(defaultValue));
-        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) return head.getAsFloat();
+        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) {
+            float asFloat = head.getAsFloat();
+            reset();
+            return asFloat;
+        }
+        reset();
+        return defaultValue;
+    }
+
+    public Float asFloat(Float defaultValue) {
+        restoreHead(() -> new JsonPrimitive(defaultValue));
+        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) {
+            float asFloat = head.getAsFloat();
+            reset();
+            return asFloat;
+        }
+        reset();
         return defaultValue;
     }
 
@@ -177,7 +304,23 @@ public class JsonTraverser {
 
     public double asDouble(double defaultValue) {
         restoreHead(() -> new JsonPrimitive(defaultValue));
-        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) return head.getAsDouble();
+        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) {
+            double asDouble = head.getAsDouble();
+            reset();
+            return asDouble;
+        }
+        reset();
+        return defaultValue;
+    }
+
+    public Double asDouble(Double defaultValue) {
+        restoreHead(() -> new JsonPrimitive(defaultValue));
+        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) {
+            double asDouble = head.getAsDouble();
+            reset();
+            return asDouble;
+        }
+        reset();
         return defaultValue;
     }
 
@@ -187,7 +330,12 @@ public class JsonTraverser {
 
     public BigInteger asBigInt(BigInteger defaultValue) {
         restoreHead(() -> new JsonPrimitive(defaultValue));
-        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) return head.getAsBigInteger();
+        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) {
+            BigInteger asBigInteger = head.getAsBigInteger();
+            reset();
+            return asBigInteger;
+        }
+        reset();
         return defaultValue;
     }
 
@@ -197,7 +345,12 @@ public class JsonTraverser {
 
     public BigDecimal asBigDecimal(BigDecimal defaultValue) {
         restoreHead(() -> new JsonPrimitive(defaultValue));
-        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) return head.getAsBigDecimal();
+        if(head != null && head.isJsonPrimitive() && head.getAsJsonPrimitive().isNumber()) {
+            BigDecimal asBigDecimal = head.getAsBigDecimal();
+            reset();
+            return asBigDecimal;
+        }
+        reset();
         return defaultValue;
     }
 
