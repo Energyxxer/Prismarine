@@ -2,6 +2,7 @@ package com.energyxxer.enxlex.lexical_analysis.token;
 
 import com.energyxxer.enxlex.report.Notice;
 import com.energyxxer.enxlex.report.Report;
+import com.energyxxer.util.ObjectPool;
 import com.energyxxer.util.StringBounds;
 import com.energyxxer.util.StringLocation;
 
@@ -15,6 +16,8 @@ import java.util.Objects;
  * it.
  */
 public class Token {
+	public static final ThreadLocal<ObjectPool<ArrayList<Token>>> TOKEN_LIST_POOL = ThreadLocal.withInitial(() -> new ObjectPool<>(ArrayList::new, ArrayList::clear));
+
 	public String value;
 	public TokenType type;
 	public TokenSource source;

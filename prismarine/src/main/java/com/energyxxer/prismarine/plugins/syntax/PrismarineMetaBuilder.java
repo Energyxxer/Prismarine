@@ -320,8 +320,14 @@ public class PrismarineMetaBuilder {
                         ArrayList<Value> args = new ArrayList<>();
                         TokenList argList = ((TokenList) pattern.find("ARGUMENT_LIST"));
                         if(argList != null) {
-                            for(TokenPattern<?> rawArg : argList.searchByName("VALUE")) {
-                                args.add(parseValue(rawArg));
+                            ArrayList<TokenPattern<?>> valueList = TokenPattern.PATTERN_LIST_POOL.get().claim();
+                            try {
+                                argList.collectByName("VALUE", valueList);
+                                for(TokenPattern<?> rawArg : valueList) {
+                                    args.add(parseValue(rawArg));
+                                }
+                            } finally {
+                                TokenPattern.PATTERN_LIST_POOL.get().free(valueList);
                             }
                         }
                         return ((FunctionValue) value).evaluate(args);

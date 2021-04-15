@@ -9,6 +9,7 @@ import com.energyxxer.util.StringLocation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class TokenStructure extends TokenPattern<TokenPattern<?>> {
 	private final TokenPattern<?> group;
@@ -36,26 +37,29 @@ public class TokenStructure extends TokenPattern<TokenPattern<?>> {
 	}
 
 	@Override
-	public List<Token> search(TokenType type) {
-		return group.search(type);
+	public void collect(TokenType type, List<Token> list) {
+		group.collect(type, list);
 	}
 
 	@Override
-	public List<Token> deepSearch(TokenType type) {
-		return group.deepSearch(type);
+	public void deepCollect(TokenType type, List<Token> list) {
+		group.deepCollect(type, list);
 	}
 
 	@Override
-	public List<TokenPattern<?>> searchByName(String name) {
-		return group.searchByName(name);
+	public TokenPattern<?> getByName(String name) {
+		return group.getByName(name);
 	}
 
 	@Override
-	public List<TokenPattern<?>> deepSearchByName(String name) {
-		ArrayList<TokenPattern<?>> list = new ArrayList<>();
+	public void collectByName(String name, List<TokenPattern<?>> list) {
+		group.collectByName(name, list);
+	}
+
+	@Override
+	public void deepCollectByName(String name, List<TokenPattern<?>> list) {
 		if(group.name.equals(name)) list.add(group);
-		list.addAll(group.deepSearchByName(name));
-		return list;
+		group.deepCollectByName(name, list);
 	}
 
 	@Override
@@ -107,13 +111,17 @@ public class TokenStructure extends TokenPattern<TokenPattern<?>> {
 	public void validate() {
 		this.validated = true;
 		if(this.name != null && this.name.length() > 0) this.tags.add(name);
-		for(String tag : this.tags) {
-			if(!tag.startsWith("__")) group.addTag(tag);
-		}
+		group.parent = this;
 		group.validate();
 	}
 
-	@Override
+    @Override
+    public void traverse(Consumer<TokenPattern<?>> consumer) {
+		consumer.accept(this);
+		group.traverse(consumer);
+    }
+
+    @Override
 	public void simplify(SimplificationDomain domain) {
 		if(source == null || (source.getEvaluator() == null && source.getSimplificationFunction() == null)) {
 			domain.pattern = group;

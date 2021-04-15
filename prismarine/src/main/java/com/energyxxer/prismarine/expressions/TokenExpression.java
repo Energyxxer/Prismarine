@@ -14,6 +14,7 @@ import com.energyxxer.util.StringLocation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public abstract class TokenExpression extends TokenPattern<TokenPattern<?>[]> {
     public TokenExpression(TokenPatternMatch source) {
@@ -68,42 +69,42 @@ public abstract class TokenExpression extends TokenPattern<TokenPattern<?>[]> {
     }
 
     @Override
-    public List<Token> search(TokenType type) {
-        ArrayList<Token> list = new ArrayList<>();
+    public void collect(TokenType type, List<Token> list) {
         for(TokenPattern<?> p : getContents()) {
             if(p.getContents() instanceof Token) {
                 if(((Token) p.getContents()).type == type) list.add((Token) p.getContents());
             }
         }
-        return list;
     }
 
     @Override
-    public List<Token> deepSearch(TokenType type) {
-        ArrayList<Token> list = new ArrayList<>();
+    public void deepCollect(TokenType type, List<Token> list) {
         for(TokenPattern<?> p : getContents()) {
-            list.addAll(p.deepSearch(type));
+            p.deepCollect(type, list);
         }
-        return list;
     }
 
     @Override
-    public List<TokenPattern<?>> searchByName(String s) {
-        ArrayList<TokenPattern<?>> list = new ArrayList<>();
+    public TokenPattern<?> getByName(String name) {
         for(TokenPattern<?> p : getContents()) {
-            if(p.getName().equals(name)) list.add(p);
+            if(p.getName().equals(name)) return p;
         }
-        return list;
+        return null;
     }
 
     @Override
-    public List<TokenPattern<?>> deepSearchByName(String s) {
-        ArrayList<TokenPattern<?>> list = new ArrayList<>();
+    public void collectByName(String s, List<TokenPattern<?>> list) {
         for(TokenPattern<?> p : getContents()) {
             if(p.getName().equals(name)) list.add(p);
-            list.addAll(p.deepSearchByName(name));
         }
-        return list;
+    }
+
+    @Override
+    public void deepCollectByName(String s, List<TokenPattern<?>> list) {
+        for(TokenPattern<?> p : getContents()) {
+            if(p.getName().equals(name)) list.add(p);
+            p.deepCollectByName(name, list);
+        }
     }
 
     @Override
@@ -111,10 +112,10 @@ public abstract class TokenExpression extends TokenPattern<TokenPattern<?>[]> {
         if(isPathInCache(path)) return getCachedFindResult(path);
         String[] subPath = path.split("\\.",2);
 
-        List<TokenPattern<?>> next = searchByName(subPath[0]);
-        if(next.size() <= 0) return null;
-        if(subPath.length == 1) return next.get(0);
-        return putFindResult(path, next.get(0).find(subPath[1]));
+        TokenPattern<?> next = getByName(subPath[0]);
+        if(next == null) return null;
+        if(subPath.length == 1) return next;
+        return putFindResult(path, next.find(subPath[1]));
     }
 
     @Override
@@ -201,12 +202,16 @@ public abstract class TokenExpression extends TokenPattern<TokenPattern<?>[]> {
         if(this.name != null && this.name.length() > 0) this.tags.add(name);
         TokenPattern<?>[] patterns = getContents();
         for(TokenPattern<?> p : patterns) {
-            for(String tag : this.tags) {
-                if(!tag.startsWith("__")) {
-                    p.addTag(tag);
-                }
-            }
+            p.parent = this;
             p.validate();
+        }
+    }
+
+    @Override
+    public void traverse(Consumer<TokenPattern<?>> consumer) {
+        consumer.accept(this);
+        for(TokenPattern<?> p : getContents()) {
+            p.traverse(consumer);
         }
     }
 

@@ -51,174 +51,179 @@ public class TokenExpressionMatch extends TokenPatternMatch {
         TokenPattern expr = null;
 
         ArrayList<UnaryOperator> unaryOperators = new ArrayList<>();
-        ArrayList<TokenPattern> unaryOperatorPatterns = new ArrayList<>();
+        ArrayList<TokenPattern<?>> unaryOperatorPatterns = TokenPattern.PATTERN_LIST_POOL.get().claim();
+        try {
+            itemLoop:
+            for (int i = index; i < lexer.getFileLength(); ) {
 
-        itemLoop: for (int i = index; i < lexer.getFileLength();) {
+                lexer.setCurrentIndex(i);
 
-            lexer.setCurrentIndex(i);
-
-            if (expectOperator) {
-                TokenMatchResponse itemMatch = this.operatorMatch.match(i, lexer);
-                expectOperator = false;
-                switch(itemMatch.getMatchType()) {
-                    case NO_MATCH: {
-                        break itemLoop;
-                    }
-                    case PARTIAL_MATCH: {
-                        hasMatched = false;
-                        faultyToken = itemMatch.faultyToken;
-                        expected = itemMatch.expected;
-                        length += itemMatch.length;
-                        break itemLoop;
-                    }
-                    case COMPLETE_MATCH: {
-                        String flattenedOperator = itemMatch.pattern.flatten(false);
-                        Operator op = operatorPool.getBinaryOrTernaryOperatorForSymbol(flattenedOperator);
-
-                        if(operatorFilter != null && op != null && !operatorFilter.test(op)) {
+                if (expectOperator) {
+                    TokenMatchResponse itemMatch = this.operatorMatch.match(i, lexer);
+                    expectOperator = false;
+                    switch (itemMatch.getMatchType()) {
+                        case NO_MATCH: {
                             break itemLoop;
                         }
-
-                        if(op == null) {
+                        case PARTIAL_MATCH: {
                             hasMatched = false;
-                            faultyToken = itemMatch.pattern.flattenTokens(new ArrayList<>()).get(0);
-                            expected = this.operatorMatch;
+                            faultyToken = itemMatch.faultyToken;
+                            expected = itemMatch.expected;
+                            length += itemMatch.length;
                             break itemLoop;
                         }
-                        try {
-                            if(expr == null) {
-                                throw new IllegalStateException("expr cannot be null after the first value");
-                            } else if(expr instanceof TokenExpression) {
-                                expr = ((TokenExpression) expr).pushOperator(op, itemMatch.pattern);
-                            } else {
-                                expr = TokenExpression.createExpressionForOperator(expr, op, itemMatch.pattern, this).setName(this.name).addTags(this.tags);
+                        case COMPLETE_MATCH: {
+                            String flattenedOperator = itemMatch.pattern.flatten(false);
+                            Operator op = operatorPool.getBinaryOrTernaryOperatorForSymbol(flattenedOperator);
+
+                            if (operatorFilter != null && op != null && !operatorFilter.test(op)) {
+                                break itemLoop;
                             }
-                            i += itemMatch.length;
-                            length += itemMatch.length;
-                        } catch(ExpressionBalanceException x) {
+
+                            if (op == null) {
+                                hasMatched = false;
+                                faultyToken = itemMatch.pattern.flattenTokens(new ArrayList<>()).get(0);
+                                expected = this.operatorMatch;
+                                break itemLoop;
+                            }
+                            try {
+                                if (expr == null) {
+                                    throw new IllegalStateException("expr cannot be null after the first value");
+                                } else if (expr instanceof TokenExpression) {
+                                    expr = ((TokenExpression) expr).pushOperator(op, itemMatch.pattern);
+                                } else {
+                                    expr = TokenExpression.createExpressionForOperator(expr, op, itemMatch.pattern, this).setName(this.name).addTags(this.tags);
+                                }
+                                i += itemMatch.length;
+                                length += itemMatch.length;
+                            } catch (ExpressionBalanceException x) {
 //                            hasMatched = false;
 //                            faultyToken = itemMatch.pattern.flattenTokens().get(0);
 //                            expected = this.operatorMatch;
+                                break itemLoop;
+                            }
+                        }
+                    }
+                } else {
+                    //match unary left operators
+
+                    while (true) {
+                        TokenMatchResponse operatorMatch = this.operatorMatch.match(i, lexer);
+                        UnaryOperator op;
+                        if (operatorMatch.matched) {
+                            String symbol = operatorMatch.pattern.flatten(false);
+                            op = operatorPool.getUnaryLeftOperatorForSymbol(symbol);
+                        } else {
+                            op = null;
+                        }
+                        if (operatorFilter != null && op != null && !operatorFilter.test(op)) {
+                            op = null;
+                        }
+                        if (op == null) {
+                            //no more unary operators
+                            break;
+                        } else {
+                            length += operatorMatch.length;
+                            i += operatorMatch.length;
+                            unaryOperators.add(op);
+                            unaryOperatorPatterns.add(operatorMatch.pattern);
+                        }
+                    }
+
+                    TokenPattern value = null;
+
+                    //match value
+                    TokenMatchResponse itemMatch = this.valueMatch.match(i, lexer);
+                    switch (itemMatch.getMatchType()) {
+                        case NO_MATCH:
+                        case PARTIAL_MATCH: {
+                            hasMatched = false;
+                            faultyToken = itemMatch.faultyToken;
+                            expected = itemMatch.expected;
+                            length += itemMatch.length;
                             break itemLoop;
                         }
-                    }
-                }
-            } else {
-                //match unary left operators
+                        case COMPLETE_MATCH: {
+                            i += itemMatch.length;
+                            length += itemMatch.length;
+                            value = itemMatch.pattern;
 
-                while(true) {
-                    TokenMatchResponse operatorMatch = this.operatorMatch.match(i, lexer);
-                    UnaryOperator op;
-                    if(operatorMatch.matched) {
-                        String symbol = operatorMatch.pattern.flatten(false);
-                        op = operatorPool.getUnaryLeftOperatorForSymbol(symbol);
-                    } else {
-                        op = null;
-                    }
-                    if(operatorFilter != null && op != null && !operatorFilter.test(op)) {
-                        op = null;
-                    }
-                    if(op == null) {
-                        //no more unary operators
-                        break;
-                    } else {
-                        length += operatorMatch.length;
-                        i += operatorMatch.length;
-                        unaryOperators.add(op);
-                        unaryOperatorPatterns.add(operatorMatch.pattern);
-                    }
-                }
-
-                TokenPattern value = null;
-
-                //match value
-                TokenMatchResponse itemMatch = this.valueMatch.match(i, lexer);
-                switch(itemMatch.getMatchType()) {
-                    case NO_MATCH:
-                    case PARTIAL_MATCH: {
-                        hasMatched = false;
-                        faultyToken = itemMatch.faultyToken;
-                        expected = itemMatch.expected;
-                        length += itemMatch.length;
-                        break itemLoop;
-                    }
-                    case COMPLETE_MATCH: {
-                        i += itemMatch.length;
-                        length += itemMatch.length;
-                        value = itemMatch.pattern;
-
-                        expectOperator = true;
-                    }
-                }
-
-                //Wrap value in unary left operators
-                for(int operatorIndex = unaryOperators.size()-1; operatorIndex >= 0; operatorIndex--) {
-                    UnaryOperator op = unaryOperators.get(operatorIndex);
-                    TokenPattern<?> operatorPattern = unaryOperatorPatterns.get(operatorIndex);
-                    value = TokenExpression.createExpressionForOperator(value, op, operatorPattern, this).setName(this.name).addTags(this.tags);
-                }
-                unaryOperators.clear();
-                unaryOperatorPatterns.clear();
-
-                //match unary right operators
-
-                TokenMatchResponse previousUnaryOperatorMatch = null;
-                while(true) {
-                    TokenMatchResponse operatorMatch = this.operatorMatch.match(i, lexer);
-                    UnaryOperator op;
-                    String symbol = null;
-                    if(operatorMatch.matched) {
-                        symbol = operatorMatch.pattern.flatten(false);
-                        op = operatorPool.getUnaryRightOperatorForSymbol(symbol);
-                    } else {
-                        op = null;
-                    }
-                    if(operatorFilter != null && op != null && !operatorFilter.test(op)) {
-                        op = null;
-                    }
-                    if(op == null) {
-                        //no more unary operators
-                        if(
-                                (!operatorMatch.matched || //If the faulty token is not a binary/ternary operator...
-                                operatorPool.getBinaryOrTernaryOperatorForSymbol(symbol) == null) &&
-                                (unaryOperators.size() > 0 && previousUnaryOperatorMatch != null && //...and the last unary operator encountered doubles as a binary operator...
-                                operatorPool.getBinaryOrTernaryOperatorForSymbol(unaryOperators.get(unaryOperators.size()-1).getSymbol()) != null)
-                        ) {
-                            //...then remove the last unary operator - it should be interpreted as a binary one instead (next loop)
-                            i -= previousUnaryOperatorMatch.length;
-                            length -= previousUnaryOperatorMatch.length;
-                            unaryOperators.remove(unaryOperators.size()-1);
-                            unaryOperatorPatterns.remove(unaryOperatorPatterns.size()-1);
+                            expectOperator = true;
                         }
-                        break;
-                    } else {
-                        length += operatorMatch.length;
-                        i += operatorMatch.length;
-                        unaryOperators.add(op);
-                        unaryOperatorPatterns.add(operatorMatch.pattern);
-                        previousUnaryOperatorMatch = operatorMatch;
                     }
-                }
 
-                //Wrap value in unary right operators
-                for(int operatorIndex = 0; operatorIndex < unaryOperators.size(); operatorIndex++) {
-                    UnaryOperator op = unaryOperators.get(operatorIndex);
-                    TokenPattern<?> operatorPattern = unaryOperatorPatterns.get(operatorIndex);
-                    value = TokenExpression.createExpressionForOperator(value, op, operatorPattern, this).setName(this.name).addTags(this.tags);
-                }
-                unaryOperators.clear();
-                unaryOperatorPatterns.clear();
+                    //Wrap value in unary left operators
+                    for (int operatorIndex = unaryOperators.size() - 1; operatorIndex >= 0; operatorIndex--) {
+                        UnaryOperator op = unaryOperators.get(operatorIndex);
+                        TokenPattern<?> operatorPattern = unaryOperatorPatterns.get(operatorIndex);
+                        value = TokenExpression.createExpressionForOperator(value, op, operatorPattern, this).setName(this.name).addTags(this.tags);
+                    }
+                    unaryOperators.clear();
+                    unaryOperatorPatterns.clear();
 
-                //Push value onto expression tree
+                    //match unary right operators
 
-                if(expr == null) {
-                    expr = value;
-                } else if(expr instanceof TokenExpression) {
-                    ((TokenExpression) expr).pushValue(value);
-                } else {
-                    throw new IllegalStateException("Unexpected two values in a row, missed operator in between");
+                    TokenMatchResponse previousUnaryOperatorMatch = null;
+                    while (true) {
+                        TokenMatchResponse operatorMatch = this.operatorMatch.match(i, lexer);
+                        UnaryOperator op;
+                        String symbol = null;
+                        if (operatorMatch.matched) {
+                            symbol = operatorMatch.pattern.flatten(false);
+                            op = operatorPool.getUnaryRightOperatorForSymbol(symbol);
+                        } else {
+                            op = null;
+                        }
+                        if (operatorFilter != null && op != null && !operatorFilter.test(op)) {
+                            op = null;
+                        }
+                        if (op == null) {
+                            //no more unary operators
+                            if (
+                                    (!operatorMatch.matched || //If the faulty token is not a binary/ternary operator...
+                                            operatorPool.getBinaryOrTernaryOperatorForSymbol(symbol) == null) &&
+                                            (unaryOperators.size() > 0 && previousUnaryOperatorMatch != null && //...and the last unary operator encountered doubles as a binary operator...
+                                                    operatorPool.getBinaryOrTernaryOperatorForSymbol(unaryOperators.get(unaryOperators.size() - 1).getSymbol()) != null)
+                            ) {
+                                //...then remove the last unary operator - it should be interpreted as a binary one instead (next loop)
+                                i -= previousUnaryOperatorMatch.length;
+                                length -= previousUnaryOperatorMatch.length;
+                                unaryOperators.remove(unaryOperators.size() - 1);
+                                unaryOperatorPatterns.remove(unaryOperatorPatterns.size() - 1);
+                            }
+                            break;
+                        } else {
+                            length += operatorMatch.length;
+                            i += operatorMatch.length;
+                            unaryOperators.add(op);
+                            unaryOperatorPatterns.add(operatorMatch.pattern);
+                            previousUnaryOperatorMatch = operatorMatch;
+                        }
+                    }
+
+                    //Wrap value in unary right operators
+                    for (int operatorIndex = 0; operatorIndex < unaryOperators.size(); operatorIndex++) {
+                        UnaryOperator op = unaryOperators.get(operatorIndex);
+                        TokenPattern<?> operatorPattern = unaryOperatorPatterns.get(operatorIndex);
+                        value = TokenExpression.createExpressionForOperator(value, op, operatorPattern, this).setName(this.name).addTags(this.tags);
+                    }
+                    unaryOperators.clear();
+                    unaryOperatorPatterns.clear();
+
+                    //Push value onto expression tree
+
+                    if (expr == null) {
+                        expr = value;
+                    } else if (expr instanceof TokenExpression) {
+                        ((TokenExpression) expr).pushValue(value);
+                    } else {
+                        throw new IllegalStateException("Unexpected two values in a row, missed operator in between");
+                    }
                 }
             }
+
+        } finally {
+            TokenPattern.PATTERN_LIST_POOL.get().free(unaryOperatorPatterns);
         }
 
         if(expr == null) { //end of file

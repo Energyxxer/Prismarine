@@ -9,6 +9,7 @@ import com.energyxxer.util.StringLocation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class TokenItem extends TokenPattern<Token> {
 	private final Token token;
@@ -35,25 +36,26 @@ public class TokenItem extends TokenPattern<Token> {
 	}
 
 	@Override
-	public List<Token> search(TokenType type) {
-		ArrayList<Token> list = new ArrayList<>();
+	public void collect(TokenType type, List<Token> list) {
 		if(token.type == type) list.add(token);
-		return list;
 	}
 
 	@Override
-	public List<Token> deepSearch(TokenType type) {
-		return search(type);
+	public void deepCollect(TokenType type, List<Token> list) {
+		collect(type, list);
 	}
 
 	@Override
-	public List<TokenPattern<?>> searchByName(String name) {
-		return new ArrayList<>();
+	public TokenPattern<?> getByName(String name) {
+		return null;
 	}
 
 	@Override
-	public List<TokenPattern<?>> deepSearchByName(String name) {
-		return new ArrayList<>();
+	public void collectByName(String name, List<TokenPattern<?>> list) {
+	}
+
+	@Override
+	public void deepCollectByName(String name, List<TokenPattern<?>> list) {
 	}
 
 	@Override
@@ -105,8 +107,10 @@ public class TokenItem extends TokenPattern<Token> {
 	public void validate() {
 		this.validated = true;
 		if(this.name != null && this.name.length() > 0) this.tags.add(name);
-		for(String tag : this.tags) {
-			if(!tag.startsWith("__")) this.token.tags.add(tag);
-		}
 	}
+
+    @Override
+    public void traverse(Consumer<TokenPattern<?>> consumer) {
+		consumer.accept(this);
+    }
 }

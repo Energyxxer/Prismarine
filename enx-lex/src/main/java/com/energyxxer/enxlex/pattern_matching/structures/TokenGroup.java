@@ -9,6 +9,7 @@ import com.energyxxer.util.StringLocation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class TokenGroup extends TokenPattern<TokenPattern<?>[]> {
 	private final TokenPattern<?>[] patterns;
@@ -41,42 +42,42 @@ public class TokenGroup extends TokenPattern<TokenPattern<?>[]> {
 	}
 
 	@Override
-	public List<Token> search(TokenType type) {
-		ArrayList<Token> list = new ArrayList<>();
+	public void collect(TokenType type, List<Token> list) {
 		for(TokenPattern<?> p : patterns) {
 			if(p.getContents() instanceof Token) {
 				if(((Token) p.getContents()).type == type) list.add((Token) p.getContents());
 			}
 		}
-		return list;
 	}
 
 	@Override
-	public List<Token> deepSearch(TokenType type) {
-		ArrayList<Token> list = new ArrayList<>();
+	public void deepCollect(TokenType type, List<Token> list) {
 		for(TokenPattern<?> p : patterns) {
-			list.addAll(p.deepSearch(type));
+			p.deepCollect(type, list);
 		}
-		return list;
 	}
 
 	@Override
-	public List<TokenPattern<?>> searchByName(String name) {
-		ArrayList<TokenPattern<?>> list = new ArrayList<>();
+	public TokenPattern<?> getByName(String name) {
 		for(TokenPattern<?> p : patterns) {
-			if(p.name.equals(name)) list.add(p);
+			if(p.name.equals(name)) return p;
 		}
-		return list;
+		return null;
 	}
 
 	@Override
-	public List<TokenPattern<?>> deepSearchByName(String name) {
-		ArrayList<TokenPattern<?>> list = new ArrayList<>();
+	public void collectByName(String name, List<TokenPattern<?>> list) {
 		for(TokenPattern<?> p : patterns) {
 			if(p.name.equals(name)) list.add(p);
-			list.addAll(p.deepSearchByName(name));
 		}
-		return list;
+	}
+
+	@Override
+	public void deepCollectByName(String name, List<TokenPattern<?>> list) {
+		for(TokenPattern<?> p : patterns) {
+			if(p.name.equals(name)) list.add(p);
+			p.deepCollectByName(name, list);
+		}
 	}
 
 	@Override
@@ -84,10 +85,10 @@ public class TokenGroup extends TokenPattern<TokenPattern<?>[]> {
 		if(isPathInCache(path)) return getCachedFindResult(path);
 		String[] subPath = path.split("\\.",2);
 
-		List<TokenPattern<?>> next = searchByName(subPath[0]);
-		if(next.size() <= 0) return null;
-		if(subPath.length == 1) return next.get(0);
-		return putFindResult(path, next.get(0).find(subPath[1]));
+		TokenPattern<?> next = getByName(subPath[0]);
+		if(next == null) return null;
+		if(subPath.length == 1) return next;
+		return putFindResult(path, next.find(subPath[1]));
 	}
 
 	@Override
@@ -191,10 +192,16 @@ public class TokenGroup extends TokenPattern<TokenPattern<?>[]> {
 		this.validated = true;
 		if(this.name != null && this.name.length() > 0) this.tags.add(name);
 		for(TokenPattern<?> p : patterns) {
-			for(String tag : this.tags) {
-				if(!tag.startsWith("__")) p.addTag(tag);
-			}
+			p.parent = this;
 			p.validate();
 		}
 	}
+
+    @Override
+    public void traverse(Consumer<TokenPattern<?>> consumer) {
+		consumer.accept(this);
+		for(TokenPattern<?> p : patterns) {
+			p.traverse(consumer);
+		}
+    }
 }

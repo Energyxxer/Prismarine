@@ -22,6 +22,7 @@ public abstract class TokenPattern<T> {
 
 	protected String name = "";
 	protected ArrayList<String> tags = new ArrayList<>();
+	public TokenPattern parent;
 	public final TokenPatternMatch source;
 	protected boolean validated = false;
 	private ThreadLocal<Object> heldData = null;
@@ -35,10 +36,13 @@ public abstract class TokenPattern<T> {
 	public abstract T getContents();
 	public abstract TokenPattern<T> setName(String name);
 
-	public abstract List<Token> search(TokenType type);
-	public abstract List<Token> deepSearch(TokenType type);
-	public abstract List<TokenPattern<?>> searchByName(String name);
-	public abstract List<TokenPattern<?>> deepSearchByName(String name);
+	public abstract void collect(TokenType type, List<Token> list);
+	public abstract void deepCollect(TokenType type, List<Token> list);
+
+	public abstract TokenPattern<?> getByName(String name);
+
+	public abstract void collectByName(String name, List<TokenPattern<?>> list);
+	public abstract void deepCollectByName(String name, List<TokenPattern<?>> list);
 
 	public abstract TokenPattern<?> find(String path);
 
@@ -114,6 +118,7 @@ public abstract class TokenPattern<T> {
 	public boolean isValidated() {
 		return validated;
 	}
+	public abstract void traverse(Consumer<TokenPattern<?>> consumer);
 
 	public Object findThenEvaluate(String path, Object defaultValue, Object... data) {
 		TokenPattern<?> found = find(path);
