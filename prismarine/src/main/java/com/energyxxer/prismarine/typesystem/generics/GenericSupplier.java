@@ -2,10 +2,7 @@ package com.energyxxer.prismarine.typesystem.generics;
 
 import com.energyxxer.prismarine.typesystem.TypeHandler;
 
-import java.util.Arrays;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class GenericSupplier {
     private final IdentityHashMap<Object, TypeHandler[]> map = new IdentityHashMap<>();
@@ -48,5 +45,24 @@ public class GenericSupplier {
 
     public Set<Map.Entry<Object, TypeHandler[]>> entrySet() {
         return map.entrySet();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GenericSupplier that = (GenericSupplier) o;
+        if(map.size() != that.map.size()) return false;
+        for(Map.Entry<Object, TypeHandler[]> thisEntry : this.map.entrySet()) {
+            if(!that.map.containsKey(thisEntry.getKey()) || !Arrays.equals(that.map.get(thisEntry.getKey()), thisEntry.getValue())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(map);
     }
 }

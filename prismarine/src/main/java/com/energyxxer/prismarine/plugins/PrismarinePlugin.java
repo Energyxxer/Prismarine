@@ -77,6 +77,10 @@ public class PrismarinePlugin {
         units.add(unit);
     }
 
+    public ArrayList<PrismarinePluginUnit> getUnits() {
+        return units;
+    }
+
     public String getName() {
         return name;
     }

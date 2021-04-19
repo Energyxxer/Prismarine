@@ -8,7 +8,6 @@ import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 import com.energyxxer.util.ObjectPool;
 import com.energyxxer.util.StringBounds;
 import com.energyxxer.util.StringLocation;
-import com.energyxxer.util.logger.Debug;
 import com.sun.istack.internal.NotNull;
 
 import java.util.ArrayList;
@@ -139,8 +138,7 @@ public abstract class TokenPattern<T> {
 
     	PatternEvaluator evaluator = simplifiedSource.getEvaluator();
     	if(evaluator == null) {
-    		Debug.log("Missing evaluator for pattern " + simplifiedSource);
-    		throw new NullPointerException();
+    		throw new PatternEvaluator.NoEvaluatorException("Missing evaluator for pattern " + simplifiedSource);
 		}
 		return evaluator.evaluate(simplified.pattern, simplified.data);
 	}

@@ -463,6 +463,11 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
         unitReadResults.get(unitConfig).add(result);
     }
 
+    public void putUnit(PrismarineLanguageUnitConfiguration unitConfig, PrismarineLanguageUnit unit, Path relativePath) {
+        ArrayList<PrismarineLanguageUnit> unitsForType = this.unitsList.computeIfAbsent(unitConfig, k -> new ArrayList<>());
+        unitsForType.add(unit);
+        pathToUnitMap.put(relativePath, unit);
+    }
 
     public <T extends PrismarineLanguageUnit> T getUnit(PrismarineLanguageUnitConfiguration<T> unitConfig, Path path) {
         return getUnit(unitConfig.getUnitClass(), path);

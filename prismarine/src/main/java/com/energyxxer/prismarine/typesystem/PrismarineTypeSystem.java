@@ -379,6 +379,10 @@ public abstract class PrismarineTypeSystem {
         }
     }
 
+    public TypeHandler<?> getUserDefinedType(String typeIdentifier) {
+        return userDefinedTypes.get(typeIdentifier);
+    }
+
     public void reportUnfulfilledUserDefinedTypes() {
         for(String typeIdentifier : userDefinedTypeListeners.keySet()) {
             compiler.getReport().addNotice(new Notice(NoticeType.ERROR, "Unfulfilled user-defined type constraint: " + typeIdentifier));

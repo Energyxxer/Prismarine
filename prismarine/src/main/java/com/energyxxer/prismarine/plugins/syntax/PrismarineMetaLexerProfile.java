@@ -4,12 +4,13 @@ import com.energyxxer.enxlex.lexical_analysis.profiles.*;
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class PrismarineMetaLexerProfile extends LexerProfile {
 
-    private static final List<String> functionNames = Arrays.asList("ofType", "stringMatch", "literal", "group", "optional", "recessive", "list", "choice", "name", "hint", "storeVar", "storeFlat", "noToken", "brace");
+    public static final List<String> functionNames = new ArrayList<>(Arrays.asList("ofType", "stringMatch", "literal", "group", "optional", "recessive", "list", "choice", "name", "hint", "storeVar", "storeFlat", "noToken", "brace"));
     private static final List<String> keywords = Arrays.asList("return", "define");
     private static final List<String> booleans = Arrays.asList("true", "false");
 

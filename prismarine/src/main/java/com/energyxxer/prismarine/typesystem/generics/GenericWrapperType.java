@@ -7,6 +7,7 @@ import com.energyxxer.prismarine.typesystem.TypeHandler;
 import com.energyxxer.prismarine.typesystem.functions.PrimitivePrismarineFunction;
 
 import java.util.Iterator;
+import java.util.Objects;
 
 public class GenericWrapperType<T> implements TypeHandler<T>, GenericSupplierImplementer {
     private final TypeHandler<T> sourceType;
@@ -125,5 +126,19 @@ public class GenericWrapperType<T> implements TypeHandler<T>, GenericSupplierImp
     public void putGenericInfo(Object binding, TypeHandler[] types) {
         if(genericSupplier == null) genericSupplier = new GenericSupplier();
         genericSupplier.put(binding, types);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GenericWrapperType<?> that = (GenericWrapperType<?>) o;
+        return sourceType.equals(that.sourceType) &&
+                Objects.equals(genericSupplier, that.genericSupplier);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sourceType, genericSupplier);
     }
 }

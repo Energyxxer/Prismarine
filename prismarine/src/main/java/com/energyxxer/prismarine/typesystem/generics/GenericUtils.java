@@ -23,11 +23,11 @@ public class GenericUtils {
      * */
     public static TypeConstraints nonGeneric(TypeConstraints constraints, Object thisObject, ActualParameterList actualParams, ISymbolContext ctx) {
         if(constraints.isGeneric()) {
-            TypeHandler genericType = nonGeneric(constraints.getGenericHandler(), thisObject, actualParams, ctx);
+            TypeHandler genericType = resolveStandIns(constraints.getGenericHandler(), thisObject, actualParams, ctx);
             boolean nullable = constraints.isNullable();
             return new TypeConstraints(constraints.getTypeSystem(), genericType, nullable);
         } else if(constraints.getHandler() instanceof GenericStandInType) {
-            TypeHandler genericType = nonGeneric(constraints.getHandler(), thisObject, actualParams, ctx);
+            TypeHandler genericType = resolveStandIns(constraints.getHandler(), thisObject, actualParams, ctx);
             boolean nullable = constraints.isNullable();
             return new TypeConstraints(constraints.getTypeSystem(), genericType, nullable);
         } else {
