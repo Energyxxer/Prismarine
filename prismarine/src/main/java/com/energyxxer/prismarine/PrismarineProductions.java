@@ -155,14 +155,14 @@ public class PrismarineProductions {
 
     public static void checkDuplicates(TokenList list, String message, Lexer lx) {
         if(lx == null) return;
-        duplicateCheck.clear();
+        duplicateCheck.get().clear();
         for(TokenPattern<?> entry : list.getContents()) {
             if(entry.getName().equals("COMMA")) continue;
-            if(!duplicateCheck.add(entry.flatten(false))) {
+            if(!duplicateCheck.get().add(entry.flatten(false))) {
                 lx.getNotices().add(new Notice(NoticeType.ERROR, message + " '" + entry.flatten(false) + "'", entry));
             }
         }
-        duplicateCheck.clear();
+        duplicateCheck.get().clear();
     }
 
     public void installProviderSet(PatternProviderSet providerSet) {
@@ -215,7 +215,7 @@ public class PrismarineProductions {
     }
 
 
-    private static final HashSet<String> duplicateCheck = new HashSet<>();
+    private static final ThreadLocal<HashSet<String>> duplicateCheck = ThreadLocal.withInitial(HashSet::new);
 
     public static final BiConsumer<TokenPattern<?>, Lexer> startComplexValue = (p, l) -> {
         if(l.getSummaryModule() != null) {
