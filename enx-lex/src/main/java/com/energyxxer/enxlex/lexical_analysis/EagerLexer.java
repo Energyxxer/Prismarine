@@ -237,6 +237,14 @@ public class EagerLexer extends Lexer {
 	}
 
 	@Override
+	public boolean isRangeWhitespace(int startIndex, int endIndex) {
+		for(int i = startIndex; i < endIndex; i++) {
+			if(!Character.isWhitespace(fileContents.charAt(i))) return false;
+		}
+		return true;
+	}
+
+	@Override
 	public int getFileLength() {
 		return stream.tokens.isEmpty() ? 0 : stream.tokens.get(stream.tokens.size()-1).getStringBounds().end.index;
 	}

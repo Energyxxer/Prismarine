@@ -18,6 +18,9 @@ public class PrismarineSummaryModule extends SummaryModule {
     protected SummaryBlock fileBlock = new SummaryBlock(this);
     protected ArrayList<Path> requires = new ArrayList<>();
     protected ArrayList<Todo> todos = new ArrayList<>();
+    protected StringBuilder documentation = new StringBuilder();
+    protected int documentationEndIndex;
+    protected HashMap<String, Integer> indexMap;
 
     public SortedList<FileAwareProcessor> fileAwareProcessors = new SortedList<>(p -> p.priority);
 
@@ -213,8 +216,49 @@ public class PrismarineSummaryModule extends SummaryModule {
         todos.add(new Todo(token, text));
     }
 
+    public boolean isDocumentationAvailable() {
+        return documentation.length() > 0;
+    }
+
+    public int getDocumentationEndIndex() {
+        return documentationEndIndex;
+    }
+
+    public void setDocumentationEndIndex(int documentationEndIndex) {
+        this.documentationEndIndex = documentationEndIndex;
+    }
+
+    public void appendDocumentation(String line) {
+        if(documentation.length() > 0) {
+            documentation.append('\n');
+        }
+        documentation.append(line);
+    }
+
+    public void clearDocumentation() {
+        documentation.setLength(0);
+    }
+
+    public String getDocumentation() {
+        return documentation.toString();
+    }
+
     public SummaryBlock getFileBlock() {
         return fileBlock;
+    }
+
+    public void putIndex(String key, int index) {
+        if(indexMap == null) indexMap = new HashMap<>();
+        indexMap.put(key, index);
+    }
+
+    public int getIndex(String key) {
+        return indexMap.get(key);
+    }
+
+    public Integer tryGetIndex(String key) {
+        if(indexMap == null) return null;
+        return indexMap.get(key);
     }
 
     public static class SymbolUsage {

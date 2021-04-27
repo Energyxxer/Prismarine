@@ -69,6 +69,10 @@ public class SummaryBlock implements SummaryElement {
         fallbackSymbols.add(symbol);
     }
 
+    public ArrayList<SummarySymbol> getFallbackSymbols() {
+        return fallbackSymbols;
+    }
+
     @Override
     public String toString() {
         return (associatedSymbol != null ? getName() + ": " : "") + subElements.toString();

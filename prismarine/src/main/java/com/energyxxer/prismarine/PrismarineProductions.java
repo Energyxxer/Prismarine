@@ -196,6 +196,13 @@ public class PrismarineProductions {
         return providedStructures.get(name);
     }
 
+    public TokenStructureMatch getStructure(String name) {
+        if(!providedStructures.containsKey(name)) {
+            throw new IllegalArgumentException("Structure '" + name + "' does not exist");
+        }
+        return providedStructures.get(name);
+    }
+
     public TokenPatternMatch putPatternMatch(String name, TokenPatternMatch match) {
         providedSingleMatches.put(name, match);
         return match;

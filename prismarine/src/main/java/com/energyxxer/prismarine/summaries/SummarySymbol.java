@@ -22,6 +22,8 @@ public class SummarySymbol implements SummaryElement {
     private SummarySymbol type;
     private SummarySymbol returnType;
 
+    private String documentation;
+
     public SummarySymbol(PrismarineSummaryModule parentSummary, String name, int declarationIndex) {
         this(parentSummary, name, SymbolVisibility.PUBLIC, declarationIndex);
     }
@@ -200,5 +202,13 @@ public class SummarySymbol implements SummaryElement {
 
     public int getScopeEnd() {
         return scopeEnd;
+    }
+
+    public String getDocumentation() {
+        return documentation;
+    }
+
+    public void setDocumentation(String documentation) {
+        this.documentation = documentation;
     }
 }

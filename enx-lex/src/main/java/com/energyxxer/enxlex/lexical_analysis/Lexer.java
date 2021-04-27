@@ -75,5 +75,7 @@ public abstract class Lexer {
     public abstract Token retrieveTokenOfType(TokenType type);
     public abstract Token retrieveAnyToken();
 
+    public abstract boolean isRangeWhitespace(int startIndex, int endIndex);
+
     public abstract int getFileLength();
 }

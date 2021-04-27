@@ -14,6 +14,7 @@ import com.energyxxer.enxlex.report.NoticeType;
 import com.energyxxer.enxlex.suggestions.SuggestionModule;
 import com.energyxxer.util.StringLocation;
 import com.energyxxer.util.StringLocationCache;
+import com.energyxxer.util.logger.Debug;
 
 import java.util.ArrayList;
 
@@ -34,41 +35,51 @@ public class LazyLexer extends Lexer {
 
     private TokenMatchResponse matchResponse = null;
 
+    private boolean running = false;
+
     @Override
     public void start(TokenSource source, String str, LexerProfile profile) {
-        this.source = source;
-        this.fileContents = str;
-        this.profile = profile;
-
-        if(getSummaryModule() != null) getSummaryModule().onStart();
-
-        lineCache.setText(fileContents);
-        lineCache.prepopulate();
-
-        {
-            Token header = new Token("", TokenType.FILE_HEADER, source, new StringLocation(0, 0, 0));
-            profile.putHeaderInfo(header);
-            stream.write(header);
+        if(running) {
+            Debug.log("Starting an already running lexer!");
         }
+        running = true;
+        try {
+            this.source = source;
+            this.fileContents = str;
+            this.profile = profile;
 
-        matchResponse = pattern.match(0, this);
+            if (getSummaryModule() != null) getSummaryModule().onStart();
 
-        if(matchResponse.matched) {
-            matchResponse.pattern.validate();
-            for(Token token : matchResponse.pattern.flattenTokens(new ArrayList<>())) {
-                token.dumpNotices(notices);
-                stream.write(token);
+            lineCache.setText(fileContents);
+            lineCache.prepopulate();
+
+            {
+                Token header = new Token("", TokenType.FILE_HEADER, source, new StringLocation(0, 0, 0));
+                profile.putHeaderInfo(header);
+                stream.write(header);
             }
-        } else {
-            this.notices.add(new Notice(NoticeType.ERROR, matchResponse.getErrorMessage(), matchResponse.faultyToken));
-        }
 
-        {
-            Token eof = new Token("", TokenType.END_OF_FILE, source, lineCache.getLocationForOffset(fileContents.length()));
-            stream.write(eof);
-        }
+            matchResponse = pattern.match(0, this);
 
-        if(getSummaryModule() != null) getSummaryModule().onEnd();
+            if (matchResponse.matched) {
+                matchResponse.pattern.validate();
+                for (Token token : matchResponse.pattern.flattenTokens(new ArrayList<>())) {
+                    token.dumpNotices(notices);
+                    stream.write(token);
+                }
+            } else {
+                this.notices.add(new Notice(NoticeType.ERROR, matchResponse.getErrorMessage(), matchResponse.faultyToken));
+            }
+
+            {
+                Token eof = new Token("", TokenType.END_OF_FILE, source, lineCache.getLocationForOffset(fileContents.length()));
+                stream.write(eof);
+            }
+
+            if (getSummaryModule() != null) getSummaryModule().onEnd();
+        } finally {
+            running = false;
+        }
     }
 
     public String getFullText() {
@@ -180,6 +191,14 @@ public class LazyLexer extends Lexer {
             }
         }
         return null;
+    }
+
+    @Override
+    public boolean isRangeWhitespace(int startIndex, int endIndex) {
+        for(int i = startIndex; i < endIndex; i++) {
+            if(!Character.isWhitespace(fileContents.charAt(i))) return false;
+        }
+        return true;
     }
 
     @Override
