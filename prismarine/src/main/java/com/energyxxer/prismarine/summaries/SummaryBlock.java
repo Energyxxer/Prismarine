@@ -16,7 +16,7 @@ public class SummaryBlock implements SummaryElement {
     private int startIndex;
     private int endIndex;
     private final ArrayList<SummaryElement> subElements = new SimpleReadArrayList<>();
-    private ArrayList<SummarySymbol> fallbackSymbols = null;
+    private ArrayList<SymbolReference> fallbackSymbols = null;
     @NotNull
     private RepeatPolicy repeatPolicy = RepeatPolicy.DUPLICATE;
 
@@ -69,7 +69,12 @@ public class SummaryBlock implements SummaryElement {
         fallbackSymbols.add(symbol);
     }
 
-    public ArrayList<SummarySymbol> getFallbackSymbols() {
+    public void addFallbackSymbol(SymbolReference symbol) {
+        if(fallbackSymbols == null) fallbackSymbols = new ArrayList<>();
+        fallbackSymbols.add(symbol);
+    }
+
+    public ArrayList<SymbolReference> getFallbackSymbols() {
         return fallbackSymbols;
     }
 
@@ -146,41 +151,44 @@ public class SummaryBlock implements SummaryElement {
     }
 
     @Override
-    public void collectSymbolsVisibleAt(int index, ArrayList<SummarySymbol> list, Path fromPath) {
-        if(associatedSymbol != null) associatedSymbol.collectSymbolsVisibleAt(index, list, fromPath);
+    public ArrayList<SummarySymbol> collectSymbolsVisibleAt(int index, ArrayList<SummarySymbol> list, Path fromPath, PrismarineSummaryModule summary) {
+        if(associatedSymbol != null) associatedSymbol.collectSymbolsVisibleAt(index, list, fromPath, summary);
 
         for(SummaryElement elem : subElements) {
             if((index < 0 && fixed) || (startIndex <= index && index <= endIndex) || (elem instanceof SummarySymbol && ((SummarySymbol) elem).getDeclarationPattern().getStringLocation().index == index)) {
-                elem.collectSymbolsVisibleAt(index, list, fromPath);
+                elem.collectSymbolsVisibleAt(index, list, fromPath, summary);
             }
         }
 
         if(fallbackSymbols != null && ((index < 0 && fixed) || (startIndex <= index && index <= endIndex)) && !checkingFallbackSymbol) {
             this.checkingFallbackSymbol = true;
             try {
-                for (SummarySymbol fallbackSymbol : fallbackSymbols) {
-                    if (fallbackSymbol.hasSubBlock()) {
-                        fallbackSymbol.getSubBlock().collectSymbolsFromOutside(index, list, fromPath);
+                for (SymbolReference fallbackSymbolRef : fallbackSymbols) {
+                    SummarySymbol fallbackSymbol = fallbackSymbolRef.getSymbol(summary);
+                    if(fallbackSymbol != null && fallbackSymbol.hasSubBlock()) {
+                        fallbackSymbol.getSubBlock().collectSymbolsFromOutside(index, list, fromPath, summary);
                     }
                 }
             } finally {
                 this.checkingFallbackSymbol = false;
             }
         }
+        return list;
     }
     private boolean checkingFallbackSymbol = false;
 
-    private void collectSymbolsFromOutside(int index, ArrayList<SummarySymbol> list, Path fromPath) {
+    private void collectSymbolsFromOutside(int index, ArrayList<SummarySymbol> list, Path fromPath, PrismarineSummaryModule summary) {
         for(SummaryElement elem : subElements) {
-            elem.collectSymbolsVisibleAt(index, list, fromPath);
+            elem.collectSymbolsVisibleAt(index, list, fromPath, summary);
         }
 
         if(fallbackSymbols != null && !checkingFallbackSymbol) {
             this.checkingFallbackSymbol = true;
             try {
-                for (SummarySymbol fallbackSymbol : fallbackSymbols) {
-                    if (fallbackSymbol.hasSubBlock()) {
-                        fallbackSymbol.getSubBlock().collectSymbolsFromOutside(index, list, fromPath);
+                for (SymbolReference fallbackSymbolRef : fallbackSymbols) {
+                    SummarySymbol fallbackSymbol = fallbackSymbolRef.getSymbol(summary);
+                    if(fallbackSymbol != null && fallbackSymbol.hasSubBlock()) {
+                        fallbackSymbol.getSubBlock().collectSymbolsFromOutside(index, list, fromPath, summary);
                     }
                 }
             } finally {
@@ -197,11 +205,12 @@ public class SummaryBlock implements SummaryElement {
     }
 
     @Override
-    public void collectGlobalSymbols(ArrayList<SummarySymbol> list) {
+    public ArrayList<SummarySymbol> collectGlobalSymbols(ArrayList<SummarySymbol> list) {
         if(associatedSymbol != null) associatedSymbol.collectGlobalSymbols(list);
         for(SummaryElement elem : subElements) {
             elem.collectGlobalSymbols(list);
         }
+        return list;
     }
 
     @Override
@@ -230,10 +239,10 @@ public class SummaryBlock implements SummaryElement {
         return associatedSymbol != null ? associatedSymbol.getVisibility() : SymbolVisibility.PUBLIC;
     }
 
-    public void collectStaticSubSymbols(String name, Path fromFile, int inFileIndex, ArrayList<SummarySymbol> list) {
-        for(SummaryElement element : subElements) {
-            if(element instanceof SummarySymbol) {
-                if(
+    public ArrayList<SummarySymbol> collectStaticSubSymbols(String name, Path fromFile, int inFileIndex, ArrayList<SummarySymbol> list, PrismarineSummaryModule summary) {
+        for (SummaryElement element : subElements) {
+            if (element instanceof SummarySymbol) {
+                if (
                         (name == null || name.equals(element.getName()))
                                 && !((SummarySymbol) element).isInstanceField()
                                 && ((SummarySymbol) element).isVisibleMember(fromFile, inFileIndex)
@@ -243,14 +252,18 @@ public class SummaryBlock implements SummaryElement {
             }
         }
 
-//        if(fallbackSymbols != null) { TODO
-//            for(SummarySymbol fallbackSymbol : fallbackSymbols) {
-//                fallbackSymbol.collect(name, fromFile, inFileIndex, list);
-//            }
-//        }
+        if (fallbackSymbols != null) {
+            for (SymbolReference fallbackSymbolRef : fallbackSymbols) {
+                SummarySymbol fallbackSymbol = fallbackSymbolRef.getSymbol(summary);
+                if (fallbackSymbol != null && fallbackSymbol.hasSubBlock()) {
+                    fallbackSymbol.collectSubSymbolsByName(name, fromFile, inFileIndex, list, summary);
+                }
+            }
+        }
+        return list;
     }
 
-    public void collectInstanceSubSymbols(String name, Path fromFile, int inFileIndex, ArrayList<SummarySymbol> list) {
+    public ArrayList<SummarySymbol> collectInstanceSubSymbols(String name, Path fromFile, int inFileIndex, ArrayList<SummarySymbol> list, PrismarineSummaryModule summary) {
         for(SummaryElement element : subElements) {
             if(element instanceof SummarySymbol) {
                 if(
@@ -266,13 +279,16 @@ public class SummaryBlock implements SummaryElement {
         if(fallbackSymbols != null && !checkingFallbackSymbol) {
             this.checkingFallbackSymbol = true;
             try {
-                for(SummarySymbol fallbackSymbol : fallbackSymbols) {
-                    fallbackSymbol.collectInstanceSubSymbols(name, fromFile, inFileIndex, list);
+                for (SymbolReference fallbackSymbolRef : fallbackSymbols) {
+                    SummarySymbol fallbackSymbol = fallbackSymbolRef.getSymbol(summary);
+                    if(fallbackSymbol != null) fallbackSymbol.collectInstanceSubSymbols(name, fromFile, inFileIndex, list, summary);
                 }
             } finally {
                 this.checkingFallbackSymbol = false;
             }
         }
+
+        return list;
     }
 
     @NotNull

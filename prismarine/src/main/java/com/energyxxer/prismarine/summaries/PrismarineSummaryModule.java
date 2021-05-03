@@ -100,8 +100,8 @@ public class PrismarineSummaryModule extends SummaryModule {
         return list;
     }
 
-    public void collectSymbolsVisibleAt(int index, ArrayList<SummarySymbol> list, Path fromPath) {
-        if(searchingSymbols) return;
+    public ArrayList<SummarySymbol> collectSymbolsVisibleAt(int index, ArrayList<SummarySymbol> list, Path fromPath) {
+        if(searchingSymbols) return list;
         searchingSymbols = true;
         if(parentSummary != null) {
             for(Path required : requires) {
@@ -112,12 +112,13 @@ public class PrismarineSummaryModule extends SummaryModule {
             }
         }
         collectExternalSymbolsVisibleToFile(list, fromPath);
-        fileBlock.collectSymbolsVisibleAt(index, list, fromPath);
+        fileBlock.collectSymbolsVisibleAt(index, list, fromPath, this);
         searchingSymbols = false;
+        return list;
     }
 
-    public void collectExternalSymbolsVisibleToFile(ArrayList<SummarySymbol> list, Path fromPath) {
-
+    public ArrayList<SummarySymbol> collectExternalSymbolsVisibleToFile(ArrayList<SummarySymbol> list, Path fromPath) {
+        return list;
     }
 
     public Collection<SummarySymbol> getGlobalSymbols() {
@@ -126,8 +127,9 @@ public class PrismarineSummaryModule extends SummaryModule {
         return list;
     }
 
-    public void collectGlobalSymbols(ArrayList<SummarySymbol> list) {
+    public ArrayList<SummarySymbol> collectGlobalSymbols(ArrayList<SummarySymbol> list) {
         fileBlock.collectGlobalSymbols(list);
+        return list;
     }
 
     public void updateIndices(Function<Integer, Integer> h) {

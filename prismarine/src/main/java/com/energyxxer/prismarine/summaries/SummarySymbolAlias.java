@@ -4,25 +4,32 @@ import com.energyxxer.prismarine.symbols.SymbolVisibility;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Function;
 
 public class SummarySymbolAlias extends SummarySymbol {
-    private final SummarySymbol real;
+    private SummarySymbol real;
 
     public SummarySymbolAlias(String name, SymbolVisibility visibility, int declarationIndex, SummarySymbol real) {
-        super(real.getParentFileSummary(), name, visibility, declarationIndex);
+        super(real != null ? real.getParentFileSummary() : null, name, visibility, declarationIndex);
         this.real = real;
     }
 
     public SummarySymbolAlias(String name, int declarationIndex, SummarySymbol real) {
-        super(real.getParentFileSummary(), name, declarationIndex);
+        super(real != null ? real.getParentFileSummary() : null, name, declarationIndex);
+        this.real = real;
+    }
+
+    public SummarySymbol getReal() {
+        return real;
+    }
+
+    public void setReal(SummarySymbol real) {
         this.real = real;
     }
 
     @Override
-    public SummarySymbol getType() {
-        return real.getType();
+    public SummarySymbol getType(PrismarineSummaryModule summary) {
+        return real != null ? real.getType(summary) : null;
     }
 
     @Override
@@ -31,12 +38,22 @@ public class SummarySymbolAlias extends SummarySymbol {
     }
 
     @Override
-    public SummarySymbol getReturnType() {
-        return real.getReturnType();
+    public void setType(SymbolReference type) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public SummarySymbol getReturnType(PrismarineSummaryModule summary) {
+        return real != null ? real.getReturnType(summary) : null;
     }
 
     @Override
     public SummarySymbol setReturnType(SummarySymbol returnType) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public SummarySymbol setReturnType(SymbolReference returnType) {
         throw new UnsupportedOperationException();
     }
 
@@ -47,24 +64,26 @@ public class SummarySymbolAlias extends SummarySymbol {
 
     @Override
     public void updateIndices(Function<Integer, Integer> h) {
-        real.updateIndices(h);
+        if(real != null) real.updateIndices(h);
     }
 
     @Override
-    public void collectSymbolsVisibleAt(int index, ArrayList<SummarySymbol> list, Path fromPath) {
-        super.collectSymbolsVisibleAt(index, list, fromPath);
-        real.collectSymbolsVisibleAt(index, list, fromPath);
+    public ArrayList<SummarySymbol> collectSymbolsVisibleAt(int index, ArrayList<SummarySymbol> list, Path fromPath, PrismarineSummaryModule summary) {
+        super.collectSymbolsVisibleAt(index, list, fromPath, summary);
+        if(real != null) real.collectSymbolsVisibleAt(index, list, fromPath, summary);
+        return list;
     }
 
     @Override
-    public void collectGlobalSymbols(ArrayList<SummarySymbol> list) {
+    public ArrayList<SummarySymbol> collectGlobalSymbols(ArrayList<SummarySymbol> list) {
         super.collectGlobalSymbols(list);
-        real.collectGlobalSymbols(list);
+        if(real != null) real.collectGlobalSymbols(list);
+        return list;
     }
 
     @Override
     public boolean hasSubBlock() {
-        return real.hasSubBlock();
+        return real != null && real.hasSubBlock();
     }
 
     @Override
@@ -74,16 +93,18 @@ public class SummarySymbolAlias extends SummarySymbol {
 
     @Override
     public SummaryBlock getSubBlock() {
-        return real.getSubBlock();
+        return real != null ? real.getSubBlock() : null;
     }
 
     @Override
-    public List<SummarySymbol> getSubSymbols(Path fromFile, int inFileIndex) {
-        return real.getSubSymbols(fromFile, inFileIndex);
+    public ArrayList<SummarySymbol> collectSubSymbols(Path fromFile, int inFileIndex, ArrayList<SummarySymbol> list, PrismarineSummaryModule summary) {
+        if(real != null) real.collectSubSymbols(fromFile, inFileIndex, list, summary);
+        return list;
     }
 
     @Override
-    public List<SummarySymbol> getSubSymbolsByName(String name, Path fromFile, int inFileIndex) {
-        return real.getSubSymbolsByName(name, fromFile, inFileIndex);
+    public ArrayList<SummarySymbol> collectSubSymbolsByName(String name, Path fromFile, int inFileIndex, ArrayList<SummarySymbol> list, PrismarineSummaryModule summary) {
+        if(real != null) real.collectSubSymbolsByName(name, fromFile, inFileIndex, list, summary);
+        return list;
     }
 }

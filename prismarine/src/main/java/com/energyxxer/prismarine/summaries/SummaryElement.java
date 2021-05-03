@@ -15,12 +15,12 @@ public interface SummaryElement {
 
     PrismarineSummaryModule getParentFileSummary();
 
-    void collectGlobalSymbols(ArrayList<SummarySymbol> list);
+    ArrayList<SummarySymbol> collectGlobalSymbols(ArrayList<SummarySymbol> list);
 
     void updateIndices(Function<Integer, Integer> h);
 
-    default void collectSymbolsVisibleAt(int index, ArrayList<SummarySymbol> list, Path fromPath) {
-
+    default ArrayList<SummarySymbol> collectSymbolsVisibleAt(int index, ArrayList<SummarySymbol> list, Path fromPath, PrismarineSummaryModule summary) {
+        return list;
     }
 
     SymbolVisibility getVisibility();

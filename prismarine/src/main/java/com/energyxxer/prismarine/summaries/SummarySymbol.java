@@ -7,10 +7,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.function.Function;
 
-public class SummarySymbol implements SummaryElement {
+public class SummarySymbol implements SummaryElement, SymbolReference {
     private final PrismarineSummaryModule parentSummary;
     private final String name;
     private int declarationIndex;
@@ -20,8 +19,8 @@ public class SummarySymbol implements SummaryElement {
     private boolean isInstanceField = false;
     private TokenPattern<?> declarationPattern;
 
-    private SummarySymbol type;
-    private SummarySymbol returnType;
+    private SymbolReference type;
+    private SymbolReference returnType;
 
     private String documentation;
 
@@ -38,19 +37,28 @@ public class SummarySymbol implements SummaryElement {
         this.declarationIndex = declarationIndex;
     }
 
-    public SummarySymbol getType() {
-        return type;
+    public SummarySymbol getType(PrismarineSummaryModule summaryModule) {
+        return type != null ? type.getSymbol(summaryModule) : null;
     }
 
     public void setType(SummarySymbol type) {
         this.type = type;
     }
 
-    public SummarySymbol getReturnType() {
-        return returnType;
+    public void setType(SymbolReference type) {
+        this.type = type;
+    }
+
+    public SummarySymbol getReturnType(PrismarineSummaryModule summaryModule) {
+        return returnType != null ? returnType.getSymbol(summaryModule) : null;
     }
 
     public SummarySymbol setReturnType(SummarySymbol returnType) {
+        this.returnType = returnType;
+        return this;
+    }
+
+    public SummarySymbol setReturnType(SymbolReference returnType) {
         this.returnType = returnType;
         return this;
     }
@@ -97,19 +105,21 @@ public class SummarySymbol implements SummaryElement {
     }
 
     @Override
-    public void collectSymbolsVisibleAt(int index, ArrayList<SummarySymbol> list, Path fromPath) {
+    public ArrayList<SummarySymbol> collectSymbolsVisibleAt(int index, ArrayList<SummarySymbol> list, Path fromPath, PrismarineSummaryModule summary) {
         if(index < 0 || visibility.isVisibleFromSummaryBlock(this, fromPath, index)) {
             list.removeIf(e -> e.getName().equals(name));
             list.add(this);
         }
+        return list;
     }
 
     @Override
-    public void collectGlobalSymbols(ArrayList<SummarySymbol> list) {
+    public ArrayList<SummarySymbol> collectGlobalSymbols(ArrayList<SummarySymbol> list) {
         if(getVisibility() == SymbolVisibility.GLOBAL) {
             list.removeIf(e -> e.getName().equals(this.getName()));
             list.add(this);
         }
+        return list;
     }
 
     public SummarySymbol addTag(String tag) {
@@ -163,32 +173,33 @@ public class SummarySymbol implements SummaryElement {
         return declarationPattern;
     }
 
-    public List<SummarySymbol> getSubSymbols(Path fromFile, int inFileIndex) {
-        ArrayList<SummarySymbol> list = new ArrayList<>();
+    public ArrayList<SummarySymbol> collectSubSymbols(Path fromFile, int inFileIndex, ArrayList<SummarySymbol> list, PrismarineSummaryModule summary) {
         if(subBlock != null) {
-            subBlock.collectStaticSubSymbols(null, fromFile, inFileIndex, list);
+            subBlock.collectStaticSubSymbols(null, fromFile, inFileIndex, list, summary);
         }
         if(type != null) {
-            type.collectInstanceSubSymbols(null, fromFile, inFileIndex, list);
+            SummarySymbol sym = type.getSymbol(summary);
+            if(sym != null) sym.collectInstanceSubSymbols(null, fromFile, inFileIndex, list, summary);
         }
         return list;
     }
 
-    public List<SummarySymbol> getSubSymbolsByName(String name, Path fromFile, int inFileIndex) {
-        ArrayList<SummarySymbol> list = new ArrayList<>();
+    public ArrayList<SummarySymbol> collectSubSymbolsByName(String name, Path fromFile, int inFileIndex, ArrayList<SummarySymbol> list, PrismarineSummaryModule summary) {
         if(subBlock != null) {
-            subBlock.collectStaticSubSymbols(name, fromFile, inFileIndex, list);
+            subBlock.collectStaticSubSymbols(name, fromFile, inFileIndex, list, summary);
         }
         if(type != null) {
-            type.collectInstanceSubSymbols(name, fromFile, inFileIndex, list);
+            SummarySymbol sym = type.getSymbol(summary);
+            if(sym != null) sym.collectInstanceSubSymbols(name, fromFile, inFileIndex, list, summary);
         }
         return list;
     }
 
-    public void collectInstanceSubSymbols(String name, Path fromFile, int inFileIndex, ArrayList<SummarySymbol> list) {
+    public ArrayList<SummarySymbol> collectInstanceSubSymbols(String name, Path fromFile, int inFileIndex, ArrayList<SummarySymbol> list, PrismarineSummaryModule summary) {
         if(subBlock != null) {
-            subBlock.collectInstanceSubSymbols(name, fromFile, inFileIndex, list);
+            subBlock.collectInstanceSubSymbols(name, fromFile, inFileIndex, list, summary);
         }
+        return list;
     }
 
     public boolean isVisibleMember(Path fromFile, int inFileIndex) {
@@ -213,6 +224,11 @@ public class SummarySymbol implements SummaryElement {
 
     public void setDocumentation(String documentation) {
         this.documentation = documentation;
+    }
+
+    @Override
+    public SummarySymbol getSymbol(PrismarineSummaryModule summary) {
+        return this;
     }
 
     public <T> void set(SymbolAttachment<T> attachmentType, T value) {
