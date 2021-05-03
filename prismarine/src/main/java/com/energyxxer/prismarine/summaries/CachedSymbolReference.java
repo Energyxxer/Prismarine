@@ -7,6 +7,8 @@ public class CachedSymbolReference implements SymbolReference {
     private PrismarineProjectSummary lastProjectSummary;
 
     private WeakReference<SummarySymbol> cachedSymbol;
+    private boolean symbolIsNull = false;
+    private int generation = 0;
 
     public CachedSymbolReference(SymbolReference getter) {
         this.getter = getter;
@@ -14,9 +16,12 @@ public class CachedSymbolReference implements SymbolReference {
 
     @Override
     public SummarySymbol getSymbol(PrismarineSummaryModule summary) {
-        if(cachedSymbol == null || !cachedSymbol.isEnqueued() || summary.getParentSummary() == null || summary.getParentSummary() != lastProjectSummary) {
-            cachedSymbol = new WeakReference<>(getter.getSymbol(summary));
+        if(cachedSymbol == null || (!symbolIsNull && cachedSymbol.get() == null) || summary.getParentSummary() == null || summary.getParentSummary() != lastProjectSummary || summary.getParentSummary().generation != this.generation) {
+            SummarySymbol symbol = getter.getSymbol(summary);
+            cachedSymbol = new WeakReference<>(symbol);
+            symbolIsNull = symbol == null;
             lastProjectSummary = summary.parentSummary;
+            generation = lastProjectSummary.getGeneration();
         }
         return cachedSymbol.get();
     }

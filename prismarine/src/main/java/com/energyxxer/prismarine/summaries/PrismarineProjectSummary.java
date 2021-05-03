@@ -2,6 +2,7 @@ package com.energyxxer.prismarine.summaries;
 
 import com.energyxxer.enxlex.lexical_analysis.summary.ProjectSummary;
 import com.energyxxer.enxlex.lexical_analysis.summary.Todo;
+import com.energyxxer.util.logger.Debug;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -13,9 +14,18 @@ public class PrismarineProjectSummary implements ProjectSummary {
     protected Set<SummarySymbol> globalSymbols = new LinkedHashSet<>();
     protected Set<Todo> todos = new HashSet<>();
 
+    protected int generation = 0;
+
     public void store(File file, PrismarineSummaryModule summaryModule) {
+        incrementGeneration();
         summaryModule.setParentSummary(this);
-        if(file != null) fileSummaryMap.put(file, summaryModule);
+        if(file != null) {
+            PrismarineSummaryModule existingModule = fileSummaryMap.get(file);
+            fileSummaryMap.put(file, summaryModule);
+            if(existingModule != null) {
+                fileSummaries.remove(existingModule);
+            }
+        }
         fileSummaries.add(summaryModule);
         this.todos.addAll(summaryModule.getTodos());
         globalSymbols.addAll(summaryModule.getGlobalSymbols());
@@ -58,5 +68,13 @@ public class PrismarineProjectSummary implements ProjectSummary {
 
     public Collection<PrismarineSummaryModule> getAllSummaries() {
         return fileSummaries;
+    }
+
+    public int getGeneration() {
+        return generation;
+    }
+
+    public void incrementGeneration() {
+        generation++;
     }
 }
