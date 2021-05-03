@@ -5,6 +5,7 @@ import com.energyxxer.prismarine.symbols.SymbolVisibility;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.Function;
@@ -23,6 +24,8 @@ public class SummarySymbol implements SummaryElement {
     private SummarySymbol returnType;
 
     private String documentation;
+
+    private HashMap<SymbolAttachment<?>, Object> attachedData = new HashMap<>();
 
     public SummarySymbol(PrismarineSummaryModule parentSummary, String name, int declarationIndex) {
         this(parentSummary, name, SymbolVisibility.PUBLIC, declarationIndex);
@@ -211,4 +214,20 @@ public class SummarySymbol implements SummaryElement {
     public void setDocumentation(String documentation) {
         this.documentation = documentation;
     }
+
+    public <T> void set(SymbolAttachment<T> attachmentType, T value) {
+        if(attachedData == null) attachedData = new HashMap<>();
+        attachedData.put(attachmentType, value);
+    }
+
+    public <T> T get(SymbolAttachment<T> attachmentType) {
+        if(attachedData == null) return null;
+        return (T) attachedData.get(attachmentType);
+    }
+
+    public <T> boolean has(SymbolAttachment<T> attachmentType) {
+        return attachedData != null && attachedData.containsKey(attachmentType);
+    }
+
+    public static class SymbolAttachment<T> {}
 }

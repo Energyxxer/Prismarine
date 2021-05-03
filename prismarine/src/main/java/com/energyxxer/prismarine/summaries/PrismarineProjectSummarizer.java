@@ -201,6 +201,10 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
         return worker;
     }
 
+    public FileWalker<PrismarineProjectSummary> getWalker() {
+        return walker;
+    }
+
     public <C> C get(PrismarineProjectWorkerTask<C> task) {
         return worker.output.get(task);
     }

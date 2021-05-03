@@ -20,7 +20,7 @@ public class PrismarineSummaryModule extends SummaryModule {
     protected ArrayList<Todo> todos = new ArrayList<>();
     protected StringBuilder documentation = new StringBuilder();
     protected int documentationEndIndex;
-    protected HashMap<String, Integer> indexMap;
+    protected HashMap<String, Object> tempMap;
 
     public SortedList<FileAwareProcessor> fileAwareProcessors = new SortedList<>(p -> p.priority);
 
@@ -185,10 +185,12 @@ public class PrismarineSummaryModule extends SummaryModule {
 
     public SymbolUsage getSymbolUsageAtIndex(int index) {
         int foundIndex = symbolUsages.findIndexForKey(index);
+        if(foundIndex < 0) return null;
+
         while(foundIndex >= 0 && foundIndex < symbolUsages.size() && symbolUsages.get(foundIndex).index >= index) {
             foundIndex--;
         }
-        if(foundIndex >= 0 && foundIndex < symbolUsages.size()-1) {
+        if(foundIndex < symbolUsages.size()-1) {
             foundIndex++;
             return symbolUsages.get(foundIndex);
         }
@@ -247,18 +249,28 @@ public class PrismarineSummaryModule extends SummaryModule {
         return fileBlock;
     }
 
-    public void putIndex(String key, int index) {
-        if(indexMap == null) indexMap = new HashMap<>();
-        indexMap.put(key, index);
+    public void setIndex(String key, int index) {
+        if(tempMap == null) tempMap = new HashMap<>();
+        tempMap.put(key, index);
     }
 
     public int getIndex(String key) {
-        return indexMap.get(key);
+        return (int) tempMap.get(key);
     }
 
     public Integer tryGetIndex(String key) {
-        if(indexMap == null) return null;
-        return indexMap.get(key);
+        if(tempMap == null) return null;
+        return (Integer) tempMap.get(key);
+    }
+
+    public void set(String key, Object value) {
+        if(tempMap == null) tempMap = new HashMap<>();
+        tempMap.put(key, value);
+    }
+
+    public Object get(String key) {
+        if(tempMap == null) return null;
+        return tempMap.get(key);
     }
 
     public static class SymbolUsage {
