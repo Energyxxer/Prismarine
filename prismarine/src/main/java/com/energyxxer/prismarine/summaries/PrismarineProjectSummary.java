@@ -2,7 +2,6 @@ package com.energyxxer.prismarine.summaries;
 
 import com.energyxxer.enxlex.lexical_analysis.summary.ProjectSummary;
 import com.energyxxer.enxlex.lexical_analysis.summary.Todo;
-import com.energyxxer.util.logger.Debug;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -29,6 +28,21 @@ public class PrismarineProjectSummary implements ProjectSummary {
         fileSummaries.add(summaryModule);
         this.todos.addAll(summaryModule.getTodos());
         globalSymbols.addAll(summaryModule.getGlobalSymbols());
+    }
+
+    public void storeTemporarily(File file, PrismarineSummaryModule summaryModule) {
+        incrementGeneration();
+        summaryModule.setParentSummary(this);
+        if(file != null) {
+            PrismarineSummaryModule existingModule = fileSummaryMap.get(file);
+            fileSummaryMap.put(file, summaryModule);
+            if(existingModule != null) {
+                fileSummaries.remove(existingModule);
+            }
+        }
+        fileSummaries.add(summaryModule);
+
+        //No global symbol or to-do merging; meant for incorporating editor changes without saving.
     }
 
     public PrismarineSummaryModule getSummaryForLocation(Path loc) {
