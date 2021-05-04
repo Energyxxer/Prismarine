@@ -133,7 +133,11 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
 
         logTime("Walker Setup");
 
-        if(cachedReader != null) walker.getReader().populateWithCachedReader(cachedReader);
+        if(cachedReader != null) {
+            walker.getReader().populateWithCachedReader(cachedReader);
+            cachedReader = null; // THIS IS A LOAD-BEARING STATEMENT HOLY SH*T
+            //Remove this, and every project summary ever run becomes a huge linked list of stuff that won't be GC'd.
+        }
         try {
             walker.walk();
         } catch (IOException x) {
