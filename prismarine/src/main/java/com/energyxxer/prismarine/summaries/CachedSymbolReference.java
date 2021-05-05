@@ -3,6 +3,7 @@ package com.energyxxer.prismarine.summaries;
 import com.energyxxer.util.logger.Debug;
 
 import java.lang.ref.WeakReference;
+import java.nio.file.Path;
 
 public class CachedSymbolReference implements SymbolReference {
     private SymbolReference getter;
@@ -14,12 +15,23 @@ public class CachedSymbolReference implements SymbolReference {
     private WeakReference<SummarySymbol> cachedSymbol;
     private boolean symbolIsNull = false;
 
+    private Path originalModulePath;
+
     public CachedSymbolReference(SymbolReference getter) {
+        this.getter = getter;
+    }
+
+    public CachedSymbolReference(PrismarineSummaryModule originalModule, SymbolReference getter) {
+        if(originalModule != null) this.originalModulePath = originalModule.getFileLocation();
         this.getter = getter;
     }
 
     @Override
     public SummarySymbol getSymbol(PrismarineSummaryModule summary) {
+        if(originalModulePath != null && !originalModulePath.equals(summary.getFileLocation()) && summary.getParentSummary() != null) {
+            PrismarineSummaryModule correctedSummary = summary.getParentSummary().getSummaryForLocation(originalModulePath);
+            if(correctedSummary != null) summary = correctedSummary;
+        }
         if(
                 cachedSymbol == null || (!symbolIsNull && cachedSymbol.get() == null) ||
                 summary.getParentSummary() == null ||
