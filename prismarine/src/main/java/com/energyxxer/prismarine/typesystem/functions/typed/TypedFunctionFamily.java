@@ -11,6 +11,7 @@ import com.energyxxer.prismarine.typesystem.functions.PrimitivePrismarineFunctio
 import com.energyxxer.prismarine.typesystem.functions.PrismarineFunction;
 import com.energyxxer.prismarine.typesystem.generics.GenericSupplier;
 import com.energyxxer.prismarine.typesystem.generics.GenericUtils;
+import com.energyxxer.util.SimpleReadArrayList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 
 public class TypedFunctionFamily<T extends TypedFunction> implements PrimitivePrismarineFunction {
     protected final String name;
-    protected final ArrayList<T> implementations = new ArrayList<>();
+    protected final ArrayList<T> implementations = new SimpleReadArrayList<>();
     protected boolean useExternalThis = false;
 
     public TypedFunctionFamily(String name) {

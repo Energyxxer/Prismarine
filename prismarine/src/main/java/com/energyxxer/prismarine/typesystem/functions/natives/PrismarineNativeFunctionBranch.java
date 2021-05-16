@@ -135,6 +135,9 @@ public class PrismarineNativeFunctionBranch extends PrismarineFunctionBranch {
         } catch (IllegalAccessException x) {
             throw new PrismarineException(PrismarineException.Type.IMPOSSIBLE, x.toString(), actualParams.getPattern(), callingCtx);
         } catch (InvocationTargetException x) {
+            if(x.getTargetException() instanceof PrismarineException) {
+                throw ((PrismarineException) x.getTargetException());
+            }
             throw new PrismarineException(PrismarineException.Type.INTERNAL_EXCEPTION, x.getTargetException().getMessage(), actualParams.getPattern(), callingCtx);
         }
 

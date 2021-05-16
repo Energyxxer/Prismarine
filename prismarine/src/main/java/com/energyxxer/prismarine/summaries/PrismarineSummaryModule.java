@@ -100,20 +100,30 @@ public class PrismarineSummaryModule extends SummaryModule {
         return list;
     }
 
+    private ArrayList<SummarySymbol> searchingSymbolsResult = new ArrayList<>();
+
     public ArrayList<SummarySymbol> collectSymbolsVisibleAt(int index, ArrayList<SummarySymbol> list, Path fromPath) {
-        if(searchingSymbols) return list;
+        if(searchingSymbols) {
+            list.addAll(searchingSymbolsResult);
+            return list;
+        }
         searchingSymbols = true;
-        if(parentSummary != null) {
-            for(Path required : requires) {
-                PrismarineSummaryModule superFile = parentSummary.getSummaryForLocation(required);
-                if(superFile != null) {
-                    superFile.collectSymbolsVisibleAt(-1, list, fromPath);
+        try {
+            if(parentSummary != null) {
+                for(Path required : requires) {
+                    PrismarineSummaryModule superFile = parentSummary.getSummaryForLocation(required);
+                    if(superFile != null) {
+                        superFile.collectSymbolsVisibleAt(-1, searchingSymbolsResult, fromPath);
+                    }
                 }
             }
+            collectExternalSymbolsVisibleToFile(searchingSymbolsResult, fromPath);
+            fileBlock.collectSymbolsVisibleAt(index, searchingSymbolsResult, fromPath, this);
+        } finally {
+            searchingSymbols = false;
+            list.addAll(searchingSymbolsResult);
+            searchingSymbolsResult.clear();
         }
-        collectExternalSymbolsVisibleToFile(list, fromPath);
-        fileBlock.collectSymbolsVisibleAt(index, list, fromPath, this);
-        searchingSymbols = false;
         return list;
     }
 
