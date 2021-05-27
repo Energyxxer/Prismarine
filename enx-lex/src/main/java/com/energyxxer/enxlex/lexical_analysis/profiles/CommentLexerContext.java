@@ -20,8 +20,15 @@ public class CommentLexerContext implements LexerContext {
     @Override
     public ScannerContextResponse analyze(String str, int startIndex, LexerProfile profile) {
         if(!str.startsWith(commentStart, startIndex)) return ScannerContextResponse.FAILED;
-        if(str.indexOf("\n", startIndex) != -1) {
-            return handleComment(str.substring(startIndex, str.indexOf("\n", startIndex)));
+
+        int endIndex = str.indexOf("\n", startIndex);
+        if(endIndex != -1) {
+            if(endIndex > 0 && str.charAt(endIndex-1) == '\r') endIndex--;
+        } else endIndex = str.length();
+
+
+        if(endIndex != -1) {
+            return handleComment(str.substring(startIndex, endIndex));
         } else return handleComment(str.substring(startIndex));
     }
 
