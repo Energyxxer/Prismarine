@@ -38,6 +38,8 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
 
     private boolean logTimes = false;
 
+    private boolean successful = false;
+
     public PrismarineProjectSummarizer(PrismarineSuiteConfiguration suiteConfig, File rootFile) {
         this.suiteConfig = suiteConfig;
         this.rootFile = rootFile;
@@ -58,6 +60,9 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
 
     public void start() {
         this.thread = new Thread(this::runSummary,"Prismarine-Summarizer[" + rootFile.getName() + "]");
+        thread.setUncaughtExceptionHandler((t, ex) -> {
+            logException((Exception) ex);
+        });
         //report = new Report();
         thread.start();
     }
@@ -166,6 +171,7 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
         }
 
         logTime("File-Aware Processors");
+        successful = true;
 
         for(java.lang.Runnable r : completionListeners) {
             r.run();
@@ -223,5 +229,10 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
 
     public void setLogTimes(boolean logTimes) {
         this.logTimes = logTimes;
+    }
+
+    @Override
+    public boolean isSuccessful() {
+        return successful;
     }
 }

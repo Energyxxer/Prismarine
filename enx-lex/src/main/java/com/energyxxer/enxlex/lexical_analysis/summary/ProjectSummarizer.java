@@ -4,4 +4,6 @@ public interface ProjectSummarizer {
     void addCompletionListener(java.lang.Runnable r);
     ProjectSummary getSummary();
     void start();
+
+    boolean isSuccessful();
 }

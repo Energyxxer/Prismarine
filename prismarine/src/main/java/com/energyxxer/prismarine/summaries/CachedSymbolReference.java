@@ -1,7 +1,5 @@
 package com.energyxxer.prismarine.summaries;
 
-import com.energyxxer.util.logger.Debug;
-
 import java.lang.ref.WeakReference;
 import java.nio.file.Path;
 
@@ -39,9 +37,9 @@ public class CachedSymbolReference implements SymbolReference {
                 summary.getParentSummary() != lastProjectSummary.get() ||
                 summary.getParentSummary().generation != this.generation
         ) {
-            if(cachedSymbol != null && !symbolIsNull && cachedSymbol.get() == null) {
-                Debug.log("REFRESHING SYMBOL BECAUSE IT WAS GARBAGE COLLECTED, HURRAY!");
-            }
+//            if(cachedSymbol != null && !symbolIsNull && cachedSymbol.get() == null) {
+//                Debug.log("REFRESHING SYMBOL BECAUSE IT WAS GARBAGE COLLECTED, HURRAY!");
+//            }
             SummarySymbol symbol = getter.getSymbol(summary);
             if(cachedSymbol != null) cachedSymbol.clear();
             cachedSymbol = new WeakReference<>(symbol);
