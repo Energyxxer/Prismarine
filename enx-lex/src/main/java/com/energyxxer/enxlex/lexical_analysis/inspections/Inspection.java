@@ -15,6 +15,9 @@ public class Inspection {
 
     private final ArrayList<CodeAction> actions = new ArrayList<>();
 
+    private String forceStyle;
+
+
     public Inspection(String description) {
         this.description = description;
     }
@@ -73,6 +76,15 @@ public class Inspection {
 
     public Inspection setSeverity(InspectionSeverity severity) {
         this.severity = severity;
+        return this;
+    }
+
+    public String getForceStyle() {
+        return forceStyle;
+    }
+
+    public Inspection setForceStyle(String forceStyle) {
+        this.forceStyle = forceStyle;
         return this;
     }
 }

@@ -275,6 +275,13 @@ public class PrismarineSummaryModule extends SummaryModule {
         return (Integer) tempMap.get(key);
     }
 
+    public int tryGetIndex(String key, int defaultValue) {
+        if(tempMap == null) return defaultValue;
+        Object existing = tempMap.get(key);
+        if(existing instanceof Integer) return (int)(Integer)existing;
+        return defaultValue;
+    }
+
     public void set(String key, Object value) {
         if(tempMap == null) tempMap = new HashMap<>();
         tempMap.put(key, value);
