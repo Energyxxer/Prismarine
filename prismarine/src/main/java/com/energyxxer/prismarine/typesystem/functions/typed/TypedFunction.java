@@ -77,7 +77,7 @@ public class TypedFunction {
 
     public static Object[] getActualParameterByFormalIndex(int formalIndex, List<FormalParameter> formalParams, ActualParameterList actualParams, ISymbolContext ctx, Object thisObject) {
         FormalParameter formalParameter = formalParams.get(formalIndex);
-        TypeConstraints formalConstraints = formalParameter.getConstraints();
+        TypeConstraints formalConstraints = formalParameter.getTypeConstraints();
 
         try {
             if(formalConstraints.isGeneric()) {
@@ -89,12 +89,12 @@ public class TypedFunction {
                 actualIndex = formalIndex;
 
                 if(actualParams.getNameForIndex(formalIndex) != null) {
-                    if(formalParameter.getConstraints().isNullable()) {
+                    if(formalParameter.getTypeConstraints().isNullable()) {
                         return new Object[] {null, -1};
                     }
                     throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "There is no argument given that corresponds to the required formal parameter '" + formalParameter.getName() + "'", actualParams.getPattern(formalIndex), ctx);
                 } else if(actualIndex >= actualParams.size()) {
-                    if(formalParameter.getConstraints().isNullable()) {
+                    if(formalParameter.getTypeConstraints().isNullable()) {
                         return new Object[] {null, -1};
                     }
                 }
@@ -111,8 +111,12 @@ public class TypedFunction {
                 actualValue = null;
             }
 
-            formalParameter.getConstraints().validate(actualValue, actualIndex < actualParams.size() ? actualParams.getPattern(actualIndex) : actualParams.getPattern(), ctx);
-            actualValue = formalParameter.getConstraints().adjustValue(actualValue, actualIndex < actualParams.size() ? actualParams.getPattern(actualIndex) : actualParams.getPattern(), ctx);
+            TokenPattern<?> actualPattern = actualIndex < actualParams.size() ? actualParams.getPattern(actualIndex) : actualParams.getPattern();
+            formalParameter.getTypeConstraints().validate(actualValue, actualPattern, ctx);
+            actualValue = formalParameter.getTypeConstraints().adjustValue(actualValue, actualPattern, ctx);
+            if(formalParameter.getValueConstraints() != null) {
+                formalParameter.getValueConstraints().validate(actualValue, formalParameter.getName(), actualPattern, ctx);
+            }
             return new Object[] {actualValue, actualIndex};
         } finally {
             if(formalConstraints.isGeneric()) {

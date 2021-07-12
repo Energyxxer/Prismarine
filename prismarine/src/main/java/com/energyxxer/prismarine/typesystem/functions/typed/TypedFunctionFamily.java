@@ -54,7 +54,7 @@ public class TypedFunctionFamily<T extends TypedFunction> implements PrimitivePr
                     actualParam = actualParams.getValue(actualIndex);
                 }
 
-                TypeConstraints formalConstraints = formalParam.getConstraints();
+                TypeConstraints formalConstraints = formalParam.getTypeConstraints();
 
                 if(formalConstraints.isGeneric()) {
                     formalConstraints.startGenericSubstitution(GenericUtils.nonGeneric(formalConstraints.getGenericHandler(), thisObject, actualParams, ctx));
@@ -154,7 +154,7 @@ public class TypedFunctionFamily<T extends TypedFunction> implements PrimitivePr
         for(T method : implementations) {
             if(genericSupplier != null) {
                 for(FormalParameter otherParam : method.getFormalParameters()) {
-                    TypeConstraints constraints = otherParam.getConstraints();
+                    TypeConstraints constraints = otherParam.getTypeConstraints();
                     if(constraints.isGeneric()) {
                         constraints.startGenericSubstitution(genericSupplier, pattern, ctx);
                     }
@@ -167,7 +167,7 @@ public class TypedFunctionFamily<T extends TypedFunction> implements PrimitivePr
             } finally {
                 if(genericSupplier != null) {
                     for(FormalParameter otherParam : method.getFormalParameters()) {
-                        TypeConstraints constraints = otherParam.getConstraints();
+                        TypeConstraints constraints = otherParam.getTypeConstraints();
                         if(constraints.isGeneric()) {
                             constraints.endGenericSubstitution();
                         }

@@ -5,6 +5,7 @@ import com.energyxxer.prismarine.reporting.PrismarineException;
 import com.energyxxer.prismarine.symbols.contexts.ISymbolContext;
 import com.energyxxer.prismarine.typesystem.PrismarineTypeSystem;
 import com.energyxxer.prismarine.typesystem.TypeConstraints;
+import com.energyxxer.prismarine.typesystem.ValueConstraints;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -18,6 +19,7 @@ public class Symbol {
     private boolean isFinal = false;
 
     private TypeConstraints typeConstraints = null;
+    private ValueConstraints valueConstraints = null;
 
     private Symbol() {
         visibility = SymbolVisibility.PUBLIC;
@@ -57,6 +59,14 @@ public class Symbol {
         this.typeConstraints = newConstraints;
     }
 
+    public ValueConstraints getValueConstraints() {
+        return valueConstraints;
+    }
+
+    public void setValueConstraints(ValueConstraints valueConstraints) {
+        this.valueConstraints = valueConstraints;
+    }
+
     @Nullable
     public Object getValue(TokenPattern<?> pattern, ISymbolContext ctx) {
         return value;
@@ -88,6 +98,9 @@ public class Symbol {
             if(typeConstraints != null) {
                 typeConstraints.validate(value, pattern, ctx);
                 value = typeConstraints.adjustValue(value, pattern, ctx);
+            }
+            if(valueConstraints != null) {
+                valueConstraints.validate(value, name, pattern, ctx);
             }
             this.value = value;
             if(isFinal) maySet = false;
