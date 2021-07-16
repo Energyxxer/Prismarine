@@ -134,7 +134,7 @@ public class PrismarineMetaBuilder {
             }
             return value;
         });
-        registerFunction("recessive", (value, args) -> {
+        registerFunction("recessive", TokenMatchValue.class, (value, args) -> {
             boolean recessive = true;
             if(args.size() >= 1) {
                 if(args.get(0) instanceof BooleanValue) {
