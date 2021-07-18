@@ -39,6 +39,9 @@ public class TokenStructureMatch extends TokenPatternMatch {
     }
 
     public TokenStructureMatch add(TokenPatternMatch g) {
+        if(dynamicEntries != null && dynamicEntries.get() != entries) {
+            if(!dynamicEntries.get().contains(g)) dynamicEntries.get().add(g);
+        }
         if(!entries.contains(g)) entries.add(g);
         return this;
     }
