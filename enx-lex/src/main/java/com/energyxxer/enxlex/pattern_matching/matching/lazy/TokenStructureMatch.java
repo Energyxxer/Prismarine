@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 public class TokenStructureMatch extends TokenPatternMatch {
     private final ArrayList<TokenPatternMatch> entries = new ArrayList<>();
+    private ThreadLocal<ArrayList<TokenPatternMatch>> dynamicEntries = null;
     /**
      * When greedy: false
      * The structure will always try to return a positive match, even if there are longer negative matches.
@@ -42,6 +43,21 @@ public class TokenStructureMatch extends TokenPatternMatch {
         return this;
     }
 
+    private void initializeDynamicEntries() {
+        if(dynamicEntries == null) {
+            dynamicEntries = ThreadLocal.withInitial(() -> entries);
+        }
+        if(dynamicEntries.get() == entries) {
+            dynamicEntries.set(new ArrayList<>(entries));
+        }
+    }
+
+    public TokenStructureMatch addDynamic(TokenPatternMatch g) {
+        initializeDynamicEntries();
+        if(!dynamicEntries.get().contains(g)) dynamicEntries.get().add(g);
+        return this;
+    }
+
     @Override
     public TokenMatchResponse match(int index, Lexer lexer) {
         lexer.setCurrentIndex(index);
@@ -49,6 +65,8 @@ public class TokenStructureMatch extends TokenPatternMatch {
         int popSuggestionStatus = handleSuggestionTags(lexer, index);
 
         TokenMatchResponse longestMatch = null;
+
+        ArrayList<TokenPatternMatch> entries = dynamicEntries != null ? dynamicEntries.get() : this.entries;
 
         if(entries.isEmpty()) {
             //throw new IllegalStateException("Cannot attempt match; TokenStructureMatch '" + this.name + "' is empty.");
@@ -136,5 +154,10 @@ public class TokenStructureMatch extends TokenPatternMatch {
 
     public void remove(TokenPatternMatch pattern) {
         entries.remove(pattern);
+    }
+
+    public void removeDynamic(TokenPatternMatch pattern) {
+        initializeDynamicEntries();
+        dynamicEntries.get().remove(pattern);
     }
 }
