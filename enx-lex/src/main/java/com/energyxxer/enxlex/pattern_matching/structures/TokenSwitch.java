@@ -73,8 +73,8 @@ public class TokenSwitch extends TokenPattern<TokenPattern<?>> {
 	}
 
 	@Override
-	public String flatten(boolean separate) {
-		return group.flatten(separate);
+	public String flatten(String delimiter) {
+		return group.flatten(delimiter);
 	}
 
 	@Override

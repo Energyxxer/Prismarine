@@ -185,13 +185,13 @@ public abstract class TokenExpression extends TokenPattern<TokenPattern<?>[]> {
     }
 
     @Override
-    public String flatten(boolean separate) {
+    public String flatten(String delimiter) {
         StringBuilder sb = new StringBuilder();
         TokenPattern<?>[] patterns = getContents();
         for(int i = 0; i < patterns.length; i++) {
-            String str = patterns[i].flatten(separate);
+            String str = patterns[i].flatten(delimiter);
             sb.append(str);
-            if(!str.isEmpty() && i < patterns.length-1 && separate) sb.append(" ");
+            if(!str.isEmpty() && i < patterns.length-1 && !delimiter.isEmpty()) sb.append(delimiter);
         }
         return sb.toString();
     }

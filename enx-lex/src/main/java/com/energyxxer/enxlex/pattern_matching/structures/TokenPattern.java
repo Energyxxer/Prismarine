@@ -65,7 +65,10 @@ public abstract class TokenPattern<T> {
 		return rv;
 	}
 
-	public abstract String flatten(boolean separate);
+	public String flatten(boolean separate) {
+		return flatten(separate ? " " : "");
+	}
+	public abstract String flatten(String delimiter);
 
 	public abstract TokenSource getSource();
 

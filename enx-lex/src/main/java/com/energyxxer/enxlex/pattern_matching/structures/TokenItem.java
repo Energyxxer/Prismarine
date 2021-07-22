@@ -64,7 +64,7 @@ public class TokenItem extends TokenPattern<Token> {
 	}
 
 	@Override
-	public String flatten(boolean separate) {
+	public String flatten(String delimiter) {
 		return token.value;
 	}
 
