@@ -241,6 +241,14 @@ public class PrismarineMetaBuilder {
                 case "DEFINE_STATEMENT": {
                     String definitionName = pattern.find("DEFINITION_NAME").flatten(false);
                     Value value = parseValue(pattern.find("VALUE"));
+
+                    if(definitionName.startsWith("GLOBAL__")) {
+                        if(!(value instanceof TokenMatchValue)) {
+                            throw new PrismarineMetaException("Global variables can only hold token match values", pattern);
+                        }
+                        value = new TokenMatchValue(productions.getOrCreateStructure(definitionName).add(((TokenMatchValue) value).patternMatch));
+                    }
+
                     variables.put(definitionName, value);
                     return;
                 }
@@ -269,6 +277,9 @@ public class PrismarineMetaBuilder {
                     String identifier = pattern.flatten(false);
                     Value defined = variables.get(identifier);
                     if(defined != null) return defined;
+                    if(identifier.startsWith("GLOBAL__")) {
+                        return new TokenMatchValue(productions.getOrCreateStructure(identifier));
+                    }
                     TokenPatternMatch production = unitConfig.getStructureByName(identifier, productions);
                     if(production != null) return new TokenMatchValue(production);
                     throw new PrismarineMetaException("Identifier not found: '" + identifier + "'", pattern);
