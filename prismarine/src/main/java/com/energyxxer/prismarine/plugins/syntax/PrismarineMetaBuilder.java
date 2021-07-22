@@ -24,9 +24,6 @@ import java.util.function.BiFunction;
 public class PrismarineMetaBuilder {
 
     public static final String PLUGIN_CREATED_TAG = "__PLUGIN_CREATED";
-    public static final String STORE_VAR_TAG_PREFIX = "__PLUGIN_STORE_VAR:";
-    public static final String STORE_FLAT_TAG_PREFIX = "__PLUGIN_STORE_FLAT:";
-    public static final String STORE_METADATA_TAG_PREFIX = "__PLUGIN_STORE_VAR_METADATA:";
 
     private final ArrayList<FunctionDefinition> FUNCTIONS = new ArrayList<>();
 
@@ -150,42 +147,6 @@ public class PrismarineMetaBuilder {
                 throw new IllegalArgumentException("Function 'recessive' can only be performed on plugin-created patterns");
             }
             return value;
-        });
-        registerFunction("storeVar", TokenMatchValue.class, (value, args) -> {
-            if(args.size() >= 1) {
-                if(args.get(0) instanceof StringLiteralValue) {
-                    if(!((TokenMatchValue) value).patternMatch.tags.contains(PLUGIN_CREATED_TAG)) {
-                        TokenGroupMatch match = new TokenGroupMatch().append(((TokenMatchValue) value).patternMatch);
-                        match.addTags(PLUGIN_CREATED_TAG).addTags(STORE_VAR_TAG_PREFIX + ((StringLiteralValue) args.get(0)).stringValue);
-                        for(int i = 1; i < args.size(); i++) {
-                            Value arg = args.get(i);
-                            if(arg instanceof StringLiteralValue) {
-                                match.addTags(STORE_METADATA_TAG_PREFIX + ((StringLiteralValue) arg).stringValue);
-                            } else {
-                                throw new IllegalArgumentException("Function 'storeVar' only accepts String Literal values at arguments 1 and later, found " + arg.getClass().getSimpleName());
-                            }
-                        }
-                        return new TokenMatchValue(match);
-                    } else {
-                        throw new IllegalArgumentException("Function 'storeVar' can only be performed on native patterns");
-                    }
-                } else {
-                    throw new IllegalArgumentException("Function 'storeVar' only accepts String Literal values at argument 0, found " + args.get(0).getClass().getSimpleName());
-                }
-            } else {
-                throw new IllegalArgumentException("Function 'storeVar' requires at least 1 parameter, found " + args.size());
-            }
-        });
-        registerFunction("storeFlat", TokenMatchValue.class, (value, args) -> {
-            if(args.size() >= 1) {
-                if(args.get(0) instanceof StringLiteralValue) {
-                    return new TokenMatchValue(new TokenGroupMatch().append(((TokenMatchValue) value).patternMatch).addTags(PLUGIN_CREATED_TAG).addTags(STORE_FLAT_TAG_PREFIX).addTags(STORE_VAR_TAG_PREFIX + ((StringLiteralValue) args.get(0)).stringValue));
-                } else {
-                    throw new IllegalArgumentException("Function 'storeVar' only accepts String Literal values at argument 0, found " + args.get(0).getClass().getSimpleName());
-                }
-            } else {
-                throw new IllegalArgumentException("Function 'storeVar' requires at least 1 parameter, found " + args.size());
-            }
         });
         registerFunction("optional", TokenMatchValue.class, (value, args) -> {
             boolean shouldBeOptional = true;
