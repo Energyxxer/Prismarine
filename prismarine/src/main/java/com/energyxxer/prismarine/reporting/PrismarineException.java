@@ -23,7 +23,7 @@ public class PrismarineException extends RuntimeException {
     }
 
     private PrismarineException(Type type, String message, @NotNull TokenPattern<?> cause, StackTrace stackTrace) {
-        super(message);
+        super(message = (message != null ? message : "null"));
         this.type = type;
 
         if(type == Type.IMPOSSIBLE) {
