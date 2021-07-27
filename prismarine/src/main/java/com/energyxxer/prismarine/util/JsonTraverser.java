@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 
 public class JsonTraverser {
     public static final JsonTraverser INSTANCE = new JsonTraverser(null);
+    public static final ThreadLocal<JsonTraverser> THREAD_SAFE_INSTANCE = ThreadLocal.withInitial(() -> new JsonTraverser(null));
 
     private final JsonElement root;
     private JsonElement neck;
@@ -385,5 +386,9 @@ public class JsonTraverser {
                 neckArr.set((int) lastTraversalKey, head);
             }
         }
+    }
+
+    public JsonTraverser getThreadInstance() {
+        return THREAD_SAFE_INSTANCE.get();
     }
 }
