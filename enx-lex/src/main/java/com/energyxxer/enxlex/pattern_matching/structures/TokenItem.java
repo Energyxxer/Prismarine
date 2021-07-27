@@ -106,7 +106,6 @@ public class TokenItem extends TokenPattern<Token> {
 	@Override
 	public void validate() {
 		this.validated = true;
-		if(this.name != null && this.name.length() > 0) this.tags.add(name);
 	}
 
     @Override

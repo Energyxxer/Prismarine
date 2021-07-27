@@ -20,7 +20,7 @@ public abstract class TokenPattern<T> {
 	public static final ThreadLocal<ObjectPool<ArrayList<TokenPattern<?>>>> PATTERN_LIST_POOL = ThreadLocal.withInitial(() -> new ObjectPool<>(ArrayList::new, ArrayList::clear));
 
 	protected String name = "";
-	protected ArrayList<String> tags = new ArrayList<>();
+	protected ArrayList<String> tags = null;
 	public TokenPattern parent;
 	public final TokenPatternMatch source;
 	protected boolean validated = false;
@@ -98,12 +98,18 @@ public abstract class TokenPattern<T> {
     }
 
 	public TokenPattern addTag(String newTag) {
-		tags.add(newTag);
+		if(newTag != null) {
+			if(tags == null) tags = new ArrayList<>(2);
+			tags.add(newTag);
+		}
 		return this;
 	}
 
 	public TokenPattern addTags(List<String> newTags) {
-		tags.addAll(newTags);
+    	if(newTags != null) {
+			if(tags == null) tags = new ArrayList<>(2);
+    		tags.addAll(newTags);
+		}
 		return this;
 	}
 
@@ -112,7 +118,7 @@ public abstract class TokenPattern<T> {
 	}
 
 	public boolean hasTag(String tag) {
-    	return tags.contains(tag);
+    	return tags != null && tags.contains(tag);
 	}
 
 	public abstract void validate();

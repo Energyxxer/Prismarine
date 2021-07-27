@@ -10,7 +10,6 @@ import com.energyxxer.enxlex.suggestions.SuggestionModule;
 import com.energyxxer.enxlex.suggestions.SuggestionTags;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -19,7 +18,7 @@ public abstract class TokenPatternMatch {
     public String name = "";
     public boolean optional;
     public boolean recessive = false;
-    public List<String> tags = new ArrayList<>();
+    public List<String> tags = null;
     private List<BiConsumer<TokenPattern<?>, Lexer>> processors;
     private List<BiConsumer<TokenPattern<?>, Lexer>> failProcessors;
 
@@ -27,8 +26,34 @@ public abstract class TokenPatternMatch {
     protected PatternEvaluator evaluator;
 
     public TokenPatternMatch addTags(String... newTags) {
-        tags.addAll(Arrays.asList(newTags));
+        if(newTags == null) return this;
+        for(String tag : newTags) {
+            addTag(tag);
+        }
         return this;
+    }
+
+    public TokenPatternMatch addTags(List<String> newTags) {
+        if(newTags == null) return this;
+        for(String tag : newTags) {
+            addTag(tag);
+        }
+        return this;
+    }
+
+    public TokenPatternMatch addTag(String tag) {
+        if(tag == null) return this;
+        if(tags == null) tags = new ArrayList<>(2);
+        tags.add(tag);
+        return this;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public boolean hasTag(String tag) {
+        return tags != null && tags.contains(tag);
     }
 
     public TokenPatternMatch setName(String name) {
@@ -93,19 +118,19 @@ public abstract class TokenPatternMatch {
         int popSuggestionStatus = 0;
         if(lexer.getSuggestionModule() != null) {
 
-            if(tags.contains(SuggestionTags.ENABLED)) {
+            if(hasTag(SuggestionTags.ENABLED)) {
                 lexer.getSuggestionModule().pushStatus(SuggestionModule.SuggestionStatus.ENABLED);
                 popSuggestionStatus++;
-            } else if(tags.contains(SuggestionTags.DISABLED)) {
+            } else if(hasTag(SuggestionTags.DISABLED)) {
                 lexer.getSuggestionModule().pushStatus(SuggestionModule.SuggestionStatus.DISABLED);
                 popSuggestionStatus++;
             }
 
             if(lexer.getSuggestionModule().isAtSuggestionIndex(index) && lexer.getSuggestionModule().getCaretIndex() == lexer.getSuggestionModule().getSuggestionIndex()) {
-                if(tags.contains(SuggestionTags.ENABLED_INDEX)) {
+                if(hasTag(SuggestionTags.ENABLED_INDEX)) {
                     lexer.getSuggestionModule().pushStatus(SuggestionModule.SuggestionStatus.ENABLED);
                     popSuggestionStatus++;
-                } else if(tags.contains(SuggestionTags.DISABLED_INDEX)) {
+                } else if(hasTag(SuggestionTags.DISABLED_INDEX)) {
                     lexer.getSuggestionModule().pushStatus(SuggestionModule.SuggestionStatus.DISABLED);
                     popSuggestionStatus++;
                 }
@@ -113,13 +138,15 @@ public abstract class TokenPatternMatch {
 
             if(lexer.getSuggestionModule().isAtSuggestionIndex(index)) {
                 ComplexSuggestion complexSuggestion = null;
-                for(String tag : tags) {
-                    if(tag.startsWith("cspn:")) {
-                        lexer.getSuggestionModule().addSuggestion(new ParameterNameSuggestion(tag.substring("cspn:".length())));
-                    } else if((tag.startsWith("csk:") && lexer.getSuggestionModule().shouldSuggest()) || tag.startsWith("ctx:")) {
-                        lexer.getSuggestionModule().addSuggestion(complexSuggestion = new ComplexSuggestion(tag));
-                    } else if((tag.startsWith("cst:") || tag.startsWith("mst:")) && complexSuggestion != null && lexer.getSuggestionModule().shouldSuggest()) {
-                        complexSuggestion.addTag(tag);
+                if(tags != null) {
+                    for(String tag : tags) {
+                        if(tag.startsWith("cspn:")) {
+                            lexer.getSuggestionModule().addSuggestion(new ParameterNameSuggestion(tag.substring("cspn:".length())));
+                        } else if((tag.startsWith("csk:") && lexer.getSuggestionModule().shouldSuggest()) || tag.startsWith("ctx:")) {
+                            lexer.getSuggestionModule().addSuggestion(complexSuggestion = new ComplexSuggestion(tag));
+                        } else if((tag.startsWith("cst:") || tag.startsWith("mst:")) && complexSuggestion != null && lexer.getSuggestionModule().shouldSuggest()) {
+                            complexSuggestion.addTag(tag);
+                        }
                     }
                 }
             }

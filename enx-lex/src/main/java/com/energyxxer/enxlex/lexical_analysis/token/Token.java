@@ -27,7 +27,7 @@ public class Token {
 	private HashMap<TokenSection, String> subSections;
 	private ArrayList<Notice> attachedNotices;
 
-	public ArrayList<String> tags = new ArrayList<>();
+	public ArrayList<String> tags = null;
 
     public Token(String value, TokenSource source, StringLocation loc) {
 		this.value = value;
@@ -148,5 +148,29 @@ public class Token {
 
 	public HashMap<String, Object> getAttributes() {
 		return attributes;
+	}
+
+	public List<String> getTags() {
+    	return tags;
+	}
+
+	public boolean hasTag(String tag) {
+    	return tags != null && tags.contains(tag);
+	}
+
+	public Token addTag(String newTag) {
+		if(newTag != null) {
+			if(tags == null) tags = new ArrayList<>(2);
+			tags.add(newTag);
+		}
+		return this;
+	}
+
+	public Token addTags(List<String> newTags) {
+		if(newTags != null) {
+			if(tags == null) tags = new ArrayList<>(2);
+			tags.addAll(newTags);
+		}
+		return this;
 	}
 }

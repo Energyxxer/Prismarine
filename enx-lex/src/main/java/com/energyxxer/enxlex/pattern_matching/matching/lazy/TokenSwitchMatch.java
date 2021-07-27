@@ -6,6 +6,7 @@ import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenItem;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenSwitch;
 import com.energyxxer.enxlex.suggestions.LiteralSuggestion;
+import com.energyxxer.enxlex.suggestions.Suggestion;
 
 import java.util.HashMap;
 
@@ -47,7 +48,15 @@ public class TokenSwitchMatch extends TokenPatternMatch {
         if(!entries.isEmpty()) {
             if(lexer.getSuggestionModule() != null && lexer.getSuggestionModule().shouldSuggest() && lexer.getSuggestionModule().isAtSuggestionIndex(index)) {
                 for(String key : entries.keySet()) {
-                    lexer.getSuggestionModule().addSuggestion(new LiteralSuggestion(key));
+                    Suggestion suggestion = new LiteralSuggestion(key);
+                    if(this.tags != null) {
+                        for(String tag : this.tags) {
+                            if(tag.startsWith("cst:") || tag.startsWith("mst:")) {
+                                suggestion.addTag(tag);
+                            }
+                        }
+                    }
+                    lexer.getSuggestionModule().addSuggestion(suggestion);
                 }
             }
 

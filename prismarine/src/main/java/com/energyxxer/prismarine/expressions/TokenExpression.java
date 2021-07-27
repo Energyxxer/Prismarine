@@ -199,7 +199,6 @@ public abstract class TokenExpression extends TokenPattern<TokenPattern<?>[]> {
     @Override
     public void validate() {
         this.validated = true;
-        if(this.name != null && this.name.length() > 0) this.tags.add(name);
         TokenPattern<?>[] patterns = getContents();
         for(TokenPattern<?> p : patterns) {
             p.parent = this;

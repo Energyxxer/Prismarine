@@ -102,7 +102,7 @@ public class PrismarineMetaBuilder {
         registerFunction("name", TokenMatchValue.class, (value, args) -> {
             if(args.size() >= 1) {
                 if(args.get(0) instanceof StringLiteralValue) {
-                    if(((TokenMatchValue) value).patternMatch.tags.contains(PLUGIN_CREATED_TAG)) {
+                    if(((TokenMatchValue) value).patternMatch.hasTag(PLUGIN_CREATED_TAG)) {
                         ((TokenMatchValue) value).patternMatch.setName(((StringLiteralValue) args.get(0)).stringValue);
                     } else {
                         throw new IllegalArgumentException("Function 'name' can only be performed on plugin-created patterns");
@@ -118,7 +118,7 @@ public class PrismarineMetaBuilder {
         registerFunction("hint", TokenMatchValue.class, (value, args) -> {
             if(args.size() >= 1) {
                 if(args.get(0) instanceof StringLiteralValue) {
-                    if(((TokenMatchValue) value).patternMatch.tags.contains(PLUGIN_CREATED_TAG)) {
+                    if(((TokenMatchValue) value).patternMatch.hasTag(PLUGIN_CREATED_TAG)) {
                         ((TokenMatchValue) value).patternMatch.addTags("cspn:" + ((StringLiteralValue) args.get(0)).stringValue);
                     } else {
                         throw new IllegalArgumentException("Function 'hint' can only be performed on plugin-created patterns");
@@ -141,7 +141,7 @@ public class PrismarineMetaBuilder {
                     throw new IllegalArgumentException("Function 'recessive' only accepts Boolean values at argument 0, found " + args.get(0).getClass().getSimpleName());
                 }
             }
-            if(((TokenMatchValue) value).patternMatch.tags.contains(PLUGIN_CREATED_TAG)) {
+            if(((TokenMatchValue) value).patternMatch.hasTag(PLUGIN_CREATED_TAG)) {
                 ((TokenMatchValue) value).patternMatch.setRecessive(recessive);
             } else {
                 throw new IllegalArgumentException("Function 'recessive' can only be performed on plugin-created patterns");
@@ -157,7 +157,7 @@ public class PrismarineMetaBuilder {
                     throw new IllegalArgumentException("Function 'optional' only accepts Boolean values at argument 0, found " + args.get(0).getClass().getSimpleName());
                 }
             }
-            if(((TokenMatchValue) value).patternMatch.tags.contains(PLUGIN_CREATED_TAG)) {
+            if(((TokenMatchValue) value).patternMatch.hasTag(PLUGIN_CREATED_TAG)) {
                 ((TokenMatchValue) value).patternMatch.setOptional(shouldBeOptional);
             } else {
                 throw new IllegalArgumentException("Function 'optional' can only be performed on plugin-created patterns");

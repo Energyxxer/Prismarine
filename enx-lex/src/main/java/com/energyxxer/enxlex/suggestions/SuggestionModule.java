@@ -34,7 +34,7 @@ public class SuggestionModule {
 
     public void addSuggestion(Suggestion prediction) {
         if(!suggestions.contains(prediction)) {
-            if(prediction instanceof LiteralSuggestion && prediction.tags.contains(SuggestionTags.LITERAL_SORT)) {
+            if(prediction instanceof LiteralSuggestion && prediction.hasTag(SuggestionTags.LITERAL_SORT)) {
                 int insertionIndex = suggestions.size();
                 Suggestion previousSuggestion;
                 while(

@@ -190,7 +190,6 @@ public class TokenGroup extends TokenPattern<TokenPattern<?>[]> {
 	@Override
 	public void validate() {
 		this.validated = true;
-		if(this.name != null && this.name.length() > 0) this.tags.add(name);
 		for(TokenPattern<?> p : patterns) {
 			p.parent = this;
 			p.validate();

@@ -55,9 +55,11 @@ public class TokenItemMatch extends TokenPatternMatch {
         if(lexer.getSuggestionModule() != null && lexer.getSuggestionModule().shouldSuggest() && lexer.getSuggestionModule().isAtSuggestionIndex(index)) {
             if(this.stringMatch != null) {
                 LiteralSuggestion suggestion = new LiteralSuggestion(this.stringMatch);
-                for(String tag : this.tags) {
-                    if(tag.startsWith("cst:") || tag.startsWith("mst:")) {
-                        suggestion.addTag(tag);
+                if(this.tags != null) {
+                    for(String tag : this.tags) {
+                        if(tag.startsWith("cst:") || tag.startsWith("mst:")) {
+                            suggestion.addTag(tag);
+                        }
                     }
                 }
                 suggestion.setCaseSensitive(caseSensitive);

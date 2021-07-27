@@ -28,9 +28,14 @@ public class PatternSwitchProviderSet extends PatternProviderSet {
 
     private TokenSwitchMatch switchMatch;
 
+    protected void switchCreated(TokenSwitchMatch switchMatch) {
+    }
+
     @Override
     protected void installUtilityProductions(PrismarineProductions productions, TokenStructureMatch providerStructure) {
         switchMatch = tokenSwitch(internalName, switchTokenType);
+
+        switchCreated(switchMatch);
 
         productions.getOrCreateStructure(internalName).add(
                 switchMatch
