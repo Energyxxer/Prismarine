@@ -388,7 +388,7 @@ public class JsonTraverser {
         }
     }
 
-    public JsonTraverser getThreadInstance() {
+    public static JsonTraverser getThreadInstance() {
         return THREAD_SAFE_INSTANCE.get();
     }
 }
