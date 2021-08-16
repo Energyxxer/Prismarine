@@ -130,14 +130,17 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
 
         //pass -1 (parsing)
         this.setProgress("Parsing files");
+        final Path finalRootPath = rootPath;
         walker = new FileWalker<>(
                 new DirectoryCompoundInput(rootPath.toFile()),
-                p -> new SourceFile(rootPath.resolve(p).toFile()),
+                p -> new SourceFile(finalRootPath.resolve(p).toFile()),
                 worker,
                 this
         );
         if(cachedReader != null) {
             walker.getReader().populateWithCachedReader(cachedReader);
+            cachedReader = null; // THIS IS A LOAD-BEARING STATEMENT HOLY SH*T
+            //Remove this, and every compiler ever run becomes a huge linked list of stuff that won't be GC'd.
         }
 
         walker.addStops(DefaultWalkerStops.createCompilerWalkerStops(suiteConfig));
@@ -149,6 +152,7 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
             logException(x);
             return;
         }
+
         this.report.addNotices(walker.getReport().getAllNotices());
 
         walker.getReader().dumpNotices(report);
@@ -393,6 +397,7 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
     }
 
     protected void finalizeProcess(boolean success) {
+        cachedReader = null;
         this.setProgress("Compilation " + (success ? "completed" : "interrupted") + " with " + report.getTotalsString(), false);
         super.finalizeProcess(success);
     }

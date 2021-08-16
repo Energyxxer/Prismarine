@@ -3,6 +3,7 @@ package com.energyxxer.prismarine.providers;
 import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 import com.energyxxer.enxlex.pattern_matching.matching.lazy.TokenStructureMatch;
 import com.energyxxer.prismarine.PrismarineProductions;
+import com.energyxxer.prismarine.worker.PrismarineProjectWorker;
 import com.energyxxer.util.logger.Debug;
 
 import java.lang.reflect.InvocationTargetException;
@@ -45,7 +46,7 @@ public abstract class PatternProviderSet {
         units.add(unit);
     }
 
-    public final void install(PrismarineProductions productions) {
+    public final void install(PrismarineProductions productions, PrismarineProjectWorker worker) {
 
         TokenStructureMatch providerStructure;
         if(internalName != null) {
@@ -54,10 +55,10 @@ public abstract class PatternProviderSet {
             providerStructure = null;
         }
 
-        installUtilityProductions(productions, providerStructure);
+        installUtilityProductions(productions, providerStructure, worker);
 
         for(PatternProviderUnit unit : units) {
-            TokenPatternMatch createdMatch = unit.createPatternMatch(productions);
+            TokenPatternMatch createdMatch = unit.createPatternMatch(productions, worker);
             if(createdMatch != null) {
                 if(createdMatch.getEvaluator() == null && createdMatch.getSimplificationFunction() == null) {
                     createdMatch.setEvaluator(unit);
@@ -79,7 +80,7 @@ public abstract class PatternProviderSet {
         }
     }
 
-    protected void installUtilityProductions(PrismarineProductions productions, TokenStructureMatch providerStructure) {
+    protected void installUtilityProductions(PrismarineProductions productions, TokenStructureMatch providerStructure, PrismarineProjectWorker worker) {
 
     }
 

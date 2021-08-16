@@ -6,6 +6,7 @@ import com.energyxxer.prismarine.in.ProjectReader;
 import com.energyxxer.prismarine.operators.OperatorPool;
 import com.energyxxer.prismarine.summaries.PrismarineProjectSummary;
 import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
+import com.energyxxer.prismarine.worker.PrismarineProjectWorker;
 
 import java.nio.file.Path;
 
@@ -17,7 +18,7 @@ public abstract class PrismarineLanguageUnitConfiguration<T extends PrismarineLa
 
     public abstract OperatorPool getOperatorPool();
 
-    public abstract void setupProductions(PrismarineProductions productions);
+    public abstract void setupProductions(PrismarineProductions productions, PrismarineProjectWorker worker);
 
     public abstract String getStopPath();
 

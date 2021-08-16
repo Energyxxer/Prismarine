@@ -34,10 +34,8 @@ public class PrismarineProductions {
     public final TokenStructureMatch FILE;
 
     public final PrismarineLanguageUnitConfiguration unitConfig;
-    public final PrismarineProjectWorker worker;
 
-    public PrismarineProductions(PrismarineProjectWorker worker, PrismarineLanguageUnitConfiguration unitConfig) {
-        this.worker = worker;
+    public PrismarineProductions(PrismarineLanguageUnitConfiguration unitConfig) {
         this.unitConfig = unitConfig;
 
         FILE = getOrCreateStructure("FILE");
@@ -165,13 +163,9 @@ public class PrismarineProductions {
         duplicateCheck.get().clear();
     }
 
-    public void installProviderSet(PatternProviderSet providerSet) {
-        providerSet.install(this);
+    public void installProviderSet(PatternProviderSet providerSet, PrismarineProjectWorker worker) {
+        providerSet.install(this, worker);
         installedProviderSets.put(providerSet.getClass(), providerSet);
-    }
-
-    public PrismarineProjectWorker getWorker() {
-        return worker;
     }
 
     public <T extends PatternProviderSet> T getProviderSet(Class<T> cls) {

@@ -126,10 +126,10 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
         suiteConfig.runSummaryPreFileTree(this);
 
         logTime("Suite Pre-Walkers");
-
+        final File finalRootFile = rootFile;
         walker = new FileWalker<>(
                 new DirectoryCompoundInput(rootFile),
-                p -> new SourceFile(rootFile.toPath().resolve(p).toFile()),
+                p -> new SourceFile(finalRootFile.toPath().resolve(p).toFile()),
                 worker,
                 summary
         );

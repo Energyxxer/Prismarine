@@ -17,8 +17,8 @@ public class SetupProductionsTask extends PrismarineProjectWorkerTask<HashMap<Pr
     public HashMap<PrismarineLanguageUnitConfiguration, PrismarineProductions> perform(PrismarineProjectWorker worker) throws Exception {
         HashMap<PrismarineLanguageUnitConfiguration, PrismarineProductions> productionMap = new HashMap<>();
         for(PrismarineLanguageUnitConfiguration unitConfig : worker.suiteConfig.getLanguageUnitConfigurations().values()) {
-            PrismarineProductions unitProductions = new PrismarineProductions(worker, unitConfig);
-            unitConfig.setupProductions(unitProductions);
+            PrismarineProductions unitProductions = new PrismarineProductions(unitConfig);
+            unitConfig.setupProductions(unitProductions, worker);
             productionMap.put(unitConfig, unitProductions);
         }
         return productionMap;

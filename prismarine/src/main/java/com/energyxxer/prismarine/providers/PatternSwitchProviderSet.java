@@ -5,6 +5,7 @@ import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 import com.energyxxer.enxlex.pattern_matching.matching.lazy.TokenStructureMatch;
 import com.energyxxer.enxlex.pattern_matching.matching.lazy.TokenSwitchMatch;
 import com.energyxxer.prismarine.PrismarineProductions;
+import com.energyxxer.prismarine.worker.PrismarineProjectWorker;
 
 import static com.energyxxer.prismarine.PrismarineProductions.tokenSwitch;
 
@@ -32,7 +33,7 @@ public class PatternSwitchProviderSet extends PatternProviderSet {
     }
 
     @Override
-    protected void installUtilityProductions(PrismarineProductions productions, TokenStructureMatch providerStructure) {
+    protected void installUtilityProductions(PrismarineProductions productions, TokenStructureMatch providerStructure, PrismarineProjectWorker worker) {
         switchMatch = tokenSwitch(internalName, switchTokenType);
 
         switchCreated(switchMatch);
