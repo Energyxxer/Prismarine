@@ -29,7 +29,7 @@ public class DefaultWalkerStops {
                 public boolean accept(File file, Path relativePath, PathMatcher.Result pathMatchResult, PrismarineProjectWorker worker, FileWalker<PrismarineCompiler> walker) throws IOException {
 
                     ProjectReader.Result result = walker.getReader()
-                            .startQuery(relativePath)
+                            .startQuery(relativePath, worker)
                             .needsPattern(unitConfig)
                             .perform();
 
@@ -54,7 +54,7 @@ public class DefaultWalkerStops {
                 public boolean accept(File file, Path relativePath, PathMatcher.Result pathMatchResult, PrismarineProjectWorker worker, FileWalker<PrismarineProjectSummary> walker) throws IOException {
 
                     ProjectReader.Result result = walker.getReader()
-                            .startQuery(relativePath)
+                            .startQuery(relativePath, worker)
                             .needsSummary(unitConfig, walker.getSubject(), true)
                             .perform();
 

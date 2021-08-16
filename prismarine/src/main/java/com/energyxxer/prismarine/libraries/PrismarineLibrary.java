@@ -43,13 +43,13 @@ public class PrismarineLibrary {
 
             worker.work();
 
-            ProjectReader reader = new ProjectReader(worker);
+            ProjectReader reader = new ProjectReader();
             //input is null because we avoid calling performQuery(), and instead pass the string contents ourselves.
 
             PrismarineProjectSummary projectSummary = suiteConfig.createSummary();
 
             for(PrismarineLibraryUnit unit : libraryUnits) {
-                ProjectReader.Query query = reader.startQuery(unit.getRelativePath()).needsPattern(unit.getUnitConfig()).needsSummary(unit.getUnitConfig(), projectSummary,true);
+                ProjectReader.Query query = reader.startQuery(unit.getRelativePath(), worker).needsPattern(unit.getUnitConfig()).needsSummary(unit.getUnitConfig(), projectSummary,true);
                 ProjectReader.Result result = reader.populateParseResult(query, new LibrarySource(name, unit.getRelativePath()), reader.createResultFromString(unit.getContent()));
 
                 if(!result.matchResponse.matched) {

@@ -25,12 +25,12 @@ public class PrismarinePluginUnit {
         config.updateUnitForProjectWorker(this, projectWorker);
     }
 
-    public PrismarineSyntaxFile createSyntaxFile(Path... paths) throws IOException {
+    public PrismarineSyntaxFile createSyntaxFile(PrismarineProjectWorker worker, Path... paths) throws IOException {
         if(paths.length == 0) throw new NullPointerException();
         IOException lastFNFException = null;
         for(Path path : paths) {
             try {
-                String strContent = definingPlugin.getWalker().getReader().startQuery(path).needsString().perform().getString();
+                String strContent = definingPlugin.getWalker().getReader().startQuery(path, worker).needsString().perform().getString();
                 return new PrismarineSyntaxFile(path, this, strContent);
             } catch (FileNotFoundException x) {
                 lastFNFException = x;

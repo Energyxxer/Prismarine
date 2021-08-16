@@ -65,9 +65,7 @@ public class PrismarinePlugin {
     public synchronized void attachToProjectWorker(PrismarineProjectWorker projectWorker) throws IOException {
         load();
 
-        this.walker.getReader().setWorker(projectWorker);
         this.walker.getReader().refreshPatterns();
-
         for(PrismarinePluginUnit unit : units) {
             unit.update(projectWorker);
         }

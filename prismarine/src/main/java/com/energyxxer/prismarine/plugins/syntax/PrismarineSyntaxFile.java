@@ -7,6 +7,7 @@ import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 import com.energyxxer.prismarine.PrismarineLanguageUnitConfiguration;
 import com.energyxxer.prismarine.plugins.PrismarinePluginFile;
 import com.energyxxer.prismarine.plugins.PrismarinePluginUnit;
+import com.energyxxer.prismarine.worker.PrismarineProjectWorker;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -18,12 +19,12 @@ public class PrismarineSyntaxFile extends PrismarinePluginFile<TokenPatternMatch
         this.string = rawSyntaxFile;
     }
 
-    public void update() throws IOException {
-        update(null);
+    public void update(PrismarineProjectWorker worker) throws IOException {
+        update(null, worker);
     }
 
     @Override
-    public void update(PrismarineLanguageUnitConfiguration langUnitConfig) throws IOException {
+    public void update(PrismarineLanguageUnitConfiguration langUnitConfig,  PrismarineProjectWorker worker) throws IOException {
         //Since this uses an eager lexer and a fixed production...
         EagerLexer lexer = unit.getDefiningPlugin().getEagerLexer();
 

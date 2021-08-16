@@ -3,6 +3,7 @@ package com.energyxxer.prismarine.plugins;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.prismarine.PrismarineLanguageUnitConfiguration;
 import com.energyxxer.prismarine.in.ProjectReader;
+import com.energyxxer.prismarine.worker.PrismarineProjectWorker;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -21,9 +22,9 @@ public class PrismarinePluginFile<T> {
         this.unit = unit;
     }
 
-    public void update(PrismarineLanguageUnitConfiguration langUnitConfig) throws IOException {
+    public void update(PrismarineLanguageUnitConfiguration langUnitConfig, PrismarineProjectWorker worker) throws IOException {
         ProjectReader reader = unit.getDefiningPlugin().getWalker().getReader();
-        ProjectReader.Query query = reader.startQuery(relativePath);
+        ProjectReader.Query query = reader.startQuery(relativePath, worker);
         query.needsString();
         if(langUnitConfig != null) {
             query.needsPattern(langUnitConfig);

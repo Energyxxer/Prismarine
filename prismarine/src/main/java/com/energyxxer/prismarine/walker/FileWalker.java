@@ -35,7 +35,7 @@ public class FileWalker<T> {
         this.worker = worker;
         this.subject = subject;
 
-        this.reader = new ProjectReader(input, sourceFunction, worker);
+        this.reader = new ProjectReader(input, sourceFunction);
         this.report = new Report();
     }
 

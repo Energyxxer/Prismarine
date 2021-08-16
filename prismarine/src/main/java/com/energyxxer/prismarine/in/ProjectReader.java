@@ -32,25 +32,22 @@ import static com.energyxxer.prismarine.Prismarine.DEFAULT_CHARSET;
 public class ProjectReader {
     private final CompoundInput input;
     private final Function<Path, TokenSource> sourceFunction;
-    private PrismarineProjectWorker worker;
 
     private final HashMap<Path, Result> cache = new HashMap<>();
     private final HashMap<PrismarineLanguageUnitConfiguration, Lexer> lexers = new HashMap<>();
 
-    public ProjectReader(PrismarineProjectWorker worker) {
+    public ProjectReader() {
         this.input = null;
         this.sourceFunction = null;
-        this.worker = worker;
     }
 
-    public ProjectReader(CompoundInput input, Function<Path, TokenSource> sourceFunction, PrismarineProjectWorker worker) {
+    public ProjectReader(CompoundInput input, Function<Path, TokenSource> sourceFunction) {
         this.input = input;
         this.sourceFunction = sourceFunction;
-        this.worker = worker;
     }
 
-    public Query startQuery(Path relativePath) {
-        return new Query(this, relativePath);
+    public Query startQuery(Path relativePath, PrismarineProjectWorker worker) {
+        return new Query(this, relativePath, worker);
     }
 
     public void refreshPatterns() {
@@ -69,14 +66,6 @@ public class ProjectReader {
         }
     }
 
-    public PrismarineProjectWorker getWorker() {
-        return worker;
-    }
-
-    public void setWorker(PrismarineProjectWorker worker) {
-        this.worker = worker;
-    }
-
     public void populateWithCachedReader(ProjectReader cachedReader) {
         this.cache.putAll(cachedReader.cache);
     }
@@ -90,6 +79,7 @@ public class ProjectReader {
         protected final Path relativePath;
 
         protected PrismarineLanguageUnitConfiguration unitConfig;
+        protected PrismarineProjectWorker worker;
 
         protected boolean needsBytes = false;
         protected boolean needsString = false;
@@ -102,9 +92,10 @@ public class ProjectReader {
         protected PrismarineProjectSummary parentSummary = null;
         protected boolean skipSummaryIfMatchFailed = false;
 
-        protected Query(ProjectReader reader, Path relativePath) {
+        protected Query(ProjectReader reader, Path relativePath, PrismarineProjectWorker worker) {
             this.reader = reader;
             this.relativePath = relativePath;
+            this.worker = worker;
         }
 
         public Query needsBytes() {
@@ -154,8 +145,6 @@ public class ProjectReader {
     }
 
     private Result performQuery(Query query) throws IOException {
-        //ownFiles.add(query.relativePath);
-
         Result existing = cache.get(query.relativePath);
 
         String relativePathStr = query.relativePath.toString().replace(File.separatorChar, '/');
@@ -200,7 +189,7 @@ public class ProjectReader {
         result.relativePath = query.relativePath;
 
         if(query.needsPattern) {
-            Lexer lexer = getLexerForUnitConfig(query.unitConfig);
+            Lexer lexer = getLexerForUnitConfig(query.unitConfig, query.worker);
 
             PrismarineSummaryModule summary = null;
             if(query.needsSummary) {
@@ -237,7 +226,7 @@ public class ProjectReader {
         }
     }
 
-    private Lexer getLexerForUnitConfig(PrismarineLanguageUnitConfiguration unitConfig) {
+    private Lexer getLexerForUnitConfig(PrismarineLanguageUnitConfiguration unitConfig, PrismarineProjectWorker worker) {
         if(lexers.containsKey(unitConfig)) return lexers.get(unitConfig);
 
         Lexer newLexer = new LazyLexer(new TokenStream(), worker.output.get(SetupProductionsTask.INSTANCE).get(unitConfig).FILE);
