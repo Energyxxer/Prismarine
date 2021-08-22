@@ -79,6 +79,8 @@ public class LazyLexer extends Lexer {
             if (getSummaryModule() != null) getSummaryModule().onEnd();
         } finally {
             running = false;
+            this.profile = null;
+            this.lineCache.clear();
         }
     }
 
