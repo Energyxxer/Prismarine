@@ -149,10 +149,25 @@ public class ProjectReader {
 
         String relativePathStr = query.relativePath.toString().replace(File.separatorChar, '/');
 
-        byte[] bytes;
-        try (InputStream is = input.get(relativePathStr)) {
-            if(is == null) throw new FileNotFoundException(query.relativePath.toString());
-            bytes = FileUtil.readAllBytes(is);
+        byte[] bytes = null;
+
+        if(existing != null) {
+            Path root = input.getRootFile().toPath();
+            File leafFile = root.resolve(relativePathStr).toFile();
+
+            if((leafFile.exists() ? leafFile.lastModified() : root.toFile().lastModified()) <= existing.readTime) {
+                if(query.skipIfNotChanged) return null;
+                else existing.skippableIfNotChanged = false;
+                if(existing.matchesRequirements(query)) return existing;
+                bytes = existing.bytes;
+            }
+        }
+
+        if(bytes == null) {
+            try (InputStream is = input.get(relativePathStr)) {
+                if(is == null) throw new FileNotFoundException(query.relativePath.toString());
+                bytes = FileUtil.readAllBytes(is);
+            }
         }
 
         int hashCode = Arrays.hashCode(bytes);
@@ -167,6 +182,7 @@ public class ProjectReader {
         //Create a new result
         Result result = new Result();
         result.relativePath = query.relativePath;
+        result.readTime = System.currentTimeMillis();
         result.hashCode = hashCode;
         result.bytes = bytes;
         result.skippableIfNotChanged = query.skipIfNotChanged;
@@ -259,6 +275,7 @@ public class ProjectReader {
 
         protected boolean skippableIfNotChanged = true;
         protected boolean changedSinceCached = true;
+        public long readTime;
 
         public TokenMatchResponse matchResponse;
 

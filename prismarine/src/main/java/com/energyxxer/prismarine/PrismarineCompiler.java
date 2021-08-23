@@ -139,8 +139,6 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
         );
         if(cachedReader != null) {
             walker.getReader().populateWithCachedReader(cachedReader);
-            cachedReader = null; // THIS IS A LOAD-BEARING STATEMENT HOLY SH*T
-            //Remove this, and every compiler ever run becomes a huge linked list of stuff that won't be GC'd.
         }
 
         walker.addStops(DefaultWalkerStops.createCompilerWalkerStops(suiteConfig));
