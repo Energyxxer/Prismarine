@@ -199,7 +199,7 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
         this.setProgress("Setting up standard libraries");
 
         PrismarineLibrary standardLibrary = suiteConfig.getStandardLibrary();
-        if(standardLibrary != null) {
+        if(standardLibrary != null && (parentCompiler == null || dependencyMode == Dependency.Mode.PRECOMPILE)) {
             standardLibrary.populateCompiler(this);
         }
 
