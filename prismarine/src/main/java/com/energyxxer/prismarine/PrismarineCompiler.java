@@ -182,8 +182,12 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
 
                 if(dependencyWorker.getDependencyInfo().mode == Dependency.Mode.COMBINE) {
                     for(Map.Entry<PrismarineLanguageUnitConfiguration, ArrayList<PrismarineLanguageUnit>> dependencyEntry : subCompiler.unitsList.entrySet()) {
-                        this.unitsList.computeIfAbsent(dependencyEntry.getKey(), k -> new ArrayList<>());
-                        this.unitsList.get(dependencyEntry.getKey()).addAll(dependencyEntry.getValue());
+                        ArrayList<PrismarineLanguageUnit> unitsForType = this.unitsList.computeIfAbsent(dependencyEntry.getKey(), k -> new ArrayList<>());
+                        for(PrismarineLanguageUnit unit : dependencyEntry.getValue()) {
+                            unitsForType.removeIf(u -> u.getPathFromRoot().equals(unit.getPathFromRoot()));
+                            unitsForType.add(unit);
+                            pathToUnitMap.put(unit.getPathFromRoot(), unit);
+                        }
                     }
                     this.pathToUnitMap.putAll(subCompiler.pathToUnitMap);
                 }
@@ -213,6 +217,7 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
             for(ProjectReader.Result readResult : entry.getValue()) {
                 try {
                     PrismarineLanguageUnit unit = unitConfig.createUnit(this, readResult);
+                    unitsForType.removeIf(u -> u.getPathFromRoot().equals(readResult.getRelativePath()));
                     unitsForType.add(unit);
                     pathToUnitMap.put(readResult.getRelativePath(), unit);
                 } catch(Exception ex) {
