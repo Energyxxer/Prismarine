@@ -263,6 +263,8 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
         finalizeProcess(true);
     }
 
+    private PrismarineLanguageUnit currentUnit;
+
     private boolean performPasses() {
         switch(suiteConfig.getUnitPassStrategy()) {
             case GROUP_BY_PASS: {
@@ -307,7 +309,9 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
                     anyPasses = true;
 
                     for(PrismarineLanguageUnit unit : entry.getValue()) {
+                        currentUnit = unit;
                         PassResult result = unitConfig.performPass(unit, this, pass);
+                        currentUnit = null;
                         if(result == PassResult.SKIP_PASS_OR_UNIT_TYPE) {
                             break passLoop;
                         } else if(result == PassResult.END_COMPILATION) {
@@ -337,7 +341,9 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
                 float progress = 0;
 
                 for(PrismarineLanguageUnit unit : entry.getValue()) {
+                    currentUnit = unit;
                     PassResult result = unitConfig.performPass(unit, this, pass);
+                    currentUnit = null;
                     if(result == PassResult.SKIP_PASS_OR_UNIT_TYPE) {
                         break unitTypeLoop;
                     } else if(result == PassResult.END_COMPILATION) {
@@ -498,6 +504,10 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
     public static File newFileObject(String path, File rootDir) {
         path = Paths.get(path.replace("$PROJECT_DIR$", rootDir.getAbsolutePath())).normalize().toString();
         return new File(path);
+    }
+
+    public PrismarineLanguageUnit getCurrentUnit() {
+        return currentUnit;
     }
 
     public static class Dependency {
