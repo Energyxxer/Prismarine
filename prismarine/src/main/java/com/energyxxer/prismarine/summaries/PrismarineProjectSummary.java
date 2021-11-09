@@ -2,13 +2,14 @@ package com.energyxxer.prismarine.summaries;
 
 import com.energyxxer.enxlex.lexical_analysis.summary.ProjectSummary;
 import com.energyxxer.enxlex.lexical_analysis.summary.Todo;
+import com.energyxxer.util.SimpleReadArrayList;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
 
 public class PrismarineProjectSummary implements ProjectSummary {
-    protected ArrayList<PrismarineSummaryModule> fileSummaries = new ArrayList<>();
+    protected ArrayList<PrismarineSummaryModule> fileSummaries = new SimpleReadArrayList<>();
     protected HashMap<File, PrismarineSummaryModule> fileSummaryMap = new HashMap<>();
     protected Set<SummarySymbol> globalSymbols = new LinkedHashSet<>();
     protected Set<Todo> todos = new HashSet<>();
