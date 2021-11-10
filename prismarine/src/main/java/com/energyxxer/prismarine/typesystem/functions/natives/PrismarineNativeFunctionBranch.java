@@ -141,7 +141,7 @@ public class PrismarineNativeFunctionBranch extends PrismarineFunctionBranch {
             if(x.getTargetException() instanceof PrismarineException.Grouped) {
                 throw ((PrismarineException.Grouped) x.getTargetException());
             }
-            throw new PrismarineException(PrismarineException.Type.INTERNAL_EXCEPTION, x.getTargetException().getMessage(), actualParams.getPattern(), callingCtx);
+            throw new PrismarineException(PrismarineException.Type.INTERNAL_EXCEPTION, x.getTargetException().getClass().getSimpleName() + ": " + x.getTargetException().getMessage(), actualParams.getPattern(), callingCtx);
         }
 
         if(returnConstraints != null) {
