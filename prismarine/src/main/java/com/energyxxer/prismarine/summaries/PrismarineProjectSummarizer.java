@@ -2,7 +2,7 @@ package com.energyxxer.prismarine.summaries;
 
 import com.energyxxer.commodore.util.io.DirectoryCompoundInput;
 import com.energyxxer.enxlex.lexical_analysis.summary.ProjectSummarizer;
-import com.energyxxer.enxlex.lexical_analysis.token.SourceFile;
+import com.energyxxer.enxlex.lexical_analysis.token.ProjectSourceFile;
 import com.energyxxer.prismarine.PrismarineSuiteConfiguration;
 import com.energyxxer.prismarine.in.ProjectReader;
 import com.energyxxer.prismarine.libraries.PrismarineLibrary;
@@ -126,10 +126,9 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
         suiteConfig.runSummaryPreFileTree(this);
 
         logTime("Suite Pre-Walkers");
-        final File finalRootFile = rootFile;
         walker = new FileWalker<>(
                 new DirectoryCompoundInput(rootFile),
-                p -> new SourceFile(finalRootFile.toPath().resolve(p).toFile()),
+                p -> new ProjectSourceFile(rootFile.toPath(), p),
                 worker,
                 summary
         );

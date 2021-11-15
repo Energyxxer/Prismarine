@@ -1,7 +1,7 @@
 package com.energyxxer.prismarine;
 
 import com.energyxxer.commodore.util.io.DirectoryCompoundInput;
-import com.energyxxer.enxlex.lexical_analysis.token.SourceFile;
+import com.energyxxer.enxlex.lexical_analysis.token.ProjectSourceFile;
 import com.energyxxer.enxlex.report.Notice;
 import com.energyxxer.enxlex.report.NoticeType;
 import com.energyxxer.enxlex.report.Report;
@@ -130,10 +130,9 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
 
         //pass -1 (parsing)
         this.setProgress("Parsing files");
-        final Path finalRootPath = rootPath;
         walker = new FileWalker<>(
                 new DirectoryCompoundInput(rootPath.toFile()),
-                p -> new SourceFile(finalRootPath.resolve(p).toFile()),
+                p -> new ProjectSourceFile(rootPath, p),
                 worker,
                 this
         );
