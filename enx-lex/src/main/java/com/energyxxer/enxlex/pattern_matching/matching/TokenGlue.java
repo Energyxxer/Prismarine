@@ -41,9 +41,9 @@ public class TokenGlue extends TokenPatternMatch {
                 }
                 matched = valid;
             }
-            return new TokenMatchResponse(matched, null, 0, null);
+            return new TokenMatchResponse(matched, null, 0, index, null);
         }
-        return new TokenMatchResponse(false, lexer.retrieveAnyToken(), 0, this, null);
+        return new TokenMatchResponse(false, lexer.retrieveAnyToken(), 0, index, this, null);
     }
 
     @Override

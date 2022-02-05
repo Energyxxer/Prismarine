@@ -52,6 +52,11 @@ public class TokenUnaryExpression extends TokenExpression {
     }
 
     @Override
+    public int endIndex() {
+        return (operator.getOrder() == OperationOrder.LTR ? operatorPattern : operand).endIndex();
+    }
+
+    @Override
     public UnaryOperator getOperator() {
         return operator;
     }

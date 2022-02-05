@@ -66,6 +66,11 @@ public class TokenBinaryExpression extends TokenExpression {
     }
 
     @Override
+    public int endIndex() {
+        return (right != null ? right : (operatorPattern != null ? operatorPattern : left)).endIndex();
+    }
+
+    @Override
     public boolean isComplete() {
         return left != null && (!(left instanceof TokenExpression) || ((TokenExpression) left).isComplete()) && operator != null && right != null && (!(right instanceof TokenExpression) || ((TokenExpression) right).isComplete());
     }

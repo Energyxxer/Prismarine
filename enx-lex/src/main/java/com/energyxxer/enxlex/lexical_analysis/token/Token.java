@@ -18,6 +18,8 @@ import java.util.Objects;
 public class Token {
 	public static final ThreadLocal<ObjectPool<ArrayList<Token>>> TOKEN_LIST_POOL = ThreadLocal.withInitial(() -> new ObjectPool<>(ArrayList::new, ArrayList::clear));
 
+	private Token[] beforeTokens;
+
 	public String value;
 	public TokenType type;
 	public TokenSource source;
@@ -172,5 +174,40 @@ public class Token {
 			tags.addAll(newTags);
 		}
 		return this;
+	}
+
+	public Token[] getBeforeTokens() {
+		return beforeTokens;
+	}
+
+	public void setBeforeTokens(Token[] beforeTokens) {
+		this.beforeTokens = beforeTokens;
+	}
+
+	public int length() {
+    	return value.length();
+	}
+
+	public int endIndex() {
+    	return loc.index + value.length();
+	}
+
+	public int startIndexWithBefore() {
+    	if(beforeTokens == null) return loc.index;
+    	else return beforeTokens[0].loc.index;
+	}
+
+	public int totalLength() {
+    	return endIndex() - startIndexWithBefore();
+	}
+
+	public ArrayList<Token> flattenTokens(ArrayList<Token> list) {
+    	if(beforeTokens != null) {
+    		for(Token token : beforeTokens) {
+    			token.flattenTokens(list);
+			}
+		}
+		list.add(this);
+    	return list;
 	}
 }

@@ -72,7 +72,7 @@ public class TokenItemMatch extends TokenPatternMatch {
         Token retrieved = lexer.retrieveTokenOfType(this.type);
         if(retrieved == null) {
             invokeFailProcessors(null, lexer);
-            return new TokenMatchResponse(false, lexer.retrieveAnyToken(), 0, this, null);
+            return new TokenMatchResponse(false, lexer.retrieveAnyToken(), 0, index, this, null);
         }
 
         matched = stringMatch == null || (caseSensitive ? retrieved.value.equals(stringMatch) : retrieved.value.equalsIgnoreCase(stringMatch));
@@ -81,7 +81,7 @@ public class TokenItemMatch extends TokenPatternMatch {
             faultyToken = retrieved;
         }
 
-        int length = (matched) ? retrieved.loc.index + retrieved.value.length() - index : 0;
+        int length = (matched) ? retrieved.value.length() : 0;
 
         TokenItem item = new TokenItem(retrieved, this).setName(this.name).addTags(this.tags);
 
@@ -90,7 +90,7 @@ public class TokenItemMatch extends TokenPatternMatch {
         }
         if(matched) invokeProcessors(item, lexer);
         else invokeFailProcessors(null, lexer);
-        return new TokenMatchResponse(matched, faultyToken, length, (matched) ? null : this, item);
+        return new TokenMatchResponse(matched, faultyToken, length, retrieved.endIndex(), (matched) ? null : this, item);
     }
 
     public boolean isCaseSensitive() {

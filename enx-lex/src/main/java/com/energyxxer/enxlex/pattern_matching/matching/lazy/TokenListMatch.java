@@ -76,6 +76,7 @@ public class TokenListMatch extends TokenPatternMatch {
         boolean hasMatched = true;
         Token faultyToken = null;
         int length = 0;
+        int endIndex = index;
         TokenPatternMatch expected = null;
         ArrayList<TokenPattern<?>> contents = TokenPattern.PATTERN_LIST_POOL.get().claim();
         try {
@@ -95,12 +96,14 @@ public class TokenListMatch extends TokenPatternMatch {
                             faultyToken = itemMatch.faultyToken;
                             expected = itemMatch.expected;
                             length += itemMatch.length;
+                            endIndex = Math.max(endIndex, itemMatch.endIndex);
                             if (itemMatch.pattern != null) contents.add(itemMatch.pattern);
                             break itemLoop;
                         }
                         case COMPLETE_MATCH: {
-                            i += itemMatch.length;
+                            i = itemMatch.endIndex;
                             length += itemMatch.length;
+                            endIndex = Math.max(endIndex, itemMatch.endIndex);
                             if (itemMatch.pattern != null) contents.add(itemMatch.pattern);
                         }
                     }
@@ -114,12 +117,14 @@ public class TokenListMatch extends TokenPatternMatch {
                                 faultyToken = itemMatch.faultyToken;
                                 expected = itemMatch.expected;
                                 length += itemMatch.length;
+                                endIndex = Math.max(endIndex, itemMatch.endIndex);
                                 if (itemMatch.pattern != null) contents.add(itemMatch.pattern);
                                 break itemLoop;
                             }
                             case COMPLETE_MATCH: {
-                                i += itemMatch.length;
+                                i = itemMatch.endIndex;
                                 length += itemMatch.length;
+                                endIndex = Math.max(endIndex, itemMatch.endIndex);
                                 if (itemMatch.pattern != null) contents.add(itemMatch.pattern);
                                 expectSeparator = true;
                                 if (itemMatch.pattern instanceof TokenStructure && ((TokenStructure) itemMatch.pattern).getContents().hasTag(StandardTags.LIST_TERMINATOR)) {
@@ -145,11 +150,13 @@ public class TokenListMatch extends TokenPatternMatch {
                                 hasMatched = false;
                                 faultyToken = itemMatch.faultyToken;
                                 expected = itemMatch.expected;
+                                endIndex = Math.max(endIndex, itemMatch.endIndex);
                                 if (itemMatch.pattern != null) contents.add(itemMatch.pattern);
                                 break itemLoop;
                             }
                             case COMPLETE_MATCH: {
-                                i += itemMatch.length;
+                                i = itemMatch.endIndex;
+                                endIndex = Math.max(endIndex, itemMatch.endIndex);
                                 if (itemMatch.pattern != null) contents.add(itemMatch.pattern);
                                 if (itemMatch.pattern instanceof TokenStructure && ((TokenStructure) itemMatch.pattern).getContents().hasTag(StandardTags.LIST_TERMINATOR)) {
                                     break itemLoop;
@@ -169,7 +176,7 @@ public class TokenListMatch extends TokenPatternMatch {
             } else {
                 invokeProcessors(list, lexer);
             }
-            return new TokenMatchResponse(hasMatched, faultyToken, length, expected, list);
+            return new TokenMatchResponse(hasMatched, faultyToken, length, endIndex, expected, list);
         } finally {
             TokenPattern.PATTERN_LIST_POOL.get().free(contents);
         }

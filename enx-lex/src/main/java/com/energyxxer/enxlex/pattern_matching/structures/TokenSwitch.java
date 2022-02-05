@@ -127,4 +127,9 @@ public class TokenSwitch extends TokenPattern<TokenPattern<?>> {
 			super.simplify(domain);
 		}
 	}
+
+    @Override
+    public int endIndex() {
+        return group.endIndex();
+    }
 }

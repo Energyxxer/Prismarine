@@ -222,4 +222,9 @@ public class TokenList extends TokenPattern<TokenPattern<?>[]> {
 			p.traverse(consumer);
 		}
     }
+
+    @Override
+    public int endIndex() {
+		return patterns[patterns.length-1].endIndex();
+    }
 }

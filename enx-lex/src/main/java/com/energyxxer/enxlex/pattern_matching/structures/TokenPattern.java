@@ -165,6 +165,8 @@ public abstract class TokenPattern<T> {
 		}
 	}
 
+	public abstract int endIndex();
+
 	public static class SimplificationDomain {
     	public TokenPattern<?> pattern;
     	public Object[] data;

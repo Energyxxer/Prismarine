@@ -98,6 +98,11 @@ public class TokenTernaryExpression extends TokenExpression {
     }
 
     @Override
+    public int endIndex() {
+        return (right != null ? right : (secondOperatorPattern != null ? secondOperatorPattern : (middle != null ? middle : (firstOperatorPattern != null ? firstOperatorPattern : left)))).endIndex();
+    }
+
+    @Override
     public boolean isComplete() {
         return secondOperatorFound && left != null && (!(left instanceof TokenExpression) || ((TokenExpression) left).isComplete()) && operator != null && right != null && (!(right instanceof TokenExpression) || ((TokenExpression) right).isComplete());
     }

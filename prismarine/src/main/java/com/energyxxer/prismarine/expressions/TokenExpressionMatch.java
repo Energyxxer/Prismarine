@@ -94,7 +94,7 @@ public class TokenExpressionMatch extends TokenPatternMatch {
                                 } else {
                                     expr = TokenExpression.createExpressionForOperator(expr, op, itemMatch.pattern, this).setName(this.name).addTags(this.tags);
                                 }
-                                i += itemMatch.length;
+                                i = itemMatch.endIndex;
                                 length += itemMatch.length;
                             } catch (ExpressionBalanceException x) {
 //                            hasMatched = false;
@@ -124,7 +124,7 @@ public class TokenExpressionMatch extends TokenPatternMatch {
                             break;
                         } else {
                             length += operatorMatch.length;
-                            i += operatorMatch.length;
+                            i = operatorMatch.endIndex;
                             unaryOperators.add(op);
                             unaryOperatorPatterns.add(operatorMatch.pattern);
                         }
@@ -144,7 +144,7 @@ public class TokenExpressionMatch extends TokenPatternMatch {
                             break itemLoop;
                         }
                         case COMPLETE_MATCH: {
-                            i += itemMatch.length;
+                            i = itemMatch.endIndex;
                             length += itemMatch.length;
                             value = itemMatch.pattern;
 
@@ -163,6 +163,7 @@ public class TokenExpressionMatch extends TokenPatternMatch {
 
                     //match unary right operators
 
+                    int previousUnaryOperatorMatchIndex = index;
                     TokenMatchResponse previousUnaryOperatorMatch = null;
                     while (true) {
                         TokenMatchResponse operatorMatch = this.operatorMatch.match(i, lexer);
@@ -186,15 +187,16 @@ public class TokenExpressionMatch extends TokenPatternMatch {
                                                     operatorPool.getBinaryOrTernaryOperatorForSymbol(unaryOperators.get(unaryOperators.size() - 1).getSymbol()) != null)
                             ) {
                                 //...then remove the last unary operator - it should be interpreted as a binary one instead (next loop)
-                                i -= previousUnaryOperatorMatch.length;
+                                i = previousUnaryOperatorMatchIndex;
                                 length -= previousUnaryOperatorMatch.length;
                                 unaryOperators.remove(unaryOperators.size() - 1);
                                 unaryOperatorPatterns.remove(unaryOperatorPatterns.size() - 1);
                             }
                             break;
                         } else {
+                            previousUnaryOperatorMatchIndex = i;
                             length += operatorMatch.length;
-                            i += operatorMatch.length;
+                            i = operatorMatch.endIndex;
                             unaryOperators.add(op);
                             unaryOperatorPatterns.add(operatorMatch.pattern);
                             previousUnaryOperatorMatch = operatorMatch;
@@ -237,12 +239,15 @@ public class TokenExpressionMatch extends TokenPatternMatch {
             expected = operatorMatch;
         }
 
+        int endIndex = index;
+
         if(!hasMatched) {
             invokeFailProcessors(expr, lexer);
         } else {
+            endIndex = expr.endIndex();
             invokeProcessors(expr, lexer);
         }
-        return new TokenMatchResponse(hasMatched, faultyToken, length, expected, expr);
+        return new TokenMatchResponse(hasMatched, faultyToken, length, endIndex, expected, expr);
     }
 
     @Override

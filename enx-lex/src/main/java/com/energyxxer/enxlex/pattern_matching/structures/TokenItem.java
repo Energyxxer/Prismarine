@@ -88,7 +88,7 @@ public class TokenItem extends TokenPattern<Token> {
 
     @Override
     public ArrayList<Token> flattenTokens(ArrayList<Token> list) {
-	    list.add(token);
+		token.flattenTokens(list);
         return list;
     }
 
@@ -111,5 +111,10 @@ public class TokenItem extends TokenPattern<Token> {
     @Override
     public void traverse(Consumer<TokenPattern<?>> consumer) {
 		consumer.accept(this);
+    }
+
+    @Override
+    public int endIndex() {
+        return token.endIndex();
     }
 }

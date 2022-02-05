@@ -10,9 +10,13 @@ import java.util.ArrayList;
  */
 public abstract class LexerProfile {
     /**
-     * Contains a list of all custom analysis contexts.
+     * Contains a list of custom lexer contexts.
      * */
     public ArrayList<LexerContext> contexts = new ArrayList<>();
+    /**
+     * Contains a list of custom lexer contexts that capture insignificant tokens anywhere in the file.
+     * */
+    public ArrayList<LexerContext> insignificantContexts = new ArrayList<>();
     /**
      * Contains the token stream to which the tokens are being sent.
      * */

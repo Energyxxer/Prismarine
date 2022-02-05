@@ -9,6 +9,7 @@ public class TokenMatchResponse {
 	public final boolean matched;
 	public final Token faultyToken;
 	public final int length;
+	public final int endIndex;
 	public TokenPatternMatch expected = null;
 	public TokenPattern<?> pattern = null;
 
@@ -16,14 +17,15 @@ public class TokenMatchResponse {
 	public static final int PARTIAL_MATCH = 1;
 	public static final int COMPLETE_MATCH = 2;
 
-	public TokenMatchResponse(boolean matched, Token faultyToken, int length, TokenPattern<?> pattern) {
-		this(matched, faultyToken, length, null, pattern);
+	public TokenMatchResponse(boolean matched, Token faultyToken, int length, int endIndex, TokenPattern<?> pattern) {
+		this(matched, faultyToken, length, endIndex, null, pattern);
 	}
 	
-	public TokenMatchResponse(boolean matched, Token faultyToken, int length, TokenPatternMatch expected, TokenPattern<?> pattern) {
+	public TokenMatchResponse(boolean matched, Token faultyToken, int length, int endIndex, TokenPatternMatch expected, TokenPattern<?> pattern) {
 		this.matched = matched;
 		this.faultyToken = faultyToken;
 		this.length = length;
+		this.endIndex = endIndex;
 		this.expected = expected;
 		this.pattern = pattern;
 	}
