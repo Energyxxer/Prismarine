@@ -3,7 +3,6 @@ package com.energyxxer.util.logger;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -17,9 +16,13 @@ public class Debug {
     }
 
     private static final ArrayList<OutputStream> streams = new ArrayList<>();
+    private static final ArrayList<OutputStream> infoStreams = new ArrayList<>();
+    private static final ArrayList<OutputStream> errorStreams = new ArrayList<>();
+    private static final ArrayList<OutputStream> warnStreams = new ArrayList<>();
+    private static final ArrayList<OutputStream> plainStreams = new ArrayList<>();
 
-    private static synchronized void logRaw(String message) {
-        for(OutputStream stream : streams) {
+    private static synchronized void logRaw(String message, MessageType type) {
+        for(OutputStream stream : getStreamsForType(type)) {
             try {
                 if(stream instanceof PrintStream) {
                     ((PrintStream) stream).print(message);
@@ -51,11 +54,31 @@ public class Debug {
 
     public static void log(String message, MessageType type) {
         DateTimeFormatter format = DateTimeFormatter.ofPattern("HH:mm:ss", Locale.ENGLISH);
-        logRaw(type != MessageType.PLAIN ? ("[" + format.format(LocalDateTime.now()) + "] [" + getCallerClassName() + "/" + type + "] " + message + "\n") : (message + "\n"));
+        String formattedMessage = type != MessageType.PLAIN ? ("[" + format.format(LocalDateTime.now()) + "] [" + getCallerClassName() + "/" + type + "] " + message + "\n") : (message + "\n");
+        logRaw(formattedMessage, null);
+        logRaw(formattedMessage, type);
     }
 
     public static void addStream(OutputStream stream) {
         streams.add(stream);
+    }
+    public static void addStream(OutputStream stream, MessageType type) {
+        getStreamsForType(type).add(stream);
+    }
+
+    private static ArrayList<OutputStream> getStreamsForType(MessageType type) {
+        if(type == null) return streams;
+        switch(type) {
+            case INFO: return infoStreams;
+            case WARN: return warnStreams;
+            case ERROR: return errorStreams;
+            case PLAIN: return plainStreams;
+            default: return streams;
+        }
+    }
+
+    public static void removeStream(OutputStream stream) {
+        streams.remove(stream);
     }
 
     public static String getCallerClassName() {
