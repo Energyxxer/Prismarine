@@ -96,6 +96,7 @@ public class Symbol {
     public void safeSetValue(Object value, TokenPattern<?> pattern, ISymbolContext ctx) {
         if(maySet) {
             if(typeConstraints != null) {
+                value = ctx.getTypeSystem().sanitizeObject(value);
                 typeConstraints.validate(value, pattern, ctx);
                 value = typeConstraints.adjustValue(value, pattern, ctx);
             }

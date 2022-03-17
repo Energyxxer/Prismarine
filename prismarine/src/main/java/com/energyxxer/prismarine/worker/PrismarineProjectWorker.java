@@ -161,5 +161,6 @@ public class PrismarineProjectWorker {
         public boolean doExport;
         public PrismarineCompiler.Dependency.Mode mode;
         public PrismarineProjectWorker parentWorker;
+        public boolean doCompile = true;
     }
 }

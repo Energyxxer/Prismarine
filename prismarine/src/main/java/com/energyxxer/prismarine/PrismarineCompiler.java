@@ -125,9 +125,6 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
             return;
         }
 
-        this.setProgress("Adding native methods");
-        suiteConfig.populateGlobalContext(this, global);
-
         //pass -1 (parsing)
         this.setProgress("Parsing files");
         walker = new FileWalker<>(
@@ -162,6 +159,7 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
 
         //not a pass
         for(PrismarineProjectWorker dependencyWorker : worker.output.getDependencies()) {
+            if(!dependencyWorker.getDependencyInfo().doCompile) continue;
             PrismarineCompiler subCompiler = dependencyWorker.createCompiler();
             subCompiler.setParentCompiler(this);
             subCompiler.addProgressListener((process) -> this.updateStatus(process.getStatus()));
@@ -230,6 +228,9 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
             finalizeProcess(true);
             return;
         }
+
+        this.setProgress("Adding native methods");
+        suiteConfig.populateGlobalContext(this, global);
 
         this.setProgress("Performing passes");
         if(!performPasses()) {
@@ -500,9 +501,32 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
         return (Collection<T>) unitsList.get(suiteConfig.getLanguageUnitConfigurations().get(unitClass));
     }
 
+    private static final HashMap<String, Path> fileVariables = new HashMap<>();
+
     public static File newFileObject(String path, File rootDir) {
-        path = Paths.get(path.replace("$PROJECT_DIR$", rootDir.getAbsolutePath())).normalize().toString();
+        path = path.replace('\\','/').replace("$PROJECT_DIR$", rootDir.getAbsolutePath());
+        if(!fileVariables.isEmpty()) {
+            for(Map.Entry<String, Path> entry : fileVariables.entrySet()) {
+                path = path.replace(entry.getKey(), entry.getValue().toString());
+            }
+        }
+        path = Paths.get(path).normalize().toString();
         return new File(path);
+    }
+
+    public static String fileObjectToString(File file, File rootDir) {
+        String path = file.getAbsolutePath();
+        path = path.replace(rootDir.getAbsolutePath(), "$PROJECT_DIR$");
+        if(!fileVariables.isEmpty()) {
+            for(Map.Entry<String, Path> entry : fileVariables.entrySet()) {
+                path = path.replace(entry.getValue().toString(), entry.getKey());
+            }
+        }
+        return path.replace('\\','/');
+    }
+
+    public static void putFileVariable(String name, Path path) {
+        fileVariables.put("$" + name + "$", path);
     }
 
     public PrismarineLanguageUnit getCurrentUnit() {

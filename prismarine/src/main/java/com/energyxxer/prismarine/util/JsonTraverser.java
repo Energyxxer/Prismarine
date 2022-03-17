@@ -32,12 +32,14 @@ public class JsonTraverser {
 
     public JsonTraverser reset() {
         this.head = root;
+        this.neck = null;
         createOnTraversal = false;
         return this;
     }
 
     public JsonTraverser reset(JsonElement newHead) {
         this.head = newHead;
+        this.neck = null;
         createOnTraversal = false;
         missingHead = false;
         return this;
@@ -111,6 +113,50 @@ public class JsonTraverser {
         }
         reset();
         return Collections.emptyList();
+    }
+
+    public void set(String value) {
+        setHead(() -> new JsonPrimitive(value));
+    }
+
+    public void set(boolean value) {
+        setHead(() -> new JsonPrimitive(value));
+    }
+
+    public void set(byte value) {
+        setHead(() -> new JsonPrimitive(value));
+    }
+
+    public void set(short value) {
+        setHead(() -> new JsonPrimitive(value));
+    }
+
+    public void set(int value) {
+        setHead(() -> new JsonPrimitive(value));
+    }
+
+    public void set(long value) {
+        setHead(() -> new JsonPrimitive(value));
+    }
+
+    public void set(float value) {
+        setHead(() -> new JsonPrimitive(value));
+    }
+
+    public void set(double value) {
+        setHead(() -> new JsonPrimitive(value));
+    }
+
+    public void set(BigInteger value) {
+        setHead(() -> new JsonPrimitive(value));
+    }
+
+    public void set(BigDecimal value) {
+        setHead(() -> new JsonPrimitive(value));
+    }
+
+    public void set(JsonElement value) {
+        setHead(() -> value);
     }
 
     public String asString() {
@@ -371,7 +417,11 @@ public class JsonTraverser {
     }
 
     private void restoreHead(Supplier<JsonElement> newHeadSupplier) {
-        if(createOnTraversal && missingHead && neck != null) {
+        if(missingHead) setHead(newHeadSupplier);
+    }
+
+    private void setHead(Supplier<JsonElement> newHeadSupplier) {
+        if(createOnTraversal && neck != null) {
             JsonElement newHead = newHeadSupplier.get();
             if(newHead == null) return;
             head = newHead;
