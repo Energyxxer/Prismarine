@@ -212,6 +212,9 @@ public class EagerLexer extends Lexer {
 	@Override
 	public int getLookingIndexTrimmed() {
 		int tokenIndex = findIndexForTokenList(currentIndex, stream.tokens);
+		while(tokenIndex < stream.tokens.size() && !stream.tokens.get(tokenIndex).isSignificant()) {
+			tokenIndex++;
+		}
 		if(tokenIndex < stream.tokens.size()) {
 			return stream.tokens.get(tokenIndex).loc.index;
 		}
@@ -230,6 +233,9 @@ public class EagerLexer extends Lexer {
 	@Override
 	public Token retrieveAnyToken() {
 		int tokenIndex = findIndexForTokenList(currentIndex, stream.tokens);
+		while(tokenIndex < stream.tokens.size() && !stream.tokens.get(tokenIndex).isSignificant()) {
+			tokenIndex++;
+		}
 		if(tokenIndex < stream.tokens.size()) {
 			return stream.tokens.get(tokenIndex);
 		}
