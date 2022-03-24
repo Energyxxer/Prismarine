@@ -21,7 +21,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -144,6 +146,15 @@ public class ProjectReader {
         }
     }
 
+    private static long getChangeTime(File file) {
+        try {
+            return Math.max(file.lastModified(), Files.readAttributes(file.toPath(), BasicFileAttributes.class).creationTime().toMillis());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return file.lastModified();
+        }
+    }
+
     private Result performQuery(Query query) throws IOException {
         Result existing = cache.get(query.relativePath);
 
@@ -155,7 +166,7 @@ public class ProjectReader {
             Path root = input.getRootFile().toPath();
             File leafFile = root.resolve(relativePathStr).toFile();
 
-            if((leafFile.exists() ? leafFile.lastModified() : root.toFile().lastModified()) <= existing.readTime) {
+            if((leafFile.exists() ? getChangeTime(leafFile) : getChangeTime(root.toFile())) <= existing.readTime) {
                 if(query.skipIfNotChanged) return null;
                 else existing.skippableIfNotChanged = false;
                 if(existing.matchesRequirements(query)) return existing;
