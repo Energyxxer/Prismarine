@@ -11,9 +11,9 @@ import com.energyxxer.enxlex.report.Report;
 import com.energyxxer.prismarine.PrismarineLanguageUnitConfiguration;
 import com.energyxxer.prismarine.summaries.PrismarineProjectSummary;
 import com.energyxxer.prismarine.summaries.PrismarineSummaryModule;
-import com.energyxxer.util.FileUtil;
 import com.energyxxer.prismarine.worker.PrismarineProjectWorker;
 import com.energyxxer.prismarine.worker.tasks.SetupProductionsTask;
+import com.energyxxer.util.FileUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -27,6 +27,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 import static com.energyxxer.prismarine.Prismarine.DEFAULT_CHARSET;
@@ -69,7 +70,15 @@ public class ProjectReader {
     }
 
     public void populateWithCachedReader(ProjectReader cachedReader) {
-        this.cache.putAll(cachedReader.cache);
+        for(Map.Entry<Path, Result> entry : cachedReader.cache.entrySet()) {
+            if(this.cache.containsKey(entry.getKey())) {
+                if(this.cache.get(entry.getKey()).readTime == 0) {
+                    this.cache.put(entry.getKey(), entry.getValue());
+                }
+            } else {
+                this.cache.put(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
     public Function<Path, TokenSource> getSourceFunction() {
@@ -155,6 +164,15 @@ public class ProjectReader {
         }
     }
 
+    private static long getFileSize(File file) {
+        try {
+            return Files.readAttributes(file.toPath(), BasicFileAttributes.class).size();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
     private Result performQuery(Query query) throws IOException {
         Result existing = cache.get(query.relativePath);
 
@@ -162,16 +180,16 @@ public class ProjectReader {
 
         byte[] bytes = null;
 
-        if(existing != null) {
-            Path root = input.getRootFile().toPath();
-            File leafFile = root.resolve(relativePathStr).toFile();
-
-            if((leafFile.exists() ? getChangeTime(leafFile) : getChangeTime(root.toFile())) <= existing.readTime) {
-                if(query.skipIfNotChanged) return null;
-                else existing.skippableIfNotChanged = false;
-                if(existing.matchesRequirements(query)) return existing;
-                bytes = existing.bytes;
-            }
+        Path root = input.getRootFile().toPath();
+        File leafFile = root.resolve(relativePathStr).toFile();
+        if(existing != null
+                && (leafFile.exists() ? getChangeTime(leafFile) : getChangeTime(root.toFile())) <= existing.readTime
+                && (leafFile.exists() ? getFileSize(leafFile) : getFileSize(root.toFile())) == existing.size
+        ) {
+            if(query.skipIfNotChanged) return null;
+            else existing.skippableIfNotChanged = false;
+            if(existing.matchesRequirements(query)) return existing;
+            bytes = existing.bytes;
         }
 
         if(bytes == null) {
@@ -187,13 +205,18 @@ public class ProjectReader {
             //Return cached result if it contains what the caller needs and is up to date
             if(query.skipIfNotChanged) return null;
             else existing.skippableIfNotChanged = false;
-            if(existing.matchesRequirements(query)) return existing;
+            if(existing.matchesRequirements(query)) {
+                existing.readTime = System.currentTimeMillis();
+                existing.size = getFileSize(leafFile);
+                return existing;
+            }
         }
 
         //Create a new result
         Result result = new Result();
         result.relativePath = query.relativePath;
         result.readTime = System.currentTimeMillis();
+        result.size = getFileSize(leafFile);
         result.hashCode = hashCode;
         result.bytes = bytes;
         result.skippableIfNotChanged = query.skipIfNotChanged;
@@ -287,6 +310,7 @@ public class ProjectReader {
         protected boolean skippableIfNotChanged = true;
         protected boolean changedSinceCached = true;
         public long readTime;
+        public long size;
 
         public TokenMatchResponse matchResponse;
 
