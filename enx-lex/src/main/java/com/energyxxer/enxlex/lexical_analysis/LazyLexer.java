@@ -43,6 +43,8 @@ public class LazyLexer extends Lexer {
             Debug.log("Starting an already running lexer!");
         }
         running = true;
+        setCurrentIndex(0);
+        resetInsignificantTokens();
         try {
             this.source = source;
             this.fileContents = str;
@@ -107,6 +109,13 @@ public class LazyLexer extends Lexer {
     private Token[] lastInsignificantTokens;
     private int lastInsignificantTokensIndex = -1;
     private int lastInsignificantTokensEndIndex = -1;
+
+    public void resetInsignificantTokens() {
+        if(tempInsignificantTokens != null) tempInsignificantTokens.clear();
+        lastInsignificantTokens = null;
+        lastInsignificantTokensIndex = -1;
+        lastInsignificantTokensEndIndex = -1;
+    }
 
     private Token[] retrieveInsignificantTokens() {
         if(currentIndex == lastInsignificantTokensIndex) {

@@ -37,12 +37,7 @@ public class NBTTMLexerProfile extends LexerProfile {
     }
 
     public NBTTMLexerProfile(CommandModule module) {
-        ArrayList<String> defcategories = new ArrayList<>();
-        module.getAllNamespaces().forEach(n -> n.getTypeManager().getAllDictionaries().forEach(d -> {
-            if(!defcategories.contains(d.getCategory())) defcategories.add(d.getCategory());
-        }));
-
-        this.initialize(defcategories);
+        this.initialize(module.minecraft.getAllValidCategoriesAndAliases());
     }
 
     private void initialize(Collection<String> defcategories) {
@@ -54,8 +49,8 @@ public class NBTTMLexerProfile extends LexerProfile {
         contexts.add(new StringMatchLexerContext(PRIMITIVE_TYPE, "Byte", "Short", "Int", "Float", "Double", "Long", "String", "JSON_Boolean"));
         contexts.add(new StringMatchLexerContext(ARRAY_TYPE, "B", "I", "L"));
         contexts.add(new IdentifierLexerContext(REFERENCE, "[a-zA-Z0-9_]", "\\$"));
-        contexts.add(new IdentifierLexerContext(KEY, "[a-zA-Z,0-9_]"));
-        contexts.add(new IdentifierLexerContext(IDENTIFIER, "[a-zA-Z,0-9_]"));
+        contexts.add(new IdentifierLexerContext(KEY, "[a-zA-Z0-9_]"));
+        contexts.add(new IdentifierLexerContext(IDENTIFIER, "[a-zA-Z0-9_]"));
 
         contexts.add(new StringMatchLexerContext(DEFINITION_CATEGORY, defcategories.toArray(new String[0])));
 

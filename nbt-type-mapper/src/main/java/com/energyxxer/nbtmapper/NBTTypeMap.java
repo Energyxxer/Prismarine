@@ -102,7 +102,7 @@ public class NBTTypeMap {
             rootsToCheck.add(ENTITY_ROOT);
             Type suspectedType = (Type) metadata;
             if(suspectedType != null) {
-                if(suspectedType.getCategory().equals(EntityType.CATEGORY)) {
+                if(suspectedType.isCategory(EntityType.CATEGORY)) {
                     if("true".equals(suspectedType.getProperty("living"))) rootsToCheck.add(0, ENTITY_MOB_ROOT);
                     if("true".equals(suspectedType.getProperty("breedable"))) rootsToCheck.add(0, ENTITY_BREEDABLE_ROOT);
                     if("true".equals(suspectedType.getProperty("tamable"))) rootsToCheck.add(0, ENTITY_TAMABLE_ROOT);
@@ -122,7 +122,7 @@ public class NBTTypeMap {
             rootsToCheck.add(BLOCK_ENTITY_ROOT);
             Type suspectedType = (Type) metadata;
             if(suspectedType != null) {
-                if(suspectedType.getCategory().equals(BlockEntityType.CATEGORY)) {
+                if(suspectedType.isCategory(BlockEntityType.CATEGORY)) {
                     rootsToCheck.add(0, getRootForBlockEntity(suspectedType));
                 }
             } else {

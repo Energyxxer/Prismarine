@@ -50,6 +50,7 @@ public class EagerLexer extends Lexer {
 		stream.setProfile(profile);
 		profile.setStream(stream);
 		line = column = index = tokenLine = tokenColumn = tokenIndex = 0;
+		setCurrentIndex(0);
 		token.setLength(0);
 
 		{
