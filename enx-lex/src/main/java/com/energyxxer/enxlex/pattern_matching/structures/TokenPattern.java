@@ -11,7 +11,6 @@ import com.energyxxer.util.StringLocation;
 import com.sun.istack.internal.NotNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -26,7 +25,9 @@ public abstract class TokenPattern<T> {
 	protected boolean validated = false;
 	private ThreadLocal<Object> heldData = null;
 	private ThreadLocal<Boolean> holdsData = null;
-	private HashMap<String, TokenPattern<?>> findCache = null;
+	private ArrayList<String> findCacheKeys = null;
+	private ArrayList<TokenPattern<?>> findCacheValues = null;
+	private int findCacheLastIndex = 0;
 
 	public TokenPattern(TokenPatternMatch source) {
 		this.source = source;
@@ -46,15 +47,32 @@ public abstract class TokenPattern<T> {
 	public abstract TokenPattern<?> find(String path);
 
 	protected TokenPattern<?> putFindResult(String path, TokenPattern<?> result) {
-		if(findCache == null) findCache = new HashMap<>();
-		findCache.put(path, result);
+		if(findCacheKeys == null) findCacheKeys = new ArrayList<>();
+		if(findCacheValues == null) findCacheValues = new ArrayList<>();
+
+		findCacheKeys.add(path);
+		findCacheValues.add(result);
 		return result;
 	}
 	protected boolean isPathInCache(String path) {
-		return findCache != null && findCache.containsKey(path);
+		if(findCacheKeys == null) return false;
+		for(int i = 0; i < findCacheKeys.size(); i++) {
+			int j = (i + findCacheLastIndex) % findCacheKeys.size();
+			if(findCacheKeys.get(j).equals(path)) {
+				findCacheLastIndex = j;
+				return true;
+			}
+		}
+		return false;
 	}
 	protected TokenPattern<?> getCachedFindResult(String path) {
-		return findCache.get(path);
+		for(int i = 0; i < findCacheKeys.size(); i++) {
+			int j = (i + findCacheLastIndex) % findCacheKeys.size();
+			if(findCacheKeys.get(j).equals(path)) {
+				return findCacheValues.get(j);
+			}
+		}
+		return null;
 	}
 
 	@NotNull public TokenPattern<?> tryFind(String path) {
