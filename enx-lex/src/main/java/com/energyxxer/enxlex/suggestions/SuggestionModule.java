@@ -3,10 +3,7 @@ package com.energyxxer.enxlex.suggestions;
 import com.energyxxer.enxlex.lexical_analysis.Lexer;
 
 import java.text.Collator;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Stack;
+import java.util.*;
 
 public class SuggestionModule {
 
@@ -23,6 +20,7 @@ public class SuggestionModule {
     private final Stack<SuggestionStatus> statusStack = new Stack<>();
 
     private final ArrayList<Suggestion> suggestions = new ArrayList<>();
+    private final HashMap<Character, PairCompletionRanges> pairCompletionRanges = new HashMap<>();
 
     private String[] lookingAtMemberPath = null;
 
@@ -50,6 +48,28 @@ public class SuggestionModule {
                 suggestions.add(prediction);
             }
         }
+    }
+
+    public void addPairCompletionRange(int start, int end, char opening, char closing) {
+        if(pairCompletionRanges.containsKey(opening)) {
+            pairCompletionRanges.get(opening).put(start, end);
+        } else {
+            PairCompletionRanges ranges = new PairCompletionRanges(opening, closing);
+            pairCompletionRanges.put(opening, ranges);
+            ranges.put(start, end);
+        }
+    }
+
+    public Character getPairCompletionAtIndex(char opening, int index) {
+        if(pairCompletionRanges.containsKey(opening)) {
+            PairCompletionRanges ranges = pairCompletionRanges.get(opening);
+            if(ranges.isInRange(index)) {
+                return ranges.getClosingSymbol();
+            } else {
+                return null;
+            }
+        }
+        return null;
     }
 
     public List<Suggestion> getSuggestions() {

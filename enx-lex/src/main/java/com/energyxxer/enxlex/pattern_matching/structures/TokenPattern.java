@@ -50,8 +50,10 @@ public abstract class TokenPattern<T> {
 		if(findCacheKeys == null) findCacheKeys = new ArrayList<>();
 		if(findCacheValues == null) findCacheValues = new ArrayList<>();
 
-		findCacheKeys.add(path);
-		findCacheValues.add(result);
+		synchronized(this) {
+			findCacheKeys.add(path);
+			findCacheValues.add(result);
+		}
 		return result;
 	}
 	protected boolean isPathInCache(String path) {

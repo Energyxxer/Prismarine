@@ -19,6 +19,7 @@ import java.util.ArrayList;
 public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummary> implements ProjectSummarizer {
 
     private final PrismarineSuiteConfiguration suiteConfig;
+    public static boolean logTimes = false;
 
     private PrismarineProjectSummarizer<T> parentSummarizer = null;
     private final File rootFile;
@@ -36,7 +37,6 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
     private long startTime;
     private long previousStageTime;
 
-    private boolean logTimes = false;
 
     private boolean successful = false;
 
@@ -224,10 +224,6 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
 
     public void setCachedReader(ProjectReader cachedReader) {
         this.cachedReader = cachedReader;
-    }
-
-    public void setLogTimes(boolean logTimes) {
-        this.logTimes = logTimes;
     }
 
     @Override
