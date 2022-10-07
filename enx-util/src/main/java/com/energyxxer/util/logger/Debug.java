@@ -1,5 +1,7 @@
 package com.energyxxer.util.logger;
 
+import com.energyxxer.util.PatternCache;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -86,7 +88,7 @@ public class Debug {
         for (int i=1; i<stElements.length; i++) {
             StackTraceElement ste = stElements[i];
             if (!ste.getClassName().equals(Debug.class.getName()) && ste.getClassName().indexOf("java.lang.Thread")!=0) {
-                return ste.getFileName().replace(".java", "");
+                return PatternCache.replace(ste.getFileName(), ".java", "");
             }
         }
         return null;

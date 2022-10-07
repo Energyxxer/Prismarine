@@ -6,6 +6,7 @@ import com.energyxxer.commodore.module.CommandModule;
 import com.energyxxer.enxlex.lexical_analysis.profiles.*;
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
+import com.energyxxer.util.PatternCache;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class NBTTMLexerProfile extends LexerProfile {
                 defcategories.add(decl.getCategory().toLowerCase());
             }
         } catch (IOException e) {
-            defcategories.addAll(Arrays.asList("entity, block, item, particle, enchantment, dimension, effect, difficulty, gamemode, gamerule, slot, attributes".split(", ")));
+            defcategories.addAll(Arrays.asList(PatternCache.split("entity, block, item, particle, enchantment, dimension, effect, difficulty, gamemode, gamerule, slot, attributes", ", ")));
             e.printStackTrace();
         }
 

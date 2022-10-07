@@ -13,7 +13,7 @@ public class StringUtil {
 
 	public static final String TRUE = "true";
 	public static final String FALSE = "false";
-	
+
 	public static String ellipsis(String str, int max) {
 		if (str.length() > max) {
 			return (str.substring(0, max - 3) + "...");
@@ -35,15 +35,24 @@ public class StringUtil {
 	}
 
 	public static String escapeHTML(String str) {
-		return str.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+		str = PatternCache.replace(str, "&", "&amp;");
+		str = PatternCache.replace(str, "<", "&lt;");
+		str = PatternCache.replace(str, ">", "&gt;");
+		return str;
 	}
 	
 	public static String escape(String str) {
-		return str.replaceAll("\n", "\\\\n").replaceAll("\t", "\\\\t").replaceAll("\f", "\\\\f").replaceAll("\r", "\\\\r");
+		str = PatternCache.replace(str, "\n", "\\n");
+		str = PatternCache.replace(str, "\t", "\\t");
+		str = PatternCache.replace(str, "\f", "\\f");
+		str = PatternCache.replace(str, "\r", "\\r");
+		return str;
 	}
 	
 	public static String addSlashes(String str) {
-		return str.replace("\\", "\\\\").replace("\"", "\\\"");
+		str = PatternCache.replace(str, "\\", "\\\\");
+		str = PatternCache.replace(str, "\"", "\\\"");
+		return str;
 	}
 	
 	public static String stringFromBoolMap(HashMap<String, Object> m) {

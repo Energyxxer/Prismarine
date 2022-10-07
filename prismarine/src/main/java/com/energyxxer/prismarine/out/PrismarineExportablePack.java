@@ -87,7 +87,7 @@ public class PrismarineExportablePack implements ExportablePack {
             zipStream.write(data, 0, data.length);
             zipStream.closeEntry();
         } else {
-            File file = new File(rootPath + File.separator + path.replace("/", File.separator));
+            File file = new File(rootPath + File.separator + path.replace('/', File.separatorChar));
             file.getParentFile().mkdirs();
             file.createNewFile();
 

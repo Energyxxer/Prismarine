@@ -17,6 +17,7 @@ import com.energyxxer.prismarine.walker.DefaultWalkerStops;
 import com.energyxxer.prismarine.walker.FileWalker;
 import com.energyxxer.prismarine.worker.PrismarineProjectWorker;
 import com.energyxxer.prismarine.worker.PrismarineProjectWorkerTask;
+import com.energyxxer.util.PatternCache;
 import com.energyxxer.util.logger.Debug;
 import com.energyxxer.util.processes.AbstractProcess;
 
@@ -504,7 +505,7 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
     private static final HashMap<String, Path> fileVariables = new HashMap<>();
 
     public static File newFileObject(String path, File rootDir) {
-        path = path.replace('\\','/').replace("$PROJECT_DIR$", rootDir.getAbsolutePath());
+        path = PatternCache.replace(path.replace('\\','/'), "$PROJECT_DIR$", rootDir.getAbsolutePath());
         if(!fileVariables.isEmpty()) {
             for(Map.Entry<String, Path> entry : fileVariables.entrySet()) {
                 path = path.replace(entry.getKey(), entry.getValue().toString());

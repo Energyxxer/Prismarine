@@ -2,6 +2,7 @@ package com.energyxxer.enxlex.lexical_analysis.profiles;
 
 import com.energyxxer.enxlex.lexical_analysis.token.TokenSection;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
+import com.energyxxer.util.PatternCache;
 import com.energyxxer.util.StringLocation;
 
 import java.util.Collection;
@@ -57,7 +58,7 @@ public class StringLiteralLexerContext implements LexerContext {
                         errorMessage = "Illegal escape character in string literal";
                     } else {
                         if(escapedChar == 'u') {
-                            if(str.length() - i+2 < 4 || !str.substring(i+2, i+2+4).matches("[0-9A-Fa-f]{4}")) {
+                            if(str.length() - i+2 < 4 || !PatternCache.regex("[0-9A-Fa-f]{4}").matcher(str.substring(i + 2, i + 2 + 4)).matches()) {
                                 errorMessage = "Illegal escape character in string literal";
                             } else {
                                 escapedChars.put(new TokenSection(i - startIndex,6), "string_literal.escape");
