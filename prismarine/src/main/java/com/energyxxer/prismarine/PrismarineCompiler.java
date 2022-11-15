@@ -126,8 +126,7 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
             return;
         }
 
-        //pass -1 (parsing)
-        this.setProgress("Parsing files");
+        //Set up walker
         walker = new FileWalker<>(
                 new DirectoryCompoundInput(rootPath.toFile()),
                 p -> new ProjectSourceFile(rootPath, p),
@@ -136,24 +135,6 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
         );
         if(cachedReader != null) {
             walker.getReader().populateWithCachedReader(cachedReader);
-        }
-
-        walker.addStops(DefaultWalkerStops.createCompilerWalkerStops(suiteConfig));
-        suiteConfig.setupWalkerForCompilation(walker);
-
-        try {
-            walker.walk();
-        } catch (IOException x) {
-            logException(x);
-            return;
-        }
-
-        this.report.addNotices(walker.getReport().getAllNotices());
-
-        walker.getReader().dumpNotices(report);
-        if(report.hasErrors()) {
-            finalizeProcess(false);
-            return;
         }
 
         this.setProgress("Resolving dependencies");
@@ -198,7 +179,27 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
 
         suiteConfig.onDependenciesResolved(this);
 
-        this.setProgress("Setting up standard libraries");
+        //pass -1 (parsing)
+        this.setProgress("Parsing files");
+        walker.addStops(DefaultWalkerStops.createCompilerWalkerStops(suiteConfig));
+        suiteConfig.setupWalkerForCompilation(walker);
+
+        try {
+            walker.walk();
+        } catch (IOException x) {
+            logException(x);
+            return;
+        }
+
+        this.report.addNotices(walker.getReport().getAllNotices());
+
+        walker.getReader().dumpNotices(report);
+        if(report.hasErrors()) {
+            finalizeProcess(false);
+            return;
+        }
+
+        this.setProgress("Setting up native libraries");
 
         PrismarineLibrary standardLibrary = suiteConfig.getStandardLibrary();
         if(standardLibrary != null && (parentCompiler == null || dependencyMode == Dependency.Mode.PRECOMPILE)) {
@@ -408,7 +409,9 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
 
     protected void finalizeProcess(boolean success) {
         cachedReader = null;
-        this.setProgress("Compilation " + (success ? "completed" : "interrupted") + " with " + report.getTotalsString(), false);
+        if(parentCompiler == null) {
+            this.setProgress("Compilation " + (success ? "completed" : "interrupted") + " with " + report.getTotalsString(), false);
+        }
         super.finalizeProcess(success);
     }
 
