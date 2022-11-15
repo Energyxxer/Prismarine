@@ -2,12 +2,13 @@ package com.energyxxer.prismarine.providers;
 
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
+import com.energyxxer.enxlex.pattern_matching.matching.lazy.TokenItemMatch;
 import com.energyxxer.enxlex.pattern_matching.matching.lazy.TokenStructureMatch;
 import com.energyxxer.enxlex.pattern_matching.matching.lazy.TokenSwitchMatch;
 import com.energyxxer.prismarine.PrismarineProductions;
 import com.energyxxer.prismarine.worker.PrismarineProjectWorker;
 
-import static com.energyxxer.prismarine.PrismarineProductions.tokenSwitch;
+import static com.energyxxer.prismarine.PrismarineProductions.ofType;
 
 
 public class PatternSwitchProviderSet extends PatternProviderSet {
@@ -34,13 +35,19 @@ public class PatternSwitchProviderSet extends PatternProviderSet {
 
     @Override
     protected void installUtilityProductions(PrismarineProductions productions, TokenStructureMatch providerStructure, PrismarineProjectWorker worker) {
-        switchMatch = tokenSwitch(internalName, switchTokenType);
+        TokenItemMatch headerMatch = ofType(switchTokenType);
+        if(isHeaderRecessive()) headerMatch.setRecessive();
+        switchMatch = new TokenSwitchMatch(internalName, headerMatch);
 
         switchCreated(switchMatch);
 
         productions.getOrCreateStructure(internalName).add(
                 switchMatch
         );
+    }
+
+    protected boolean isHeaderRecessive() {
+        return false;
     }
 
     @Override

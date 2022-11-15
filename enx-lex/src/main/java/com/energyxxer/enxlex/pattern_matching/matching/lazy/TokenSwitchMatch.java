@@ -80,7 +80,7 @@ public class TokenSwitchMatch extends TokenPatternMatch {
             TokenSwitch result = new TokenSwitch(this.name, branchResponse.pattern, this).addTags(this.tags);
             invokeProcessors(result, lexer);
             return new TokenMatchResponse(true, null, branchResponse.length, branchResponse.endIndex, result);
-        } else if(branchResponse != null) {
+        } else if(branchResponse != null && !switchMatch.isRecessive()) {
             invokeFailProcessors(branchResponse.pattern, lexer);
             return new TokenMatchResponse(false, branchResponse.faultyToken, branchResponse.length, branchResponse.endIndex, branchResponse.expected, null);
         } else {
