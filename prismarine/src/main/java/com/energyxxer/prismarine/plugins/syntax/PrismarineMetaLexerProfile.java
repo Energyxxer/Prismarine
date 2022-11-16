@@ -7,6 +7,7 @@ import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class PrismarineMetaLexerProfile extends LexerProfile {
 
@@ -47,7 +48,7 @@ public class PrismarineMetaLexerProfile extends LexerProfile {
         //Comments
         contexts.add(new CommentLexerContext("//", COMMENT));
 
-        contexts.add(new IdentifierLexerContext(IDENTIFIER, "[a-zA-Z0-9_]", "[a-zA-Z_]").setOnlyWhenExpected(false));
+        contexts.add(new RegexLexerContext(Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]*"), IDENTIFIER, true));
     }
 
     @Override

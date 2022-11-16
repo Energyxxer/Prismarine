@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.regex.Pattern;
 
 import static com.energyxxer.nbtmapper.parser.NBTTMTokens.*;
 
@@ -49,9 +50,9 @@ public class NBTTMLexerProfile extends LexerProfile {
         contexts.add(new StringMatchLexerContext(BRACE, "{", "}", "[", "]", "(", ")"));
         contexts.add(new StringMatchLexerContext(PRIMITIVE_TYPE, "Byte", "Short", "Int", "Float", "Double", "Long", "String", "JSON_Boolean"));
         contexts.add(new StringMatchLexerContext(ARRAY_TYPE, "B", "I", "L"));
-        contexts.add(new IdentifierLexerContext(REFERENCE, "[a-zA-Z0-9_]", "\\$"));
-        contexts.add(new IdentifierLexerContext(KEY, "[a-zA-Z0-9_]"));
-        contexts.add(new IdentifierLexerContext(IDENTIFIER, "[a-zA-Z0-9_]"));
+        contexts.add(new RegexLexerContext(Pattern.compile("\\$[a-zA-Z0-9_]*"), REFERENCE, false));
+        contexts.add(new RegexLexerContext(Pattern.compile("[a-zA-Z0-9_]+"), KEY, false));
+        contexts.add(new RegexLexerContext(Pattern.compile("[a-zA-Z0-9_]+"), IDENTIFIER, false));
 
         contexts.add(new StringMatchLexerContext(DEFINITION_CATEGORY, defcategories.toArray(new String[0])));
 
