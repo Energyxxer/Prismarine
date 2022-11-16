@@ -2,8 +2,6 @@ package com.energyxxer.enxlex.lexical_analysis.profiles;
 
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,7 +32,7 @@ public class RegexLexerContext implements LexerContext {
     }
 
     @Override
-    public Collection<TokenType> getHandledTypes() {
-        return Collections.singletonList(handledType);
+    public boolean handlesType(TokenType type) {
+        return type == handledType;
     }
 }

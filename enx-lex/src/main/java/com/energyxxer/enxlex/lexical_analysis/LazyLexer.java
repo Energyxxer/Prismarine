@@ -170,7 +170,7 @@ public class LazyLexer extends Lexer {
             Token[] beforeTokens = retrieveInsignificantTokens();
             int lookingIndexTrimmed = getLookingIndexTrimmed();
             for (LexerContext context : profile.contexts) {
-                if (context.getHandledTypes().contains(type)) {
+                if (context.handlesType(type)) {
                     ScannerContextResponse response = context.analyzeExpectingType(fileContents, context.ignoreLeadingWhitespace() ?
                             lookingIndexTrimmed :
                             currentIndex, type, profile);

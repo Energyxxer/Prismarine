@@ -27,6 +27,7 @@ public abstract class PrismarineTypeSystem {
     protected final ISymbolContext globalCtx;
 
     private final LinkedHashMap<String, TypeHandler<?>> primitiveHandlers = new LinkedHashMap<>();
+    private final LinkedHashMap<Class, TypeHandler<?>> primitiveHandlersByClass = new LinkedHashMap<>();
     private final LinkedHashMap<String, TypeHandler<?>> userDefinedTypes = new LinkedHashMap<>();
     private final HashMap<String, ArrayList<Consumer<TypeHandler<?>>>> userDefinedTypeListeners = new HashMap<>();
 
@@ -54,6 +55,7 @@ public abstract class PrismarineTypeSystem {
     protected void registerPrimitiveTypeHandler(String alias, TypeHandler<?> handler) {
         if(handler.isPrimitive()) {
             primitiveHandlers.put(alias, handler);
+            primitiveHandlersByClass.put(handler.getHandledClass(), handler);
         }
     }
 
@@ -75,7 +77,8 @@ public abstract class PrismarineTypeSystem {
             if(((TypeHandler) obj).isSelfHandler()) return (TypeHandler<?>) obj;
             return ((TypeHandler) obj).getStaticHandler();
         }
-        TypeHandler superHandler = null;
+        TypeHandler superHandler = primitiveHandlersByClass.get(obj.getClass());
+        if(superHandler != null) return superHandler;
         for(TypeHandler<?> handler : primitiveHandlers.values()) {
             if(handler.getHandledClass() == obj.getClass()) {
                 //A sure match
@@ -194,21 +197,21 @@ public abstract class PrismarineTypeSystem {
         }
         if(targetType.isInstance(obj)) return obj;
         TypeHandler sourceType = getHandlerForObject(obj, pattern, ctx);
-        try {
-            return sourceType.cast(obj, targetType, pattern, ctx);
-        } catch(ClassCastException x) {
+        Object result = sourceType.cast(obj, targetType, pattern, ctx);
+        if(result == null || result instanceof ClassCastException) {
             if("primitive(string)".equals(getInternalTypeIdentifierForType(targetType))) {
                 return castToString(obj, pattern, ctx);
             }
             if(failureException) {
-                if(x.getMessage() != null) {
-                    throw new PrismarineException(TYPE_ERROR, "Couldn't cast '" + obj + "' to type " + typeHandlerToString(targetType) + ": " + x.getMessage(), pattern, ctx);
+                if(result != null && ((ClassCastException) result).getMessage() != null) {
+                    throw new PrismarineException(TYPE_ERROR, "Couldn't cast '" + obj + "' to type " + typeHandlerToString(targetType) + ": " + ((ClassCastException) result).getMessage(), pattern, ctx);
                 } else {
                     throw new PrismarineException(TYPE_ERROR, "Unable to cast " + getTypeIdentifierForObject(obj) + " to type " + typeHandlerToString(targetType), pattern, ctx);
                 }
             }
             return null;
         }
+        return result;
     }
 
     @Contract("null, _, _, _ -> null")

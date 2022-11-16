@@ -161,7 +161,7 @@ public abstract class TokenPattern<T> {
 	}
 
     public Object evaluate(Object... data) {
-    	SimplificationDomain simplified = new SimplificationDomain(this, data).simplifyFully();
+    	SimplificationDomain simplified = SimplificationDomain.get(this, data).simplifyFully();
 
     	TokenPatternMatch simplifiedSource = simplified.pattern.source;
 
@@ -169,11 +169,13 @@ public abstract class TokenPattern<T> {
     	if(evaluator == null) {
     		throw new PatternEvaluator.NoEvaluatorException("Missing evaluator for pattern " + simplifiedSource);
 		}
+		simplified.unlock();
 		return evaluator.evaluate(simplified.pattern, simplified.data);
 	}
 
 	public static Object evaluate(TokenPattern<?> pattern, Object... data) {
-		SimplificationDomain domain = new SimplificationDomain(pattern, data).simplifyFully();
+		SimplificationDomain domain = SimplificationDomain.get(pattern, data).simplifyFully();
+		domain.unlock();
     	return domain.pattern.evaluate(domain.data);
 	}
 
@@ -188,12 +190,23 @@ public abstract class TokenPattern<T> {
 	public abstract int endIndex();
 
 	public static class SimplificationDomain {
+		private static ThreadLocal<SimplificationDomain> INSTANCE = ThreadLocal.withInitial(SimplificationDomain::new);
     	public TokenPattern<?> pattern;
     	public Object[] data;
+		private boolean locked = false;
 
-		public SimplificationDomain(TokenPattern<?> pattern, Object[] data) {
-			this.pattern = pattern;
-			this.data = data;
+		public SimplificationDomain() {
+		}
+
+		public static SimplificationDomain get(TokenPattern<?> pattern, Object[] data) {
+			SimplificationDomain instance = INSTANCE.get();
+			if(instance.locked) {
+				throw new IllegalStateException("Must unlock SimplificationDomain before trying to create another. Please report ASAP, and include the stack trace");
+			}
+			instance.pattern = pattern;
+			instance.data = data;
+			instance.locked = true;
+			return instance;
 		}
 
 		public SimplificationDomain simplifyOnce() {
@@ -208,6 +221,10 @@ public abstract class TokenPattern<T> {
 				simplifyOnce();
 			}
 			return this;
+		}
+
+		public void unlock() {
+			locked = false;
 		}
 	}
 

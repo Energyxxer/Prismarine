@@ -2,9 +2,6 @@ package com.energyxxer.enxlex.lexical_analysis.profiles;
 
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 
-import java.util.Collection;
-import java.util.Collections;
-
 public class IdentifierLexerContext implements LexerContext {
     private final TokenType type;
     private final String regex;
@@ -43,8 +40,8 @@ public class IdentifierLexerContext implements LexerContext {
     } //substring done
 
     @Override
-    public Collection<TokenType> getHandledTypes() {
-        return Collections.singletonList(type);
+    public boolean handlesType(TokenType type) {
+        return type == this.type;
     }
 
     public IdentifierLexerContext setOnlyWhenExpected(boolean onlyWhenExpected) {

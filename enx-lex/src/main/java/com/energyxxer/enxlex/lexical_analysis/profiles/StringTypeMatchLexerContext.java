@@ -2,9 +2,6 @@ package com.energyxxer.enxlex.lexical_analysis.profiles;
 
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 public class StringTypeMatchLexerContext implements LexerContext {
     private final String[] strings;
     private final TokenType[] types;
@@ -33,7 +30,10 @@ public class StringTypeMatchLexerContext implements LexerContext {
     } //substring done
 
     @Override
-    public Collection<TokenType> getHandledTypes() {
-        return Arrays.asList(types);
+    public boolean handlesType(TokenType type) {
+        for(TokenType tokenType : types) {
+            if (tokenType == type) return true;
+        }
+        return false;
     }
 }

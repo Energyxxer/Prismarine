@@ -2,8 +2,6 @@ package com.energyxxer.enxlex.lexical_analysis.profiles;
 
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 
-import java.util.Collection;
-
 /**
  * Defines sub-routines to analyze special-case tokens.
  */
@@ -30,7 +28,7 @@ public interface LexerContext {
 
     default boolean ignoreLeadingWhitespace() { return true; }
 
-    Collection<TokenType> getHandledTypes();
+    boolean handlesType(TokenType type);
 
     enum ContextCondition {
         NONE, LINE_START, LEADING_WHITESPACE
