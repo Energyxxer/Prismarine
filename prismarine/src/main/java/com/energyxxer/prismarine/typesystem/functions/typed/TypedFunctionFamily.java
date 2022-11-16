@@ -85,6 +85,9 @@ public class TypedFunctionFamily<T extends TypedFunction> implements PrimitivePr
                 if(score != bestScore) bestScoreBranchMatches.clear();
                 bestScore = score;
                 bestScoreBranchMatches.add(method);
+
+                //try for an early exit
+                if(formalParams.size() == actualParams.size() && score >= 6) break;
             }
         }
         if(bestScoreBranchMatches.isEmpty()) {

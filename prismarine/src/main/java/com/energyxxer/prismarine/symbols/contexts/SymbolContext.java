@@ -25,7 +25,7 @@ public class SymbolContext implements ISymbolContext {
     public Symbol search(@NotNull String name, ISymbolContext from, ActualParameterList params) {
         Symbol inMap = table.get(name);
         if(inMap != null && inMap.getVisibility().isVisibleFromContext(inMap, this, from)) {
-            return table.get(name);
+            return inMap;
         }
         else if(parentScope != null) return parentScope.search(name, from, params);
         else return getGlobalContext().search(name, from, params);

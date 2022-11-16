@@ -6,6 +6,7 @@ import com.energyxxer.enxlex.report.Notice;
 import com.energyxxer.enxlex.report.NoticeType;
 import com.energyxxer.enxlex.report.Report;
 import com.energyxxer.enxlex.report.Reported;
+import com.energyxxer.prismarine.controlflow.Interruption;
 import com.energyxxer.prismarine.in.ProjectReader;
 import com.energyxxer.prismarine.libraries.PrismarineLibrary;
 import com.energyxxer.prismarine.state.CallStack;
@@ -49,6 +50,7 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
     private final GlobalSymbolContext global = new GlobalSymbolContext(this);
     private final CallStack callStack = new CallStack();
     private final TryStack tryStack = new TryStack();
+    private Interruption interruption = null;
 
     //useful stuff
     private PrismarineTypeSystem typeSystem; //set from prismarine suite config
@@ -462,6 +464,25 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
 
     public ISymbolContext getGlobalContext() {
         return global;
+    }
+
+    public void setInterruption(Interruption interruption) {
+        if(this.interruption != null) throw new IllegalStateException("Cannot set an interruption: another one is already set");
+        this.interruption = interruption;
+    }
+
+    public Interruption getInterruption() {
+        return interruption;
+    }
+
+    public boolean hasInterruption() {
+        return interruption != null;
+    }
+
+    public Interruption popInterruption() {
+        Interruption i = interruption;
+        interruption = null;
+        return i;
     }
 
     public void setDependencyMode(Dependency.Mode dependencyMode) {
