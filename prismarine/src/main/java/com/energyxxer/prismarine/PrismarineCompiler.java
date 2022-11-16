@@ -128,10 +128,11 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
             return;
         }
 
+        final Path finalRootPath = rootPath;
         //Set up walker
         walker = new FileWalker<>(
                 new DirectoryCompoundInput(rootPath.toFile()),
-                p -> new ProjectSourceFile(rootPath, p),
+                p -> new ProjectSourceFile(finalRootPath, p),
                 worker,
                 this
         );

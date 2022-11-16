@@ -14,6 +14,7 @@ import com.energyxxer.util.logger.Debug;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummary> implements ProjectSummarizer {
@@ -126,9 +127,10 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
         suiteConfig.runSummaryPreFileTree(this);
 
         logTime("Suite Pre-Walkers");
+        final Path finalRootPath = rootFile.toPath();
         walker = new FileWalker<>(
                 new DirectoryCompoundInput(rootFile),
-                p -> new ProjectSourceFile(rootFile.toPath(), p),
+                p -> new ProjectSourceFile(finalRootPath, p),
                 worker,
                 summary
         );
