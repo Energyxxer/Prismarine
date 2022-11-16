@@ -151,8 +151,10 @@ public class LazyLexer extends Lexer {
                     tempInsignificantTokens.add(token);
                     currentIndex = lookingIndexTrimmed + response.endLocation.index;
                     any = true;
+                    response.unlock();
                     break;
                 }
+                response.unlock();
             }
         }
         if(tempInsignificantTokens != null && !tempInsignificantTokens.isEmpty()) {
@@ -182,8 +184,10 @@ public class LazyLexer extends Lexer {
                             token.attachNotice(new Notice(NoticeType.ERROR, response.errorMessage, token));
                         }
                         token.setBeforeTokens(beforeTokens);
+                        response.unlock();
                         return token;
                     }
+                    response.unlock();
                 }
             }
             if (type == TokenType.END_OF_FILE) {
@@ -249,8 +253,10 @@ public class LazyLexer extends Lexer {
                 if (response.errorMessage != null) {
                     token.attachNotice(new Notice(NoticeType.ERROR, response.errorMessage, token));
                 }
+                response.unlock();
                 return token;
             }
+            response.unlock();
         }
         if(getLookingIndexTrimmed() == fileContents.length()) {
             return new Token("", TokenType.END_OF_FILE, source, lineCache.getLocationForOffset(fileContents.length()));

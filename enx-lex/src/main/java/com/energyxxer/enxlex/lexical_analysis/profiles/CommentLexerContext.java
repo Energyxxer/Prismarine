@@ -49,7 +49,7 @@ public class CommentLexerContext implements LexerContext {
             if(todoEnd < 0) todoEnd = str.length();
             sections.put(new TokenSection(todoIndex, todoEnd-todoIndex), "comment.todo");
         }
-        return new ScannerContextResponse(true, str, handledType, sections);
+        return ScannerContextResponse.success(str, handledType, sections);
     }
 
     @Override

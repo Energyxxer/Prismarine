@@ -14,7 +14,8 @@ public class StringTypeMatchLexerContext implements LexerContext {
     @Override
     public ScannerContextResponse analyze(String str, int startIndex, LexerProfile profile) {
         for(int i = 0; i < strings.length; i++) {
-            if(str.startsWith(strings[i], startIndex) && (str.length() == startIndex + strings[i].length() || !(profile.canMerge(str.charAt(startIndex+strings[i].length()-1), str.charAt(startIndex+strings[i].length()))))) return new ScannerContextResponse(true, strings[i], types[i]);
+            if(str.startsWith(strings[i], startIndex) && (str.length() == startIndex + strings[i].length() || !(profile.canMerge(str.charAt(startIndex+strings[i].length()-1), str.charAt(startIndex+strings[i].length())))))
+                return ScannerContextResponse.success(strings[i], types[i]);
         }
         return ScannerContextResponse.FAILED;
     }
@@ -23,7 +24,7 @@ public class StringTypeMatchLexerContext implements LexerContext {
     public ScannerContextResponse analyzeExpectingType(String str, int startIndex, TokenType type, LexerProfile profile) {
         for(int i = 0; i < strings.length; i++) {
             if(type == types[i] && str.startsWith(strings[i], startIndex)) {
-                return new ScannerContextResponse(true, strings[i], types[i]);
+                return ScannerContextResponse.success(strings[i], types[i]);
             }
         }
         return ScannerContextResponse.FAILED;

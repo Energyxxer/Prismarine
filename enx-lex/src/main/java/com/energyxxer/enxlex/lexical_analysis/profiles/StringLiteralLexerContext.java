@@ -42,7 +42,7 @@ public class StringLiteralLexerContext implements LexerContext {
                 end.index++;
 
                 if(c == '\n') {
-                    ScannerContextResponse response = new ScannerContextResponse(true, token.toString(), end, handledType, escapedChars);
+                    ScannerContextResponse response = ScannerContextResponse.success(token.toString(), end, handledType, escapedChars);
                     response.setError("Illegal line end in string literal", i-startIndex, 1);
                     return response;
                 }
@@ -68,7 +68,7 @@ public class StringLiteralLexerContext implements LexerContext {
                     token.append(escapedChar);
                     i++;
                 } else if(c == startingCharacter) {
-                    ScannerContextResponse response = new ScannerContextResponse(true, token.toString(), end, handledType, escapedChars);
+                    ScannerContextResponse response = ScannerContextResponse.success(token.toString(), end, handledType, escapedChars);
                     if(errorMessage != null) {
                         response.setError(errorMessage, 0, i - startIndex + 1);
                     }
@@ -76,7 +76,7 @@ public class StringLiteralLexerContext implements LexerContext {
                 }
             }
             //Unexpected end of input
-            ScannerContextResponse response = new ScannerContextResponse(true, token.toString(), end, handledType, escapedChars);
+            ScannerContextResponse response = ScannerContextResponse.success(token.toString(), end, handledType, escapedChars);
             response.setError("Unexpected end of input", str.length() - startIndex-1, 1);
             return response;
         } else return ScannerContextResponse.FAILED;

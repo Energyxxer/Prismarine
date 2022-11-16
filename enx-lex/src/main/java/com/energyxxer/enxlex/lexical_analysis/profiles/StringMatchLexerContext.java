@@ -20,7 +20,8 @@ public class StringMatchLexerContext implements LexerContext {
     @Override
     public ScannerContextResponse analyzeExpectingType(String str, int startIndex, TokenType type, LexerProfile profile) {
         for(String match : strings) {
-            if(str.startsWith(match, startIndex) && (str.length() == startIndex+match.length() || !(profile.canMerge(str.charAt(startIndex+match.length()-1), str.charAt(startIndex+match.length()))))) return new ScannerContextResponse(true, match, type);
+            if(str.startsWith(match, startIndex) && (str.length() == startIndex+match.length() || !(profile.canMerge(str.charAt(startIndex+match.length()-1), str.charAt(startIndex+match.length())))))
+                return ScannerContextResponse.success(match, type);
         }
         return ScannerContextResponse.FAILED;
     } //substring done

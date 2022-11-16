@@ -89,6 +89,7 @@ public class EagerLexer extends Lexer {
 					token.append(response.value);
 					tokenType = response.tokenType;
 					subSections = response.subSections;
+					response.unlock();
 					flush();
 					continue mainLoop;
 				}

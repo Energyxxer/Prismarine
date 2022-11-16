@@ -27,7 +27,7 @@ public class RegexLexerContext implements LexerContext {
 
         if(matcher.lookingAt() && matcher.end() - matcher.start() > 0) {
             int length = matcher.end() - matcher.start();
-            return new ScannerContextResponse(true, str.substring(startIndex,startIndex+length), handledType);
+            return ScannerContextResponse.success(str.substring(startIndex,startIndex+length), handledType);
         } else return ScannerContextResponse.FAILED;
     }
 
