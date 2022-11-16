@@ -10,6 +10,7 @@ import com.energyxxer.util.StringLocation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.function.Consumer;
 
 public class TokenList extends TokenPattern<TokenPattern<?>[]> {
@@ -210,18 +211,19 @@ public class TokenList extends TokenPattern<TokenPattern<?>[]> {
 	public void validate() {
 		this.validated = true;
 		for(TokenPattern<?> p : patterns) {
-			p.parent = this;
 			p.validate();
 		}
 	}
 
     @Override
-    public void traverse(Consumer<TokenPattern<?>> consumer) {
+    public void traverse(Consumer<TokenPattern<?>> consumer, Stack<TokenPattern<?>> stack) {
+		if(stack != null) stack.push(this);
 		consumer.accept(this);
 		for(TokenPattern<?> p : patterns) {
-			p.traverse(consumer);
+			p.traverse(consumer, stack);
 		}
-    }
+		if(stack != null) stack.pop();
+	}
 
     @Override
     public int endIndex() {

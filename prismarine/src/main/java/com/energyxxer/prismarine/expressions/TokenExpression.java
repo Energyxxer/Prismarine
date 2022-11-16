@@ -14,6 +14,7 @@ import com.energyxxer.util.StringLocation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.function.Consumer;
 
 public abstract class TokenExpression extends TokenPattern<TokenPattern<?>[]> {
@@ -201,17 +202,18 @@ public abstract class TokenExpression extends TokenPattern<TokenPattern<?>[]> {
         this.validated = true;
         TokenPattern<?>[] patterns = getContents();
         for(TokenPattern<?> p : patterns) {
-            p.parent = this;
             p.validate();
         }
     }
 
     @Override
-    public void traverse(Consumer<TokenPattern<?>> consumer) {
+    public void traverse(Consumer<TokenPattern<?>> consumer, Stack<TokenPattern<?>> stack) {
+        if(stack != null) stack.push(this);
         consumer.accept(this);
         for(TokenPattern<?> p : getContents()) {
-            p.traverse(consumer);
+            p.traverse(consumer, stack);
         }
+        if(stack != null) stack.pop();
     }
 
     @Override

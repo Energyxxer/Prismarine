@@ -9,6 +9,7 @@ import com.energyxxer.util.StringLocation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.function.Consumer;
 
 public class TokenItem extends TokenPattern<Token> {
@@ -109,9 +110,11 @@ public class TokenItem extends TokenPattern<Token> {
 	}
 
     @Override
-    public void traverse(Consumer<TokenPattern<?>> consumer) {
+    public void traverse(Consumer<TokenPattern<?>> consumer, Stack<TokenPattern<?>> stack) {
+		if(stack != null) stack.push(this);
 		consumer.accept(this);
-    }
+		if(stack != null) stack.pop();
+	}
 
     @Override
     public int endIndex() {

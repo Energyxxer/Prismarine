@@ -12,6 +12,7 @@ import com.sun.istack.internal.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -20,7 +21,6 @@ public abstract class TokenPattern<T> {
 
 	protected String name = "";
 	protected ArrayList<String> tags = null;
-	public TokenPattern parent;
 	public final TokenPatternMatch source;
 	protected boolean validated = false;
 	private ThreadLocal<Object> heldData = null;
@@ -146,7 +146,7 @@ public abstract class TokenPattern<T> {
 	public boolean isValidated() {
 		return validated;
 	}
-	public abstract void traverse(Consumer<TokenPattern<?>> consumer);
+	public abstract void traverse(Consumer<TokenPattern<?>> consumer, Stack<TokenPattern<?>> stack);
 
 	public <CTX> Object findThenEvaluate(String path, Object defaultValue, CTX ctx, Object[] data) {
 		TokenPattern<?> found = find(path);

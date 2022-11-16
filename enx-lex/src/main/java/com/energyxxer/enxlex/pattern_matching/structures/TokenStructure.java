@@ -9,6 +9,7 @@ import com.energyxxer.util.StringLocation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.function.Consumer;
 
 public class TokenStructure extends TokenPattern<TokenPattern<?>> {
@@ -110,15 +111,16 @@ public class TokenStructure extends TokenPattern<TokenPattern<?>> {
 	@Override
 	public void validate() {
 		this.validated = true;
-		group.parent = this;
 		group.validate();
 	}
 
     @Override
-    public void traverse(Consumer<TokenPattern<?>> consumer) {
+    public void traverse(Consumer<TokenPattern<?>> consumer, Stack<TokenPattern<?>> stack) {
+		if(stack != null) stack.push(this);
 		consumer.accept(this);
-		group.traverse(consumer);
-    }
+		group.traverse(consumer, stack);
+		if(stack != null) stack.pop();
+	}
 
     @Override
 	public void simplify(SimplificationDomain domain) {
