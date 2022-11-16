@@ -148,35 +148,35 @@ public abstract class TokenPattern<T> {
 	}
 	public abstract void traverse(Consumer<TokenPattern<?>> consumer);
 
-	public Object findThenEvaluate(String path, Object defaultValue, Object... data) {
+	public <CTX> Object findThenEvaluate(String path, Object defaultValue, CTX ctx, Object[] data) {
 		TokenPattern<?> found = find(path);
 		if(found == null) return defaultValue;
-		return found.evaluate(data);
+		return found.evaluate(ctx, data);
 	}
 
-	public Object findThenEvaluateLazyDefault(String path, Supplier<Object> defaultValue, Object... data) {
+	public <CTX> Object findThenEvaluateLazyDefault(String path, Supplier<Object> defaultValue, CTX ctx, Object[] data) {
 		TokenPattern<?> found = find(path);
 		if(found == null) return defaultValue.get();
-		return found.evaluate(data);
+		return found.evaluate(ctx, data);
 	}
 
-    public Object evaluate(Object... data) {
-    	SimplificationDomain simplified = SimplificationDomain.get(this, data).simplifyFully();
+    public <CTX> Object evaluate(CTX ctx, Object[] data) {
+    	SimplificationDomain simplified = SimplificationDomain.get(this, ctx, data).simplifyFully();
 
     	TokenPatternMatch simplifiedSource = simplified.pattern.source;
 
-    	PatternEvaluator evaluator = simplifiedSource.getEvaluator();
+    	PatternEvaluator<CTX> evaluator = simplifiedSource.getEvaluator();
     	if(evaluator == null) {
     		throw new PatternEvaluator.NoEvaluatorException("Missing evaluator for pattern " + simplifiedSource);
 		}
 		simplified.unlock();
-		return evaluator.evaluate(simplified.pattern, simplified.data);
+		return evaluator.evaluate(simplified.pattern, (CTX) simplified.ctx, simplified.data);
 	}
 
-	public static Object evaluate(TokenPattern<?> pattern, Object... data) {
-		SimplificationDomain domain = SimplificationDomain.get(pattern, data).simplifyFully();
+	public static <CTX> Object evaluate(TokenPattern<?> pattern, CTX ctx, Object[] data) {
+		SimplificationDomain domain = SimplificationDomain.get(pattern, ctx, data).simplifyFully();
 		domain.unlock();
-    	return domain.pattern.evaluate(domain.data);
+    	return domain.pattern.evaluate(domain.ctx, domain.data);
 	}
 
 	public void simplify(SimplificationDomain domain) {
@@ -192,18 +192,20 @@ public abstract class TokenPattern<T> {
 	public static class SimplificationDomain {
 		private static ThreadLocal<SimplificationDomain> INSTANCE = ThreadLocal.withInitial(SimplificationDomain::new);
     	public TokenPattern<?> pattern;
+		public Object ctx;
     	public Object[] data;
 		private boolean locked = false;
 
 		public SimplificationDomain() {
 		}
 
-		public static SimplificationDomain get(TokenPattern<?> pattern, Object[] data) {
+		public static SimplificationDomain get(TokenPattern<?> pattern, Object ctx, Object[] data) {
 			SimplificationDomain instance = INSTANCE.get();
 			if(instance.locked) {
 				throw new IllegalStateException("Must unlock SimplificationDomain before trying to create another. Please report ASAP, and include the stack trace");
 			}
 			instance.pattern = pattern;
+			instance.ctx = ctx;
 			instance.data = data;
 			instance.locked = true;
 			return instance;

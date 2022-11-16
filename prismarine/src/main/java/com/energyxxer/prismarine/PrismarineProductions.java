@@ -83,17 +83,17 @@ public class PrismarineProductions {
         return new TokenGroupMatch(true);
     }
 
-    public static TokenGroupMatch wrapper(TokenPatternMatch inner, PostValidationPatternEvaluator evaluator) {
-        return (TokenGroupMatch) group(inner).setEvaluator((p, d) -> {
-            Object result = ((TokenGroup) p).getContents()[0].evaluate(d);
-            return evaluator.apply(result, p, d);
+    public static <CTX> TokenGroupMatch wrapper(TokenPatternMatch inner, PostValidationPatternEvaluator<CTX> evaluator) {
+        return (TokenGroupMatch) group(inner).setEvaluator((TokenPattern<?> p, CTX ctx, Object[] d) -> {
+            Object result = ((TokenGroup) p).getContents()[0].evaluate(ctx, d);
+            return evaluator.apply(result, p, ctx, d);
         });
     }
 
-    public static TokenGroupMatch wrapper(TokenPatternMatch inner, Function<Object[], Object[]> dataTransformer, PostValidationPatternEvaluator evaluator) {
-        return (TokenGroupMatch) group(inner).setEvaluator((p, d) -> {
-            Object result = ((TokenGroup) p).getContents()[0].evaluate(dataTransformer.apply(d));
-            return evaluator.apply(result, p, d);
+    public static <CTX> TokenGroupMatch wrapper(TokenPatternMatch inner, Function<Object[], Object[]> dataTransformer, PostValidationPatternEvaluator<CTX> evaluator) {
+        return (TokenGroupMatch) group(inner).setEvaluator((TokenPattern<?> p, CTX ctx, Object[] d) -> {
+            Object result = ((TokenGroup) p).getContents()[0].evaluate(ctx, dataTransformer.apply(d));
+            return evaluator.apply(result, p, ctx, d);
         });
     }
 
@@ -136,7 +136,7 @@ public class PrismarineProductions {
         for(Object enumConstant : enumClass.getEnumConstants()) {
             String lit = ((T) enumConstant).name().toLowerCase(Locale.ENGLISH);
             if(lit.startsWith("_")) lit = lit.substring(1);
-            choice.add(literal(lit).setEvaluator((p, d) -> enumConstant));
+            choice.add(literal(lit).setEvaluator((p, ctx, d) -> enumConstant));
         }
         return choice;
     }
@@ -146,7 +146,7 @@ public class PrismarineProductions {
         for(T enumConstant : enumConstants) {
             String lit = enumConstant.name().toLowerCase(Locale.ENGLISH);
             if(lit.startsWith("_")) lit = lit.substring(1);
-            choice.add(literal(lit).setEvaluator((p, d) -> enumConstant));
+            choice.add(literal(lit).setEvaluator((p, ctx, d) -> enumConstant));
         }
         return choice;
     }
@@ -211,8 +211,8 @@ public class PrismarineProductions {
         FILE.add(group);
     }
 
-    public interface PostValidationPatternEvaluator {
-        Object apply(Object result, TokenPattern<?> pattern, Object... data);
+    public interface PostValidationPatternEvaluator<CTX> {
+        Object apply(Object result, TokenPattern<?> pattern, CTX ctx, Object[] data);
     }
 
 

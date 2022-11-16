@@ -330,31 +330,31 @@ public abstract class PrismarineTypeSystem {
     }
 
     public static TokenPatternMatch validatorGroup(TokenPatternMatch innerMatch, boolean nullable, Class... expected) {
-        return PrismarineProductions.group(innerMatch).setEvaluator((p, d) -> {
+        return PrismarineProductions.group(innerMatch).setEvaluator((TokenPattern<?> p, ISymbolContext ctx, Object[] d) -> {
             TokenPattern<?> inner = ((TokenGroup) p).getContents()[0];
-            Object result = inner.evaluate(d);
+            Object result = inner.evaluate(ctx, d);
             if(result == null && nullable) return null;
-            return assertOfClass(result, inner, ((ISymbolContext) d[0]), expected);
+            return assertOfClass(result, inner, ctx, expected);
         });
     }
 
-    public static TokenPatternMatch validatorGroup(TokenPatternMatch innerMatch, PrismarineProductions.PostValidationPatternEvaluator finalEvaluator, boolean nullable, Class... expected) {
-        return PrismarineProductions.group(innerMatch).setEvaluator((p, d) -> {
+    public static TokenPatternMatch validatorGroup(TokenPatternMatch innerMatch, PrismarineProductions.PostValidationPatternEvaluator<ISymbolContext> finalEvaluator, boolean nullable, Class... expected) {
+        return PrismarineProductions.group(innerMatch).setEvaluator((TokenPattern<?> p, ISymbolContext ctx, Object[] d) -> {
             TokenPattern<?> inner = ((TokenGroup) p).getContents()[0];
-            Object result = inner.evaluate(d);
+            Object result = inner.evaluate(ctx, d);
             if(result == null && nullable) return null;
-            result = assertOfClass(result, inner, ((ISymbolContext) d[0]), expected);
-            return finalEvaluator.apply(result, p, d);
+            result = assertOfClass(result, inner, ctx, expected);
+            return finalEvaluator.apply(result, p, ctx, d);
         });
     }
 
-    public static TokenPatternMatch validatorGroup(TokenPatternMatch innerMatch, Function<Object[], Object[]> dataTransformer, PrismarineProductions.PostValidationPatternEvaluator finalEvaluator, boolean nullable, Class... expected) {
-        return PrismarineProductions.group(innerMatch).setEvaluator((p, d) -> {
+    public static TokenPatternMatch validatorGroup(TokenPatternMatch innerMatch, Function<Object[], Object[]> dataTransformer, PrismarineProductions.PostValidationPatternEvaluator<ISymbolContext> finalEvaluator, boolean nullable, Class... expected) {
+        return PrismarineProductions.group(innerMatch).setEvaluator((TokenPattern<?> p, ISymbolContext ctx, Object[] d) -> {
             TokenPattern<?> inner = ((TokenGroup) p).getContents()[0];
-            Object result = inner.evaluate(dataTransformer.apply(d));
+            Object result = inner.evaluate(ctx, dataTransformer.apply(d));
             if(result == null && nullable) return null;
-            result = assertOfClass(result, inner, ((ISymbolContext) d[0]), expected);
-            return finalEvaluator.apply(result, p, d);
+            result = assertOfClass(result, inner, ctx, expected);
+            return finalEvaluator.apply(result, p, ctx, d);
         });
     }
     //endregion

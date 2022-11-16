@@ -153,7 +153,7 @@ public class OperatorManager<T extends TypedFunction> {
             if(operands[i] instanceof TokenExpression) {
                 operands[i] = evaluate((TokenExpression) operands[i], ctx);
             } else if(operands[i] instanceof TokenPattern<?>) {
-                operands[i] = ((TokenPattern<?>) operands[i]).evaluate(ctx);
+                operands[i] = ((TokenPattern<?>) operands[i]).evaluate(ctx, null);
             }
         }
 

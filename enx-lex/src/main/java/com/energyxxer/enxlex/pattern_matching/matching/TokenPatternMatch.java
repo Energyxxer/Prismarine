@@ -158,7 +158,7 @@ public abstract class TokenPatternMatch {
         return evaluator;
     }
 
-    public TokenPatternMatch setEvaluator(PatternEvaluator evaluator) {
+    public <CTX> TokenPatternMatch setEvaluator(PatternEvaluator<CTX> evaluator) {
         this.evaluator = evaluator;
         return this;
     }
