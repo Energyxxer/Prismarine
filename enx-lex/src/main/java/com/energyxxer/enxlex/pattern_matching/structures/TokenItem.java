@@ -76,14 +76,14 @@ public class TokenItem extends TokenPattern<Token> {
 
 	@Override
 	public StringLocation getStringLocation() {
-		return new StringLocation(token.loc.index, token.loc.line, token.loc.column);
+		return new StringLocation(token.index, token.line, token.column);
 	}
 
 	@Override
 	public StringBounds getStringBounds() {
 		return new StringBounds(
-				new StringLocation(token.loc.index, token.loc.line, token.loc.column),
-				new StringLocation(token.loc.index + token.value.length(), token.loc.line, token.loc.column + token.value.length())
+				new StringLocation(token.index, token.line, token.column),
+				new StringLocation(token.index + token.value.length(), token.line, token.column + token.value.length())
 		);
 	}
 

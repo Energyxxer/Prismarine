@@ -103,9 +103,9 @@ public abstract class TokenPattern<T> {
 	public int getCharLength() {
 		ArrayList<Token> tokens = flattenTokens(new ArrayList<>());
 		if(tokens.size() == 0) return 0;
-		int start = tokens.get(0).loc.index;
+		int start = tokens.get(0).index;
 		Token lastToken = tokens.get(tokens.size()-1);
-		int end = lastToken.loc.index + lastToken.value.length();
+		int end = lastToken.index + lastToken.value.length();
 		return end - start;
 	}
 

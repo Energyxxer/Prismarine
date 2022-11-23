@@ -27,8 +27,10 @@ public class TokenGlue extends TokenPatternMatch {
                 TokenMatchResponse match = ignored.match(index, lexer);
                 if(match.matched) {
                     matched = false;
+                    match.discard();
                     break;
                 }
+                match.discard();
             }
             if(matched && !this.required.isEmpty()) {
                 boolean valid = false;
@@ -36,14 +38,20 @@ public class TokenGlue extends TokenPatternMatch {
                     TokenMatchResponse match = required.match(index, lexer);
                     if(match.matched) {
                         valid = true;
+                        match.discard();
                         break;
                     }
+                    match.discard();
                 }
                 matched = valid;
             }
-            return new TokenMatchResponse(matched, null, 0, index, null);
+            if(matched) {
+                return TokenMatchResponse.success(0, index, null);
+            } else {
+                return TokenMatchResponse.failure(null, 0, index, this, null);
+            }
         }
-        return new TokenMatchResponse(false, lexer.retrieveAnyToken(), 0, index, this, null);
+        return TokenMatchResponse.failure(lexer.retrieveAnyToken(), 0, index, this, null);
     }
 
     @Override

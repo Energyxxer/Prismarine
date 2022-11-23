@@ -63,12 +63,15 @@ public class TokenSwitchMatch extends TokenPatternMatch {
             TokenMatchResponse headResponse = switchMatch.match(index, lexer);
             if(headResponse.matched) {
                 String key = ((TokenItem) headResponse.pattern).getContents().value;
+                headResponse.discard();
 
                 TokenPatternMatch chosenBranch = entries.get(key);
 
                 if(chosenBranch != null) {
                     branchResponse = chosenBranch.match(index, lexer);
                 }
+            } else {
+                headResponse.discard();
             }
         }
 
@@ -79,13 +82,13 @@ public class TokenSwitchMatch extends TokenPatternMatch {
         if(branchResponse != null && branchResponse.matched) {
             TokenSwitch result = new TokenSwitch(this.name, branchResponse.pattern, this).addTags(this.tags);
             invokeProcessors(result, lexer);
-            return new TokenMatchResponse(true, null, branchResponse.length, branchResponse.endIndex, result);
+            return TokenMatchResponse.success(branchResponse.length, branchResponse.endIndex, result);
         } else if(branchResponse != null && !switchMatch.isRecessive()) {
             invokeFailProcessors(branchResponse.pattern, lexer);
-            return new TokenMatchResponse(false, branchResponse.faultyToken, branchResponse.length, branchResponse.endIndex, branchResponse.expected, null);
+            return TokenMatchResponse.failure(branchResponse.faultyToken, branchResponse.length, branchResponse.endIndex, branchResponse.expected, null);
         } else {
             invokeFailProcessors(null, lexer);
-            return new TokenMatchResponse(false, null, 0, index, this, null);
+            return TokenMatchResponse.failure(null, 0, index, this, null);
         }
     }
 

@@ -1,10 +1,10 @@
 package com.energyxxer.util;
 
-import java.util.HashMap;
-
 public class StringLocationCache {
-    //              (line)   (index)
-    private final HashMap<Integer, Integer> lineLocations = new HashMap<>();
+    //index: line number (0-indexed)
+    //value: index within text of first character in the line (0-indexed)
+    private final PrimitiveIntList lineLocations = new PrimitiveIntList();
+    //0-indexed
     private int lastKnownLine = 0;
 
     public String text;
@@ -18,15 +18,15 @@ public class StringLocationCache {
     }
 
     public void textChanged(String newText, int changeIndex) {
+        //changeIndex: 0-indexed
         this.text = newText;
         if(changeIndex > lineLocations.get(lastKnownLine)) return;
         int line = getLocationForOffset(changeIndex).line-1;
-        while(lineLocations.containsKey(line)) {
-            lineLocations.remove(line);
-            line++;
+        if(lineLocations.size() >= line) {
+            lineLocations.setSize(line);
         }
         if(lineLocations.isEmpty()) {
-            lineLocations.put(0,0);
+            lineLocations.add(0);
         }
         lastKnownLine = lineLocations.size()-1;
     }
@@ -37,12 +37,16 @@ public class StringLocationCache {
     }
 
     public void clear() {
-        lineLocations.clear();
-        lineLocations.put(0,0);
+        lineLocations.setSize(0);
+        lineLocations.add(0);
         lastKnownLine = 0;
     }
 
     public StringLocation getLocationForOffset(int index) {
+        return getLocationForOffset(index, new StringLocation(0, 0, 0));
+    }
+
+    public StringLocation getLocationForOffset(int index, StringLocation location) {
         int line = 0;
         int lineStart = 0;
 
@@ -51,20 +55,15 @@ public class StringLocationCache {
 
         while(lastLine >= firstLine) {
             if(lastLine <= firstLine) {
-                Integer boxedLoc = lineLocations.get(lastLine);
-                if(boxedLoc == null) { //Concurrent modification occurred.
-                    break;
-                }
+                int loc = lineLocations.get(lastLine);
                 line = lastLine;
-                lineStart = boxedLoc;
+                lineStart = loc;
                 break;
             } else {
                 int pivot = (lastLine + firstLine) / 2;
-                Integer boxedLoc = lineLocations.get(pivot);
-                if(boxedLoc == null) break;
-                int loc = boxedLoc;
+                int loc = lineLocations.get(pivot);
                 if(loc == index) {
-                    return new StringLocation(index, pivot+1, 1);
+                    return location.setLocation(index, pivot+1, 1);
                 } else if(index > loc) {
                     firstLine = pivot;
                     if(lastLine - firstLine <= 1) {
@@ -76,24 +75,26 @@ public class StringLocationCache {
             }
         }
 
-        if(text == null) return new StringLocation(0, 1, 1);
+        if(text == null) return location.setLocation(0, 1, 1);
 
         int column = 0;
 
         for(int i = lineStart; i < text.length(); i++) {
             if(i == index) {
-                return new StringLocation(index, line + 1, column + 1);
+                return location.setLocation(index, line + 1, column + 1);
             }
             if(text.charAt(i) == '\n') {
                 line++;
                 column = 0;
-                lineLocations.putIfAbsent(line, i + 1);
+                if(line == lineLocations.size()) {
+                    lineLocations.add(i + 1);
+                }
                 lastKnownLine = Math.max(lastKnownLine, line);
             } else {
                 column++;
             }
         }
-        return new StringLocation(index, line + 1, column + 1);
+        return location.setLocation(index, line + 1, column + 1);
     }
 
     public void prepopulate() {

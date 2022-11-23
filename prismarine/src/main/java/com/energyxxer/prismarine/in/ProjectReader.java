@@ -115,7 +115,6 @@ public class ProjectReader {
         }
 
         public Query needsString() {
-            this.needsBytes();
             this.needsString = true;
             return this;
         }
@@ -218,7 +217,7 @@ public class ProjectReader {
         result.readTime = System.currentTimeMillis();
         result.size = getFileSize(leafFile);
         result.hashCode = hashCode;
-        result.bytes = bytes;
+        if(query.needsBytes) result.bytes = bytes;
         result.skippableIfNotChanged = query.skipIfNotChanged;
         result.changedSinceCached = existing == null || existing.hashCode != hashCode;
         if(query.needsString) result.string = new String(bytes, DEFAULT_CHARSET);
@@ -259,6 +258,8 @@ public class ProjectReader {
             if(query.needsSummary && (response.matched || !query.skipSummaryIfMatchFailed)) {
                 result.summary = summary;
             }
+
+            lexer.clear();
         }
 
         return result;

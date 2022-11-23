@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 public class RegexLexerContext implements LexerContext {
     private final Pattern pattern;
+    private final Matcher matcher;
     private final TokenType handledType;
     private boolean parseEagerly = false;
 
@@ -14,6 +15,7 @@ public class RegexLexerContext implements LexerContext {
         this.pattern = pattern;
         this.handledType = handledType;
         this.parseEagerly = parseEagerly;
+        this.matcher = pattern.matcher("");
     }
 
     @Override
@@ -22,8 +24,9 @@ public class RegexLexerContext implements LexerContext {
     }
 
     @Override
-    public ScannerContextResponse analyzeExpectingType(String str, int startIndex, TokenType type, LexerProfile profile) {
-        Matcher matcher = pattern.matcher(str).region(startIndex, str.length());
+    public synchronized ScannerContextResponse analyzeExpectingType(String str, int startIndex, TokenType type, LexerProfile profile) {
+        matcher.reset(str);
+        matcher.region(startIndex, str.length());
 
         if(matcher.lookingAt() && matcher.end() - matcher.start() > 0) {
             int length = matcher.end() - matcher.start();

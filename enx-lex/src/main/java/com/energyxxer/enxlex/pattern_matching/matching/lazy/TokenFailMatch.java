@@ -32,7 +32,8 @@ public class TokenFailMatch extends TokenPatternMatch {
         }
 
         invokeFailProcessors(itemMatch.pattern, lexer);
-        return new TokenMatchResponse(false, null, 0, index, this, null);
+        itemMatch.discard();
+        return TokenMatchResponse.failure(null, 0, index, this, null);
     }
 
     @Override

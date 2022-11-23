@@ -78,4 +78,8 @@ public abstract class Lexer {
     public abstract boolean isRangeWhitespace(int startIndex, int endIndex);
 
     public abstract int getFileLength();
+
+    public void clear() {
+        stream.clear();
+    };
 }

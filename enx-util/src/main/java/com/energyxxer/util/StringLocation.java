@@ -27,6 +27,13 @@ public class StringLocation {
 				column == that.column;
 	}
 
+	public StringLocation setLocation(int index, int line, int column) {
+		this.index = index;
+		this.line = line;
+		this.column = column;
+		return this;
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(index, line, column);

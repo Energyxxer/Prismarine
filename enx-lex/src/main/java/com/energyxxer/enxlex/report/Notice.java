@@ -80,7 +80,7 @@ public class Notice {
 
     public void setSourceLocation(Token token) {
         pointToSource(token.source);
-        this.locationIndex = token.loc.index;
+        this.locationIndex = token.index;
         this.locationLength = token.value.length();
     }
 

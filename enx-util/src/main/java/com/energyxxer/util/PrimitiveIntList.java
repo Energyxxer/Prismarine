@@ -15,6 +15,12 @@ public class PrimitiveIntList {
         return len;
     }
 
+    public void setSize(int size) {
+        if(size > len) throw new IndexOutOfBoundsException("new size > size");
+        if(size < 0) throw new IndexOutOfBoundsException("new size < 0");
+        len = size;
+    }
+
     public boolean isEmpty() {
         return len == 0;
     }

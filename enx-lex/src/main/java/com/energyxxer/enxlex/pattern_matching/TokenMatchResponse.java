@@ -5,11 +5,15 @@ import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
 import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 
+import java.util.ArrayList;
+
 public class TokenMatchResponse {
-	public final boolean matched;
-	public final Token faultyToken;
-	public final int length;
-	public final int endIndex;
+	private static final ThreadLocal<ArrayList<TokenMatchResponse>> reusableResponses = ThreadLocal.withInitial(ArrayList::new);
+
+	public boolean matched;
+	public Token faultyToken;
+	public int length;
+	public int endIndex;
 	public TokenPatternMatch expected = null;
 	public TokenPattern<?> pattern = null;
 
@@ -17,17 +21,7 @@ public class TokenMatchResponse {
 	public static final int PARTIAL_MATCH = 1;
 	public static final int COMPLETE_MATCH = 2;
 
-	public TokenMatchResponse(boolean matched, Token faultyToken, int length, int endIndex, TokenPattern<?> pattern) {
-		this(matched, faultyToken, length, endIndex, null, pattern);
-	}
-	
-	public TokenMatchResponse(boolean matched, Token faultyToken, int length, int endIndex, TokenPatternMatch expected, TokenPattern<?> pattern) {
-		this.matched = matched;
-		this.faultyToken = faultyToken;
-		this.length = length;
-		this.endIndex = endIndex;
-		this.expected = expected;
-		this.pattern = pattern;
+	public TokenMatchResponse() {
 	}
 
 	public int getMatchType() {
@@ -46,6 +40,46 @@ public class TokenMatchResponse {
 				", pattern=" + pattern +
 				", matchType=" + getMatchType() +
 				'}';
+	}
+
+	private static TokenMatchResponse getOrCreateResponse() {
+		ArrayList<TokenMatchResponse> availableResponses = reusableResponses.get();
+		if(availableResponses.isEmpty()) {
+			return new TokenMatchResponse();
+		} else {
+			return availableResponses.remove(availableResponses.size()-1);
+		}
+	}
+
+	public static TokenMatchResponse success(int length, int endIndex, TokenPattern<?> pattern) {
+		TokenMatchResponse response = getOrCreateResponse();
+		response.matched = true;
+		response.faultyToken = null;
+		response.length = length;
+		response.endIndex = endIndex;
+		response.expected = null;
+		response.pattern = pattern;
+		return response;
+	}
+
+	public static TokenMatchResponse failure(Token faultyToken, int length, int endIndex, TokenPatternMatch expected, TokenPattern<?> pattern) {
+		TokenMatchResponse response = getOrCreateResponse();
+		response.matched = false;
+		response.faultyToken = faultyToken;
+		response.length = length;
+		response.endIndex = endIndex;
+		response.expected = expected;
+		response.pattern = pattern;
+		return response;
+	}
+
+	public void discard() {
+		reusableResponses.get().add(this);
+	}
+
+	public boolean matchedThenDiscard() {
+		discard();
+		return this.matched;
 	}
 
 	public String getErrorMessage() {

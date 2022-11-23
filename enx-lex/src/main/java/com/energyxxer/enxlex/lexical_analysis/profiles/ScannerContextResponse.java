@@ -135,9 +135,12 @@ public class ScannerContextResponse {
 
         instance.success = true;
         instance.value = value;
-        instance.endLocation = endLoc;
         instance.tokenType = tokenType;
+        instance.endLocation = endLoc;
         instance.subSections = subSections;
+        instance.errorMessage = null;
+        instance.errorIndex = -1;
+        instance.errorLength = 0;
         instance.locked = true;
 
         return instance;

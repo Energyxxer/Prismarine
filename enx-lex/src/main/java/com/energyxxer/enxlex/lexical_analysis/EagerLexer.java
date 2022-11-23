@@ -6,7 +6,6 @@ import com.energyxxer.enxlex.lexical_analysis.profiles.ScannerContextResponse;
 import com.energyxxer.enxlex.lexical_analysis.token.*;
 import com.energyxxer.enxlex.report.Notice;
 import com.energyxxer.enxlex.report.NoticeType;
-import com.energyxxer.util.StringLocation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,7 +53,7 @@ public class EagerLexer extends Lexer {
 		token.setLength(0);
 
 		{
-			Token header = new Token("", TokenType.FILE_HEADER, source, new StringLocation(0, 0, 0));
+			Token header = new Token("", TokenType.FILE_HEADER, source, 0, 0, 0);
 			profile.putHeaderInfo(header);
 			flush(header);
 		}
@@ -149,7 +148,7 @@ public class EagerLexer extends Lexer {
 
 	private void flush() {
 		if(token.length() > 0 || (tokenType == TokenType.FILE_HEADER || tokenType == TokenType.END_OF_FILE))
-			flush(new Token(token.toString(), tokenType, source, new StringLocation(tokenIndex, tokenLine, tokenColumn), subSections));
+			flush(new Token(token.toString(), tokenType, source, tokenIndex, tokenLine, tokenColumn, subSections));
 
 		token.setLength(0);
 		tokenType = null;
@@ -180,11 +179,11 @@ public class EagerLexer extends Lexer {
 		int minIndex = 0; // inclusive
 		int maxIndex = list.size(); // exclusive
 
-		if (index < list.get(minIndex).loc.index)
+		if (index < list.get(minIndex).index)
 		{
 			return minIndex;
 		}
-		if (index > list.get(maxIndex-1).loc.index)
+		if (index > list.get(maxIndex-1).index)
 		{
 			return maxIndex;
 		}
@@ -193,7 +192,7 @@ public class EagerLexer extends Lexer {
 		{
 			int pivotIndex = (minIndex + maxIndex) / 2;
 
-			int pivotId = list.get(pivotIndex).loc.index;
+			int pivotId = list.get(pivotIndex).index;
 			if (pivotId == index)
 			{
 				return pivotIndex;
@@ -218,7 +217,7 @@ public class EagerLexer extends Lexer {
 			tokenIndex++;
 		}
 		if(tokenIndex < stream.tokens.size()) {
-			return stream.tokens.get(tokenIndex).loc.index;
+			return stream.tokens.get(tokenIndex).index;
 		}
 		return currentIndex;
 	}
@@ -255,5 +254,12 @@ public class EagerLexer extends Lexer {
 	@Override
 	public int getFileLength() {
 		return stream.tokens.isEmpty() ? 0 : stream.tokens.get(stream.tokens.size()-1).getStringBounds().end.index;
+	}
+
+	@Override
+	public void clear() {
+		super.clear();
+		source = null;
+		fileContents = null;
 	}
 }

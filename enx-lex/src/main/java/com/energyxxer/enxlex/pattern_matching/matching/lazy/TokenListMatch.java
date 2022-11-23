@@ -89,6 +89,7 @@ public class TokenListMatch extends TokenPatternMatch {
                     expectSeparator = false;
                     switch (itemMatch.getMatchType()) {
                         case NO_MATCH: {
+                            itemMatch.discard();
                             break itemLoop;
                         }
                         case PARTIAL_MATCH: {
@@ -98,6 +99,7 @@ public class TokenListMatch extends TokenPatternMatch {
                             length += itemMatch.length;
                             endIndex = Math.max(endIndex, itemMatch.endIndex);
                             if (itemMatch.pattern != null) contents.add(itemMatch.pattern);
+                            itemMatch.discard();
                             break itemLoop;
                         }
                         case COMPLETE_MATCH: {
@@ -107,6 +109,7 @@ public class TokenListMatch extends TokenPatternMatch {
                             if (itemMatch.pattern != null) contents.add(itemMatch.pattern);
                         }
                     }
+                    itemMatch.discard();
                 } else {
                     if (this.separator != null) {
                         TokenMatchResponse itemMatch = this.pattern.match(i, lexer);
@@ -119,6 +122,7 @@ public class TokenListMatch extends TokenPatternMatch {
                                 length += itemMatch.length;
                                 endIndex = Math.max(endIndex, itemMatch.endIndex);
                                 if (itemMatch.pattern != null) contents.add(itemMatch.pattern);
+                                itemMatch.discard();
                                 break itemLoop;
                             }
                             case COMPLETE_MATCH: {
@@ -128,10 +132,12 @@ public class TokenListMatch extends TokenPatternMatch {
                                 if (itemMatch.pattern != null) contents.add(itemMatch.pattern);
                                 expectSeparator = true;
                                 if (itemMatch.pattern instanceof TokenStructure && ((TokenStructure) itemMatch.pattern).getContents().hasTag(StandardTags.LIST_TERMINATOR)) {
+                                    itemMatch.discard();
                                     break itemLoop;
                                 }
                             }
                         }
+                        itemMatch.discard();
                     } else {
                         TokenMatchResponse itemMatch = this.pattern.match(i, lexer);
                         length += itemMatch.length;
@@ -144,6 +150,7 @@ public class TokenListMatch extends TokenPatternMatch {
                                     length += itemMatch.length;
                                     if (itemMatch.pattern != null) contents.add(itemMatch.pattern);
                                 }
+                                itemMatch.discard();
                                 break itemLoop;
                             }
                             case PARTIAL_MATCH: {
@@ -152,6 +159,7 @@ public class TokenListMatch extends TokenPatternMatch {
                                 expected = itemMatch.expected;
                                 endIndex = Math.max(endIndex, itemMatch.endIndex);
                                 if (itemMatch.pattern != null) contents.add(itemMatch.pattern);
+                                itemMatch.discard();
                                 break itemLoop;
                             }
                             case COMPLETE_MATCH: {
@@ -159,10 +167,12 @@ public class TokenListMatch extends TokenPatternMatch {
                                 endIndex = Math.max(endIndex, itemMatch.endIndex);
                                 if (itemMatch.pattern != null) contents.add(itemMatch.pattern);
                                 if (itemMatch.pattern instanceof TokenStructure && ((TokenStructure) itemMatch.pattern).getContents().hasTag(StandardTags.LIST_TERMINATOR)) {
+                                    itemMatch.discard();
                                     break itemLoop;
                                 }
                             }
                         }
+                        itemMatch.discard();
                     }
                 }
             }
@@ -173,10 +183,11 @@ public class TokenListMatch extends TokenPatternMatch {
             TokenList list = new TokenList(this, contents.toArray(new TokenPattern[0])).setName(this.name).addTags(this.tags);
             if (!hasMatched) {
                 invokeFailProcessors(list, lexer);
+                return TokenMatchResponse.failure(faultyToken, length, endIndex, expected, list);
             } else {
                 invokeProcessors(list, lexer);
+                return TokenMatchResponse.success(length, endIndex, list);
             }
-            return new TokenMatchResponse(hasMatched, faultyToken, length, endIndex, expected, list);
         } finally {
             TokenPattern.PATTERN_LIST_POOL.get().free(contents);
         }

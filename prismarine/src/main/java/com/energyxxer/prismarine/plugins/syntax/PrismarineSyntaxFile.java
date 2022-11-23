@@ -36,13 +36,15 @@ public class PrismarineSyntaxFile extends PrismarinePluginFile<TokenPatternMatch
 
         TokenMatchResponse response = PrismarineMetaProductions.FILE.match(0, lexer);
 
-        lexer.getStream().tokens.clear();
+        lexer.clear();
 
         if(!response.matched) {
+            response.discard();
             throw new IOException("Syntax error in Meta Syntax file '" + source + "': " + response.getErrorMessage());
         }
 
         pattern = response.pattern;
+        response.discard();
     }
 
     public void createSyntax(PrismarineMetaBuilder builder) throws IOException {

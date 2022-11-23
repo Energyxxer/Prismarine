@@ -1,8 +1,6 @@
 package com.energyxxer.enxlex.lexical_analysis.token;
 
 import com.energyxxer.enxlex.lexical_analysis.profiles.LexerProfile;
-import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
-import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -37,6 +35,10 @@ public class TokenStream implements Iterable<Token> {
 	}
 
 	public void onWrite(Token token) {}
+
+	public void clear() {
+		tokens.clear();
+	}
 
 	@Override
 	public Iterator<Token> iterator() {

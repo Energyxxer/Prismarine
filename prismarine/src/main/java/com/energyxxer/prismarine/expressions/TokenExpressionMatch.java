@@ -243,11 +243,12 @@ public class TokenExpressionMatch extends TokenPatternMatch {
 
         if(!hasMatched) {
             invokeFailProcessors(expr, lexer);
+            return TokenMatchResponse.failure(faultyToken, length, endIndex, expected, expr);
         } else {
             endIndex = expr.endIndex();
             invokeProcessors(expr, lexer);
+            return TokenMatchResponse.success(length, endIndex, expr);
         }
-        return new TokenMatchResponse(hasMatched, faultyToken, length, endIndex, expected, expr);
     }
 
     @Override

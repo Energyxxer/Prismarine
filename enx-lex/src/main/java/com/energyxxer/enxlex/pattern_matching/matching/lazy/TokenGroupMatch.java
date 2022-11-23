@@ -39,7 +39,7 @@ public class TokenGroupMatch extends TokenPatternMatch {
     @Override
     public TokenMatchResponse match(int index, Lexer lexer) {
         lexer.setCurrentIndex(index);
-        if(items.size() == 0) return new TokenMatchResponse(true, null, 0, index, null, new TokenGroup(this, new TokenPattern<?>[0]));
+        if(items.size() == 0) return TokenMatchResponse.success(0, index, new TokenGroup(this, new TokenPattern<?>[0]));
 
         int popSuggestionStatus = handleSuggestionTags(lexer, index);
 
@@ -74,6 +74,7 @@ public class TokenGroupMatch extends TokenPatternMatch {
                             hasMatched = false;
                             faultyToken = itemMatch.faultyToken;
                             expected = itemMatch.expected;
+                            itemMatch.discard();
                             break itemLoop;
                         }
                         break;
@@ -84,12 +85,13 @@ public class TokenGroupMatch extends TokenPatternMatch {
                             longestFailedMatch = itemMatch;
                             longestFailedMatchLength = totalLengthUpToNow;
                         }
-                        if(!(items.get(i).optional && i+1 < items.size() && items.get(i+1).match(currentIndex, lexer).matched)) { //TODO check if this is right. Looks weird
+                        if(!(items.get(i).optional && i+1 < items.size() && items.get(i+1).match(currentIndex, lexer).matchedThenDiscard())) {
                             hasMatched = false;
                             length += itemMatch.length;
                             endIndex = Math.max(endIndex, itemMatch.endIndex);
                             faultyToken = itemMatch.faultyToken;
                             expected = itemMatch.expected;
+                            itemMatch.discard();
                             break itemLoop;
                         } else {
                             break;
@@ -104,6 +106,7 @@ public class TokenGroupMatch extends TokenPatternMatch {
                         anyItemsMatched = true;
                     }
                 }
+                itemMatch.discard();
             }
 
             while(--popSuggestionStatus >= 0) {
@@ -131,10 +134,12 @@ public class TokenGroupMatch extends TokenPatternMatch {
 
             TokenGroup group = new TokenGroup(this, contents.toArray(new TokenPattern<?>[0])).setName(this.name).addTags(this.tags);
 
-            TokenMatchResponse response = new TokenMatchResponse(hasMatched, faultyToken, length, endIndex, expected, group);
+            TokenMatchResponse response;
             if(hasMatched) {
+                response = TokenMatchResponse.success(length, endIndex, group);
                 invokeProcessors(group, lexer);
             } else {
+                response = TokenMatchResponse.failure(faultyToken, length, endIndex, expected, group);
                 invokeFailProcessors(group, lexer);
             }
             return response;

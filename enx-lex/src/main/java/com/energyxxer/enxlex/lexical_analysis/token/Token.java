@@ -6,16 +6,13 @@ import com.energyxxer.util.ObjectPool;
 import com.energyxxer.util.StringBounds;
 import com.energyxxer.util.StringLocation;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Class containing a value, or token, its type, source file and location within
  * it.
  */
-public class Token {
+public class Token extends StringLocation {
 	public static final ThreadLocal<ObjectPool<ArrayList<Token>>> TOKEN_LIST_POOL = ThreadLocal.withInitial(() -> new ObjectPool<>(ArrayList::new, ArrayList::clear));
 
 	private Token[] beforeTokens;
@@ -23,7 +20,6 @@ public class Token {
 	public String value;
 	public TokenType type;
 	public TokenSource source;
-	public StringLocation loc;
 
 	private HashMap<String, Object> attributes;
 	private HashMap<TokenSection, String> subSections;
@@ -31,33 +27,33 @@ public class Token {
 
 	public ArrayList<String> tags = null;
 
-    public Token(String value, TokenSource source, StringLocation loc) {
+    public Token(String value, TokenSource source, int index, int line, int column) {
+		super(index, line, column);
 		this.value = value;
 		this.type = TokenType.UNKNOWN;
 		this.source = source;
-		this.loc = loc;
 	}
 
-	public Token(String value, TokenSource source, StringLocation loc, HashMap<TokenSection, String> subSections) {
+	public Token(String value, TokenSource source, int index, int line, int column, HashMap<TokenSection, String> subSections) {
+		super(index, line, column);
 		this.value = value;
 		this.type = TokenType.UNKNOWN;
 		this.source = source;
-		this.loc = loc;
 		this.subSections = subSections;
 	}
 
-	public Token(String value, TokenType tokenType, TokenSource source, StringLocation loc) {
+	public Token(String value, TokenType tokenType, TokenSource source, int index, int line, int column) {
+		super(index, line, column);
 		this.value = value;
 		this.type = (tokenType != null) ? tokenType : TokenType.UNKNOWN;
 		this.source = source;
-		this.loc = loc;
 	}
 
-	public Token(String value, TokenType tokenType, TokenSource source, StringLocation loc, HashMap<TokenSection, String> subSections) {
+	public Token(String value, TokenType tokenType, TokenSource source, int index, int line, int column, HashMap<TokenSection, String> subSections) {
+		super(index, line, column);
 		this.value = value;
 		this.type = (tokenType != null) ? tokenType : TokenType.UNKNOWN;
 		this.source = source;
-		this.loc = loc;
 		this.subSections = subSections;
 	}
 
@@ -66,7 +62,7 @@ public class Token {
 	}
 
 	public String getLocation() {
-		return source.getPrettyName() + ":" + loc.line + ":" + loc.column + "#" + loc.index;
+		return source.getPrettyName() + ":" + line + ":" + column + "#" + index;
 	}
 
 	public TokenSource getSource() {
@@ -87,7 +83,7 @@ public class Token {
 		for(Token t : tokens) {
 			s.append(t.value);
 		}
-		return new Token(s.toString(), type, tokens[0].source, tokens[0].loc);
+		return new Token(s.toString(), type, tokens[0].source, tokens[0].index, tokens[0].line, tokens[0].column);
 	}
 
 	public HashMap<TokenSection, String> getSubSections() {
@@ -104,26 +100,18 @@ public class Token {
 		if (o == null || getClass() != o.getClass()) return false;
 
 		Token token = (Token) o;
-
-		if (!Objects.equals(value, token.value)) return false;
-		if (!Objects.equals(type, token.type)) return false;
-		if (!Objects.equals(source, token.source)) return false;
-		if (!Objects.equals(loc, token.loc)) return false;
-		return Objects.equals(attributes, token.attributes);
+		return index == token.index && line == token.line && column == token.column && Arrays.equals(beforeTokens, token.beforeTokens) && Objects.equals(value, token.value) && Objects.equals(type, token.type) && Objects.equals(source, token.source) && Objects.equals(attributes, token.attributes) && Objects.equals(subSections, token.subSections) && Objects.equals(attachedNotices, token.attachedNotices) && Objects.equals(tags, token.tags);
 	}
 
 	@Override
 	public int hashCode() {
-		int result = value != null ? value.hashCode() : 0;
-		result = 31 * result + (type != null ? type.hashCode() : 0);
-		result = 31 * result + (source != null ? source.hashCode() : 0);
-		result = 31 * result + (loc != null ? loc.hashCode() : 0);
-		result = 31 * result + (attributes != null ? attributes.hashCode() : 0);
+		int result = Objects.hash(value, type, source, index, line, column, attributes, subSections, attachedNotices, tags);
+		result = 31 * result + Arrays.hashCode(beforeTokens);
 		return result;
 	}
 
 	public StringBounds getStringBounds() {
-		return new StringBounds(loc, new StringLocation(loc.index + value.length(), loc.line, loc.column + value.length()));
+		return new StringBounds(new StringLocation(index, line, column), new StringLocation(index + value.length(), line, column + value.length()));
 	}
 
 	public void dumpNotices(Report report) {
@@ -189,12 +177,12 @@ public class Token {
 	}
 
 	public int endIndex() {
-    	return loc.index + value.length();
+    	return index + value.length();
 	}
 
 	public int startIndexWithBefore() {
-    	if(beforeTokens == null) return loc.index;
-    	else return beforeTokens[0].loc.index;
+    	if(beforeTokens == null) return index;
+    	else return beforeTokens[0].index;
 	}
 
 	public int totalLength() {
