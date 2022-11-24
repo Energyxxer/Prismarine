@@ -3,8 +3,10 @@ package com.energyxxer.prismarine.summaries;
 import com.energyxxer.enxlex.lexical_analysis.summary.SummaryModule;
 import com.energyxxer.enxlex.lexical_analysis.summary.Todo;
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
+import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.util.SortedList;
+import com.energyxxer.util.StringBounds;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -189,7 +191,8 @@ public class PrismarineSummaryModule extends SummaryModule {
     public void addSymbolUsage(SymbolUsage usage) {
         SymbolUsage existingUsage = symbolUsages.getByKey(usage.index);
         if(existingUsage != null && existingUsage.symbolName.equals(usage.symbolName)) {
-            existingUsage.pattern = usage.pattern; //replace old usage, with new info
+            existingUsage.tokenSource = usage.tokenSource;
+            existingUsage.bounds = usage.bounds; //replace old usage with new info
             return;
         }
         symbolUsages.add(usage);
@@ -296,13 +299,15 @@ public class PrismarineSummaryModule extends SummaryModule {
         public static final BiFunction<PrismarineSummaryModule, SymbolUsage, SummarySymbol> ROOT_SYMBOL_GETTER = (fs, usage) -> fs.getSymbolForName(usage.symbolName, usage.index);
 
         public final String symbolName;
-        public TokenPattern<?> pattern;
+        public TokenSource tokenSource;
+        public StringBounds bounds;
         public int index;
         public BiFunction<PrismarineSummaryModule, SymbolUsage, SummarySymbol> symbolGetter = ROOT_SYMBOL_GETTER;
 
         public SymbolUsage(TokenPattern<?> pattern, String symbolName) {
             this.symbolName = symbolName;
-            this.pattern = pattern;
+            this.tokenSource = pattern.getSource();
+            this.bounds = pattern.getStringBounds();
             index = pattern.getStringLocation().index;
         }
 

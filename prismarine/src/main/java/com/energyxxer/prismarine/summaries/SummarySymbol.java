@@ -1,7 +1,9 @@
 package com.energyxxer.prismarine.summaries;
 
+import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.prismarine.symbols.SymbolVisibility;
+import com.energyxxer.util.StringBounds;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -17,7 +19,8 @@ public class SummarySymbol implements SummaryElement, SymbolReference {
     private HashSet<String> suggestionTags;
     private SummaryBlock subBlock = null;
     private boolean isInstanceField = false;
-    private TokenPattern<?> declarationPattern;
+    private TokenSource tokenSource;
+    private StringBounds bounds;
 
     private SymbolReference type;
     private SymbolReference returnType;
@@ -165,12 +168,16 @@ public class SummarySymbol implements SummaryElement, SymbolReference {
     }
 
     public void setDeclarationPattern(TokenPattern<?> declarationPattern) {
-        this.declarationPattern = declarationPattern;
+        this.tokenSource = declarationPattern.getSource();
+        this.bounds = declarationPattern.getStringBounds();
     }
 
+    public TokenSource getSource() {
+        return tokenSource;
+    }
 
-    public TokenPattern<?> getDeclarationPattern() {
-        return declarationPattern;
+    public StringBounds getStringBounds() {
+        return bounds;
     }
 
     public ArrayList<SummarySymbol> collectSubSymbols(Path fromFile, int inFileIndex, ArrayList<SummarySymbol> list, PrismarineSummaryModule summary) {

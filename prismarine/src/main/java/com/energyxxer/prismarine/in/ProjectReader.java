@@ -133,10 +133,11 @@ public class ProjectReader {
         }
 
         public Query needsSummary(PrismarineLanguageUnitConfiguration unitConfig, PrismarineProjectSummary parentSummary, boolean skipIfMatchFailed) {
-            this.needsPattern(unitConfig);
+            this.needsString();
             this.needsSummary = true;
             this.parentSummary = parentSummary;
             this.skipSummaryIfMatchFailed = skipIfMatchFailed;
+            this.unitConfig = unitConfig;
             return this;
         }
 
@@ -237,7 +238,7 @@ public class ProjectReader {
     public Result populateParseResult(Query query, TokenSource source, Result result) {
         result.relativePath = query.relativePath;
 
-        if(query.needsPattern) {
+        if(query.needsPattern || query.needsSummary) {
             Lexer lexer = getLexerForUnitConfig(query.unitConfig, query.worker);
 
             PrismarineSummaryModule summary = null;
@@ -250,10 +251,12 @@ public class ProjectReader {
             lexer.start(source, result.string, query.unitConfig.createLexerProfile());
             TokenMatchResponse response = ((LazyLexer) lexer).getMatchResponse();
 
-            if(response.matched) {
-                result.pattern = response.pattern;
+            if(query.needsPattern) {
+                if(response.matched) {
+                    result.pattern = response.pattern;
+                }
+                result.matchResponse = response;
             }
-            result.matchResponse = response;
 
             if(query.needsSummary && (response.matched || !query.skipSummaryIfMatchFailed)) {
                 result.summary = summary;

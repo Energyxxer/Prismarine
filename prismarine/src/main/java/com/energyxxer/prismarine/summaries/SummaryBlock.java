@@ -155,7 +155,7 @@ public class SummaryBlock implements SummaryElement {
         if(associatedSymbol != null) associatedSymbol.collectSymbolsVisibleAt(index, list, fromPath, summary);
 
         for(SummaryElement elem : subElements) {
-            if((index < 0 && fixed) || (startIndex <= index && index <= endIndex) || (elem instanceof SummarySymbol && ((SummarySymbol) elem).getDeclarationPattern().getStringLocation().index == index)) {
+            if((index < 0 && fixed) || (startIndex <= index && index <= endIndex) || (elem instanceof SummarySymbol && ((SummarySymbol) elem).getStringBounds().start.index == index)) {
                 elem.collectSymbolsVisibleAt(index, list, fromPath, summary);
             }
         }
