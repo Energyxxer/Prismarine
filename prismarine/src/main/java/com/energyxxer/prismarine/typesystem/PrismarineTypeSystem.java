@@ -114,10 +114,7 @@ public abstract class PrismarineTypeSystem {
     }
     public TypeHandler<?> getHandlerForHandledClass(Class handlingClass) {
         if(handlingClass == null) return null;
-        for(TypeHandler<?> handler : primitiveHandlers.values()) {
-            if(handler.getHandledClass() == handlingClass) return handler;
-        }
-        return null;
+        return primitiveHandlersByClass.get(handlingClass);
     }
 
     public TypeHandler getStaticHandlerForObject(Object obj) {

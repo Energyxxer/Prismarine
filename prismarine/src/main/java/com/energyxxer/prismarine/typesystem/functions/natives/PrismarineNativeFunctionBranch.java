@@ -14,7 +14,9 @@ import com.energyxxer.prismarine.typesystem.functions.typed.TypedFunction;
 import com.energyxxer.util.logger.Debug;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.InvocationTargetException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -22,11 +24,29 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class PrismarineNativeFunctionBranch extends PrismarineFunctionBranch {
-    private final Method method;
+    private static MethodHandles.Lookup lookup;
+    private final MethodHandle handle;
+    private int modifiers;
+    private Class<?>[] paramTypes;
+    private Class<?> returnType;
+    private int thisArgIndex = -1;
 
     public PrismarineNativeFunctionBranch(PrismarineTypeSystem typeSystem, Method method) {
         super(typeSystem, createFormalParameters(typeSystem, method));
-        this.method = method;
+        if(lookup == null) lookup = MethodHandles.publicLookup();
+        this.modifiers = method.getModifiers();
+        this.paramTypes = method.getParameterTypes();
+        this.returnType = method.getReturnType();
+        try {
+            int objectArgCount = paramTypes.length + ((modifiers & Modifier.STATIC) != 0 ? 0 : 1);
+            this.handle = lookup
+                    .unreflect(method)
+                    .asType(MethodType.genericMethodType(objectArgCount))
+                    .asSpreader(Object[].class, objectArgCount)
+            ;
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
 
         Class<?> returnType = PrismarineTypeSystem.sanitizeClass(method.getReturnType());
         TypeHandler correspondingHandler = typeSystem.getHandlerForHandledClass(returnType);
@@ -39,6 +59,14 @@ public class PrismarineNativeFunctionBranch extends PrismarineFunctionBranch {
 
         if(method.isAnnotationPresent(NativeFunctionAnnotations.NotNullReturn.class) || (method.getReturnType().isPrimitive() && method.getReturnType() != Void.TYPE)) {
             nullable = false;
+        }
+
+        Parameter[] javaParams = method.getParameters();
+        for(int i = 0; i < javaParams.length; i++) {
+            if(javaParams[i].isAnnotationPresent(NativeFunctionAnnotations.ThisArg.class)) {
+                thisArgIndex = i;
+                break;
+            }
         }
 
         String userDefinedIdentifier = null;
@@ -100,48 +128,48 @@ public class PrismarineNativeFunctionBranch extends PrismarineFunctionBranch {
 
     @Override
     public Object call(ActualParameterList actualParams, ISymbolContext declaringCtx, ISymbolContext callingCtx, Object thisObject) {
-        Object[] methodParams = new Object[method.getParameterCount()];
+        int leadingArgCount = (modifiers & Modifier.STATIC) != 0 ? 0 : 1;
+        Object[] methodParams = new Object[paramTypes.length+leadingArgCount];
 
         actualParams.reportInvalidNames(formalParameters, callingCtx);
 
         int formalIndex = 0;
-        for(int methodIndex = 0; methodIndex < method.getParameterCount(); methodIndex++, formalIndex++) {
-            if(method.getParameterTypes()[methodIndex] == ISymbolContext.class) {
-                methodParams[methodIndex] = callingCtx;
+        for(int methodIndex = 0; methodIndex < paramTypes.length; methodIndex++, formalIndex++) {
+            if(paramTypes[methodIndex] == ISymbolContext.class) {
+                methodParams[methodIndex+leadingArgCount] = callingCtx;
                 formalIndex--;
                 continue;
             }
-            if(method.getParameterTypes()[methodIndex] == TokenPattern.class) {
-                methodParams[methodIndex] = actualParams.getPattern();
+            if(paramTypes[methodIndex] == TokenPattern.class) {
+                methodParams[methodIndex+leadingArgCount] = actualParams.getPattern();
                 formalIndex--;
                 continue;
             }
-            if(method.getParameters()[methodIndex].isAnnotationPresent(NativeFunctionAnnotations.ThisArg.class)) {
-                methodParams[methodIndex] = thisObject;
+            if(methodIndex == thisArgIndex) {
+                methodParams[methodIndex+leadingArgCount] = thisObject;
                 formalIndex--;
                 continue;
             }
 
-            methodParams[methodIndex] = TypedFunction.getActualParameterByFormalIndex(formalIndex, formalParameters, actualParams, callingCtx, thisObject)[0];
+            methodParams[methodIndex+leadingArgCount] = TypedFunction.getActualParameterByFormalIndex(formalIndex, formalParameters, actualParams, callingCtx, thisObject)[0];
         }
 
         Object returnValue;
         try {
-            Object invocObject = null;
-            if((method.getModifiers() & Modifier.STATIC) == 0) { //not static, invocation object must not be null
-                invocObject = thisObject;
+            if(leadingArgCount > 0) {
+                methodParams[0] = thisObject; //not static, invocation object must not be null
             }
-            returnValue = method.invoke(invocObject, methodParams);
+            returnValue = handle.invokeExact((Object[])methodParams);
         } catch (IllegalAccessException x) {
             throw new PrismarineException(PrismarineException.Type.IMPOSSIBLE, x.toString(), actualParams.getPattern(), callingCtx);
-        } catch (InvocationTargetException x) {
-            if(x.getTargetException() instanceof PrismarineException) {
-                throw ((PrismarineException) x.getTargetException());
+        } catch (Throwable x) {
+            if(x instanceof PrismarineException) {
+                throw ((PrismarineException) x);
             }
-            if(x.getTargetException() instanceof PrismarineException.Grouped) {
-                throw ((PrismarineException.Grouped) x.getTargetException());
+            if(x instanceof PrismarineException.Grouped) {
+                throw ((PrismarineException.Grouped) x);
             }
-            throw new PrismarineException(PrismarineException.Type.INTERNAL_EXCEPTION, x.getTargetException().getClass().getSimpleName() + ": " + x.getTargetException().getMessage(), actualParams.getPattern(), callingCtx);
+            throw new PrismarineException(PrismarineException.Type.INTERNAL_EXCEPTION, x.getClass().getSimpleName() + ": " + x.getMessage(), actualParams.getPattern(), callingCtx);
         }
 
         if(returnConstraints != null) {
