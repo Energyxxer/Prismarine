@@ -5,11 +5,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.HashSet;
 
 public class FileUtil {
     private FileUtil() {}
 
     public static boolean recursivelyDelete(File folder) {
+        return recursivelyDelete(folder, null);
+    }
+
+    public static boolean recursivelyDelete(File folder, HashSet<File> exclude) {
         if(!folder.exists()) return true;
         if(!Files.isWritable(folder.toPath())) return false;
         if(!folder.isDirectory()) {
@@ -19,8 +24,8 @@ public class FileUtil {
         if (files != null) {
             for (File f : files) {
                 if (f.isDirectory()) {
-                    recursivelyDelete(f);
-                } else {
+                    recursivelyDelete(f, exclude);
+                } else if (exclude == null || !exclude.contains(f)) {
                     f.delete();
                 }
             }

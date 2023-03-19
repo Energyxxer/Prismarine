@@ -473,14 +473,17 @@ public final class PrismarineCompiler extends AbstractProcess implements Reporte
     }
 
     public Interruption getInterruption() {
+        if(parentCompiler != null) return parentCompiler.getInterruption();
         return interruption;
     }
 
     public boolean hasInterruption() {
+        if(parentCompiler != null) return parentCompiler.hasInterruption();
         return interruption != null;
     }
 
     public Interruption popInterruption() {
+        if(parentCompiler != null) return parentCompiler.popInterruption();
         Interruption i = interruption;
         interruption = null;
         return i;

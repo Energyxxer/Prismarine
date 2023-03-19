@@ -159,6 +159,10 @@ public class JsonTraverser {
         setHead(() -> value);
     }
 
+    public void remove() {
+        setHead(null);
+    }
+
     public String asString() {
         return asString(null);
     }
@@ -422,18 +426,29 @@ public class JsonTraverser {
 
     private void setHead(Supplier<JsonElement> newHeadSupplier) {
         if(createOnTraversal && neck != null) {
-            JsonElement newHead = newHeadSupplier.get();
-            if(newHead == null) return;
+            JsonElement newHead = null;
+            if(newHeadSupplier != null) newHead = newHeadSupplier.get();
+
             head = newHead;
             missingHead = false;
             if (lastTraversalKey instanceof String) { //Last traversal should have been via a key
-                neck.getAsJsonObject().add((String) lastTraversalKey, head);
+                if(head == null) {
+                    neck.getAsJsonObject().remove((String) lastTraversalKey);
+                } else {
+                    neck.getAsJsonObject().add((String) lastTraversalKey, head);
+                }
             } else { //Last traversal should have been via an index
                 JsonArray neckArr = neck.getAsJsonArray();
-                while (neckArr.size() <= ((int) lastTraversalKey)) {
-                    neckArr.add(0);
+                if(head == null) {
+                    while (neckArr.size() > ((int) lastTraversalKey)) {
+                        neckArr.remove(neckArr.size()-1);
+                    }
+                } else {
+                    while (neckArr.size() <= ((int) lastTraversalKey)) {
+                        neckArr.add(0);
+                    }
+                    neckArr.set((int) lastTraversalKey, head);
                 }
-                neckArr.set((int) lastTraversalKey, head);
             }
         }
     }

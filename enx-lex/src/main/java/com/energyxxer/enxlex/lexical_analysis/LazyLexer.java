@@ -38,6 +38,9 @@ public class LazyLexer extends Lexer {
 
     @Override
     public void start(TokenSource source, String str, LexerProfile profile) {
+        start(source, str, profile, pattern);
+    }
+    public void start(TokenSource source, String str, LexerProfile profile, TokenPatternMatch pattern) {
         if(running) {
             Debug.log("Starting an already running lexer!");
         }
@@ -167,8 +170,10 @@ public class LazyLexer extends Lexer {
         return null;
     }
 
+    private StringBuffer sb = new StringBuffer();
+
     @Override
-    public Token retrieveTokenOfType(TokenType type) {
+    public synchronized Token retrieveTokenOfType(TokenType type) {
         int startIndex = currentIndex;
         try {
             Token[] beforeTokens = retrieveInsignificantTokens();
@@ -215,7 +220,7 @@ public class LazyLexer extends Lexer {
                 }
             }
             if (type == TokenType.UNKNOWN || type == null) {
-                StringBuilder sb = new StringBuilder();
+                sb.setLength(0);
                 for (int i = getLookingIndexTrimmed(); i < fileContents.length(); i++) {
 
                     char lastChar = '\u0000';
@@ -224,6 +229,7 @@ public class LazyLexer extends Lexer {
 
                     if (sb.length() > 0 && lastChar != '\u0000' && !profile.canMerge(lastChar, fileContents.charAt(i))) {
                         Token token = new Token(sb.toString(), TokenType.UNKNOWN, source, 0, 0, 0);
+                        sb.setLength(0);
                         lineCache.getLocationForOffset(getLookingIndexTrimmed(), token);
                         token.setBeforeTokens(beforeTokens);
                         return token;
@@ -232,6 +238,7 @@ public class LazyLexer extends Lexer {
                 }
                 if (sb.length() > 0) {
                     Token token = new Token(sb.toString(), TokenType.UNKNOWN, source, 0, 0, 0);
+                    sb.setLength(0);
                     lineCache.getLocationForOffset(getLookingIndexTrimmed(), token);
                     token.setBeforeTokens(beforeTokens);
                     return token;
@@ -244,7 +251,7 @@ public class LazyLexer extends Lexer {
     }
 
     @Override
-    public Token retrieveAnyToken() {
+    public synchronized Token retrieveAnyToken() {
         int lookingIndexTrimmed = getLookingIndexTrimmed();
         for (LexerContext context : profile.contexts) {
             ScannerContextResponse response = context.analyze(
@@ -275,7 +282,7 @@ public class LazyLexer extends Lexer {
             return eof;
         }
         {
-            StringBuilder sb = new StringBuilder();
+            sb.setLength(0);
             for (int i = getLookingIndexTrimmed(); i < fileContents.length(); i++) {
 
                 char lastChar = '\u0000';
@@ -284,6 +291,7 @@ public class LazyLexer extends Lexer {
 
                 if (sb.length() > 0 && lastChar != '\u0000' && !profile.canMerge(lastChar, fileContents.charAt(i))) {
                     Token token = new Token(sb.toString(), TokenType.UNKNOWN, source, 0, 0, 0);
+                    sb.setLength(0);
                     lineCache.getLocationForOffset(getLookingIndexTrimmed(), token);
                     return token;
                 }
@@ -291,6 +299,7 @@ public class LazyLexer extends Lexer {
             }
             if(sb.length() > 0) {
                 Token token = new Token(sb.toString(), TokenType.UNKNOWN, source, 0, 0, 0);
+                sb.setLength(0);
                 lineCache.getLocationForOffset(getLookingIndexTrimmed(), token);
                 return token;
             }
@@ -318,7 +327,7 @@ public class LazyLexer extends Lexer {
     @Override
     public void setSuggestionModule(SuggestionModule suggestionModule) {
         super.setSuggestionModule(suggestionModule);
-        suggestionModule.setLexer(this);
+        if(suggestionModule != null) suggestionModule.setLexer(this);
     }
 
     @Override

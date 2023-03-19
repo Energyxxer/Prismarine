@@ -110,12 +110,25 @@ public class TokenList extends TokenPattern<TokenPattern<?>[]> {
 	@Override
 	public TokenPattern<?> find(String path) {
 		if(isPathInCache(path)) return getCachedFindResult(path);
-		String[] subPath = path.split("\\.",2);
+		int dotIndex = path.indexOf('.');
+		String name;
+		String nextPath;
+		if(dotIndex < 0) {
+			name = path;
+			nextPath = null;
+		} else {
+			name = path.substring(0, dotIndex);
+			nextPath = path.substring(dotIndex+1);
+		}
 
-		TokenPattern<?> next = getByName(subPath[0]);
-		if(next == null) return null;
-		if(subPath.length == 1) return next;
-		return putFindResult(path, next.find(subPath[1]));
+		TokenPattern<?> next = getByName(name);
+		TokenPattern<?> result;
+		if(next == null || nextPath == null) {
+			result = next;
+		} else {
+			result = next.find(nextPath);
+		}
+		return putFindResult(path, result);
 	}
 
 	@Override

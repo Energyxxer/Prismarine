@@ -280,7 +280,7 @@ public class ProjectReader {
         }
     }
 
-    private Lexer getLexerForUnitConfig(PrismarineLanguageUnitConfiguration unitConfig, PrismarineProjectWorker worker) {
+    public Lexer getLexerForUnitConfig(PrismarineLanguageUnitConfiguration unitConfig, PrismarineProjectWorker worker) {
         if(lexers.containsKey(unitConfig)) return lexers.get(unitConfig);
 
         Lexer newLexer = new LazyLexer(new TokenStream(), worker.output.get(SetupProductionsTask.INSTANCE).get(unitConfig).FILE);

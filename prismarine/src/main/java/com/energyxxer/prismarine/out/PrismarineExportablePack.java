@@ -8,10 +8,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -55,22 +56,31 @@ public class PrismarineExportablePack implements ExportablePack {
         this.exportables = new ArrayList<>();
     }
 
-    public void generate() throws IOException {
+    public ArrayList<IOException> generate(int numThreads) {
         if(outputType == ZIP) {
-            zipStream = new ZipOutputStream(new FileOutputStream(rootFile));
+            try {
+                zipStream = new ZipOutputStream(new FileOutputStream(rootFile));
+            } catch (FileNotFoundException e) {
+                ArrayList<IOException> exceptions = new ArrayList<>();
+                exceptions.add(e);
+                return exceptions;
+            }
         }
 
+        ArrayList<IOException> exceptions = null;
         try {
-            progressDelta = exportables.isEmpty() ? 1 : 1f/(exportables.size());
-
-            for(Exportable exportable : exportables) {
-                if(exportable.shouldExport()) {
-                    createFile(exportable.getExportPath(), exportable.getContents());
+            exceptions = Exportable.exportAll(exportables, rootPath, zipStream, true, numThreads);
+        } finally {
+            if(zipStream != null) {
+                try {
+                    zipStream.close();
+                } catch (IOException e) {
+                    if(exceptions == null) exceptions = new ArrayList<>();
+                    exceptions.add(e);
                 }
             }
-        } finally {
-            if(zipStream != null) zipStream.close();
         }
+        return exceptions;
     }
 
     private void createFile(@Nullable String path, @Nullable byte[] contents) throws IOException {
@@ -104,7 +114,7 @@ public class PrismarineExportablePack implements ExportablePack {
     }
 
     @Override
-    public Collection<Exportable> getAllExportables() {
+    public List<Exportable> getAllExportables() {
         return exportables;
     }
 

@@ -27,7 +27,7 @@ public class EagerLexer extends Lexer {
 
 	private TokenSource source;
 
-	private final StringBuilder token = new StringBuilder();
+	private final StringBuffer token = new StringBuffer();
 	private int line = 0;
 	private int column = 0;
 	private int index = 0;
@@ -43,7 +43,7 @@ public class EagerLexer extends Lexer {
 	private String fileContents;
 
 	@Override
-	public void start(TokenSource source, String str, LexerProfile profile) {
+	public synchronized void start(TokenSource source, String str, LexerProfile profile) {
 		this.source = source;
 		this.fileContents = str;
 		stream.setProfile(profile);

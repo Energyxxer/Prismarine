@@ -75,7 +75,7 @@ public class TypedFunction {
     }
 
 
-    public static Object[] getActualParameterByFormalIndex(int formalIndex, List<FormalParameter> formalParams, ActualParameterList actualParams, ISymbolContext ctx, Object thisObject) {
+    public static ActualParameterResponse getActualParameterByFormalIndex(int formalIndex, List<FormalParameter> formalParams, ActualParameterList actualParams, ISymbolContext ctx, Object thisObject) {
         FormalParameter formalParameter = formalParams.get(formalIndex);
         TypeConstraints formalConstraints = formalParameter.getTypeConstraints();
 
@@ -90,12 +90,12 @@ public class TypedFunction {
 
                 if(actualParams.getNameForIndex(formalIndex) != null) {
                     if(formalParameter.getTypeConstraints().isNullable()) {
-                        return new Object[] {null, -1};
+                        return ActualParameterResponse.get(null, -1);
                     }
                     throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "There is no argument given that corresponds to the required formal parameter '" + formalParameter.getName() + "'", actualParams.getPattern(formalIndex), ctx);
                 } else if(actualIndex >= actualParams.size()) {
                     if(formalParameter.getTypeConstraints().isNullable()) {
-                        return new Object[] {null, -1};
+                        return ActualParameterResponse.get(null, -1);
                     }
                 }
             } else if(actualIndex != formalIndex) {
@@ -117,11 +117,25 @@ public class TypedFunction {
             if(formalParameter.getValueConstraints() != null) {
                 formalParameter.getValueConstraints().validate(actualValue, formalParameter.getName(), actualPattern, ctx);
             }
-            return new Object[] {actualValue, actualIndex};
+            return ActualParameterResponse.get(actualValue, actualIndex);
         } finally {
             if(formalConstraints.isGeneric()) {
                 formalConstraints.endGenericSubstitution();
             }
+        }
+    }
+
+    public static class ActualParameterResponse {
+        private static final ThreadLocal<ActualParameterResponse> INSTANCE = ThreadLocal.withInitial(ActualParameterResponse::new);
+
+        public Object value;
+        public int index;
+
+        public static ActualParameterResponse get(Object value, int index) {
+            ActualParameterResponse response = INSTANCE.get();
+            response.value = value;
+            response.index = index;
+            return response;
         }
     }
 }

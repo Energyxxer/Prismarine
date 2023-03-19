@@ -13,6 +13,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 
 public class ActualParameterList implements GenericSupplierImplementer {
+    private static final Object[] NO_ARGS = new Object[0];
+    private static final TokenPattern<?>[] NO_PATTERNS = new TokenPattern<?>[0];
+
     private @Nullable
     final String[] names;
     private final Object[] values;
@@ -23,7 +26,7 @@ public class ActualParameterList implements GenericSupplierImplementer {
     private GenericSupplier genericSupplier;
 
     public ActualParameterList(@NotNull TokenPattern<?> pattern) {
-        this(new Object[0], new TokenPattern<?>[0], pattern);
+        this(NO_ARGS, NO_PATTERNS, pattern);
     }
 
     public ActualParameterList(Object[] values, TokenPattern<?>[] patterns, @NotNull TokenPattern<?> pattern) {
@@ -88,6 +91,10 @@ public class ActualParameterList implements GenericSupplierImplementer {
     public String getNameForIndex(int index) {
         if(names == null || index < 0 || index >= names.length) return null;
         return names[index];
+    }
+
+    public String[] getNames() {
+        return names;
     }
 
     public boolean hasNames() {

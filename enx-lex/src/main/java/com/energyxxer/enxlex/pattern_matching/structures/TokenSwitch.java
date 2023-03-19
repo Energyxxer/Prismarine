@@ -66,11 +66,20 @@ public class TokenSwitch extends TokenPattern<TokenPattern<?>> {
 	@Override
 	public TokenPattern<?> find(String path) {
 		if(isPathInCache(path)) return getCachedFindResult(path);
-		String[] subPath = path.split("\\.",2);
+		int dotIndex = path.indexOf('.');
+		String name;
+		String nextPath;
+		if(dotIndex < 0) {
+			name = path;
+			nextPath = null;
+		} else {
+			name = path.substring(0, dotIndex);
+			nextPath = path.substring(dotIndex+1);
+		}
 
-		if(subPath.length == 1) return (this.name.equals(path)) ? this : group.find(path);
+		if(nextPath == null) return putFindResult(path, (this.name.equals(path)) ? this : group.find(path));
 
-		return putFindResult(path, (group.name.equals(subPath[0])) ? group.find(subPath[1]) : group.find(path));
+		return putFindResult(path, (group.name.equals(name)) ? group.find(nextPath) : group.find(path));
 	}
 
 	@Override

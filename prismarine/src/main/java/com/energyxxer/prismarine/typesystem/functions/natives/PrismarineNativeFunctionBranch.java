@@ -28,17 +28,18 @@ public class PrismarineNativeFunctionBranch extends PrismarineFunctionBranch {
     private final MethodHandle handle;
     private int modifiers;
     private Class<?>[] paramTypes;
-    private Class<?> returnType;
     private int thisArgIndex = -1;
+    private int leadingArgCount;
+    private Object[] invocationParams;
 
     public PrismarineNativeFunctionBranch(PrismarineTypeSystem typeSystem, Method method) {
         super(typeSystem, createFormalParameters(typeSystem, method));
         if(lookup == null) lookup = MethodHandles.publicLookup();
         this.modifiers = method.getModifiers();
         this.paramTypes = method.getParameterTypes();
-        this.returnType = method.getReturnType();
+        this.leadingArgCount = (modifiers & Modifier.STATIC) != 0 ? 0 : 1;
         try {
-            int objectArgCount = paramTypes.length + ((modifiers & Modifier.STATIC) != 0 ? 0 : 1);
+            int objectArgCount = paramTypes.length + leadingArgCount;
             this.handle = lookup
                     .unreflect(method)
                     .asType(MethodType.genericMethodType(objectArgCount))
@@ -47,6 +48,8 @@ public class PrismarineNativeFunctionBranch extends PrismarineFunctionBranch {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+
+        invocationParams = new Object[paramTypes.length+leadingArgCount];
 
         Class<?> returnType = PrismarineTypeSystem.sanitizeClass(method.getReturnType());
         TypeHandler correspondingHandler = typeSystem.getHandlerForHandledClass(returnType);
@@ -128,38 +131,35 @@ public class PrismarineNativeFunctionBranch extends PrismarineFunctionBranch {
 
     @Override
     public Object call(ActualParameterList actualParams, ISymbolContext declaringCtx, ISymbolContext callingCtx, Object thisObject) {
-        int leadingArgCount = (modifiers & Modifier.STATIC) != 0 ? 0 : 1;
-        Object[] methodParams = new Object[paramTypes.length+leadingArgCount];
-
         actualParams.reportInvalidNames(formalParameters, callingCtx);
 
         int formalIndex = 0;
         for(int methodIndex = 0; methodIndex < paramTypes.length; methodIndex++, formalIndex++) {
             if(paramTypes[methodIndex] == ISymbolContext.class) {
-                methodParams[methodIndex+leadingArgCount] = callingCtx;
+                invocationParams[methodIndex+leadingArgCount] = callingCtx;
                 formalIndex--;
                 continue;
             }
             if(paramTypes[methodIndex] == TokenPattern.class) {
-                methodParams[methodIndex+leadingArgCount] = actualParams.getPattern();
+                invocationParams[methodIndex+leadingArgCount] = actualParams.getPattern();
                 formalIndex--;
                 continue;
             }
             if(methodIndex == thisArgIndex) {
-                methodParams[methodIndex+leadingArgCount] = thisObject;
+                invocationParams[methodIndex+leadingArgCount] = thisObject;
                 formalIndex--;
                 continue;
             }
 
-            methodParams[methodIndex+leadingArgCount] = TypedFunction.getActualParameterByFormalIndex(formalIndex, formalParameters, actualParams, callingCtx, thisObject)[0];
+            invocationParams[methodIndex+leadingArgCount] = TypedFunction.getActualParameterByFormalIndex(formalIndex, formalParameters, actualParams, callingCtx, thisObject).value;
         }
 
         Object returnValue;
         try {
             if(leadingArgCount > 0) {
-                methodParams[0] = thisObject; //not static, invocation object must not be null
+                invocationParams[0] = thisObject; //not static, invocation object must not be null
             }
-            returnValue = handle.invokeExact((Object[])methodParams);
+            returnValue = handle.invokeExact((Object[]) invocationParams);
         } catch (IllegalAccessException x) {
             throw new PrismarineException(PrismarineException.Type.IMPOSSIBLE, x.toString(), actualParams.getPattern(), callingCtx);
         } catch (Throwable x) {
