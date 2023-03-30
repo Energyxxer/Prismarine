@@ -45,12 +45,10 @@ public interface ISymbolContext {
     HashMap<String, Symbol> collectVisibleSymbols(HashMap<String, Symbol> list, ISymbolContext from);
 
     default boolean isAncestor(ISymbolContext ancestor) {
-        ISymbolContext thiz = this;
-        while(thiz != null) {
-            if(thiz == ancestor) return true;
-            thiz = thiz.getParent();
-        }
-        return false;
+        if(this == ancestor) return true;
+        ISymbolContext parent = getParent();
+        if(parent == null) return false;
+        return parent.isAncestor(ancestor);
     }
 
     default <T> T get(PrismarineProjectWorkerTask<T> task) {
