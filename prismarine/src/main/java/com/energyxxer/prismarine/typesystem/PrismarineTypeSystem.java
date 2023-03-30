@@ -26,9 +26,11 @@ public abstract class PrismarineTypeSystem {
     protected final PrismarineCompiler compiler;
     protected final ISymbolContext globalCtx;
 
-    private final LinkedHashMap<String, TypeHandler<?>> primitiveHandlers = new LinkedHashMap<>();
-    private final LinkedHashMap<Class, TypeHandler<?>> primitiveHandlersByClass = new LinkedHashMap<>();
-    private final LinkedHashMap<String, TypeHandler<?>> userDefinedTypes = new LinkedHashMap<>();
+    private TypeHandler<?> nullHandler;
+    private final ArrayList<TypeHandler<?>> primitiveHandlers = new ArrayList<>();
+    private final HashMap<String, TypeHandler<?>> primitiveHandlersById = new HashMap<>();
+    private final HashMap<Class, TypeHandler<?>> primitiveHandlersByClass = new HashMap<>();
+    private final HashMap<String, TypeHandler<?>> userDefinedTypes = new HashMap<>();
     private final HashMap<String, ArrayList<Consumer<TypeHandler<?>>>> userDefinedTypeListeners = new HashMap<>();
 
     private TypeHandler<?> metaTypeHandler;
@@ -39,7 +41,7 @@ public abstract class PrismarineTypeSystem {
 
         registerTypes();
 
-        for(TypeHandler<?> handler : primitiveHandlers.values()) {
+        for(TypeHandler<?> handler : primitiveHandlers) {
             handler.staticTypeSetup(this, globalCtx);
         }
     }
@@ -54,8 +56,16 @@ public abstract class PrismarineTypeSystem {
 
     protected void registerPrimitiveTypeHandler(String alias, TypeHandler<?> handler) {
         if(handler.isPrimitive()) {
-            primitiveHandlers.put(alias, handler);
+            if(primitiveHandlersById.containsKey(alias)) { //huh?
+                Debug.log("Primitive type handler overwritten: " + alias);
+                TypeHandler<?> existing = primitiveHandlersById.get(alias);
+                primitiveHandlers.remove(existing);
+            }
+
+            primitiveHandlers.add(handler);
+            primitiveHandlersById.put(alias, handler);
             primitiveHandlersByClass.put(handler.getHandledClass(), handler);
+            if("null".equals(alias)) nullHandler = handler;
         }
     }
 
@@ -68,18 +78,18 @@ public abstract class PrismarineTypeSystem {
 
     //region Getting handlers
     public TypeHandler<?> getPrimitiveHandlerForShorthand(String shorthand) {
-        return primitiveHandlers.get(shorthand);
+        return primitiveHandlersById.get(shorthand);
     }
 
     public TypeHandler<?> getHandlerForObject(Object obj) {
-        if(obj == null) return primitiveHandlers.get("null");
+        if(obj == null) return nullHandler;
         if(obj instanceof TypeHandler) {
             if(((TypeHandler) obj).isSelfHandler()) return (TypeHandler<?>) obj;
             return ((TypeHandler) obj).getStaticHandler();
         }
-        TypeHandler superHandler = primitiveHandlersByClass.get(obj.getClass());
+        TypeHandler superHandler = getHandlerForHandledClass(obj.getClass());
         if(superHandler != null) return superHandler;
-        for(TypeHandler<?> handler : primitiveHandlers.values()) {
+        for(TypeHandler<?> handler : primitiveHandlers) {
             if(handler.getHandledClass() == obj.getClass()) {
                 //A sure match
                 return handler;
@@ -107,14 +117,15 @@ public abstract class PrismarineTypeSystem {
 
     public <T extends TypeHandler> T getHandlerForHandlerClass(Class handlerClass) {
         if(handlerClass == null) return null;
-        for(TypeHandler<?> handler : primitiveHandlers.values()) {
+        for(TypeHandler<?> handler : primitiveHandlers) {
             if(handler.getClass() == handlerClass) return (T) handler;
         }
         return null;
     }
-    public TypeHandler<?> getHandlerForHandledClass(Class handlingClass) {
-        if(handlingClass == null) return null;
-        return primitiveHandlersByClass.get(handlingClass);
+
+    public TypeHandler<?> getHandlerForHandledClass(Class handledClass) {
+        if(handledClass == null) return null;
+        return primitiveHandlersByClass.get(handledClass);
     }
 
     public TypeHandler getStaticHandlerForObject(Object obj) {
@@ -162,7 +173,7 @@ public abstract class PrismarineTypeSystem {
     //endregion
 
     public boolean isStaticPrimitiveHandler(TypeHandler<?> handler) {
-        return primitiveHandlers.containsValue(handler);
+        return primitiveHandlersById.containsValue(handler);
     }
 
     //region Sanitization
