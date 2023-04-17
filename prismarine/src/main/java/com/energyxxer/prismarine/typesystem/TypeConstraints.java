@@ -74,6 +74,11 @@ public class TypeConstraints {
         }
     }
 
+    public boolean verify(Object value, TypeHandler<?> type, ISymbolContext ctx) {
+        if(isGeneric() && !genericSubstituted) throw new IllegalStateException("Cannot use this generic handler without starting a generic substitution");
+        return (value != null || nullable) && (value == null || handler == null || handler.isInstance(value) || type.canCoerce(value, handler, ctx));
+    }
+
     public boolean verify(Object value, ISymbolContext ctx) {
         if(isGeneric() && !genericSubstituted) throw new IllegalStateException("Cannot use this generic handler without starting a generic substitution");
         return (value != null || nullable) && (value == null || handler == null || handler.isInstance(value) || ctx.getTypeSystem().getHandlerForObject(value).canCoerce(value, handler, ctx));
@@ -105,15 +110,14 @@ public class TypeConstraints {
     //2: null-explicit match
     //1: null-implicit match
     //0: no match
-    public int rateMatch(Object value, ISymbolContext ctx) {
+    public int rateMatch(Object value, TypeHandler<?> type, ISymbolContext ctx) {
         if(isGeneric() && !genericSubstituted) throw new IllegalStateException("Cannot use this generic handler without starting a generic substitution"); //TODO generic parameter rating
         if(value == null && nullable) return 2;
         if(handler == null && value != null) return 3;
-        if(!verify(value, ctx)) return 0;
-        TypeHandler objectTypeHandler = typeSystem.getHandlerForObject(value);
-        if(objectTypeHandler == handler) return 6;
+        if(!verify(value, type, ctx)) return 0;
+        if(type == handler) return 6;
         if(handler.isInstance(value)) return 5;
-        if(objectTypeHandler.canCoerce(value, handler, ctx)) return 4;
+        if(type.canCoerce(value, handler, ctx)) return 4;
         return 0;
     }
 

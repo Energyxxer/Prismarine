@@ -20,20 +20,21 @@ public class ActualParameterList implements GenericSupplierImplementer {
     final String[] names;
     private final Object[] values;
     private final TokenPattern<?>[] patterns;
+    private final TypeHandler<?>[] types;
     private @NotNull
     final TokenPattern<?> pattern;
 
     private GenericSupplier genericSupplier;
 
     public ActualParameterList(@NotNull TokenPattern<?> pattern) {
-        this(NO_ARGS, NO_PATTERNS, pattern);
+        this(NO_ARGS, NO_PATTERNS, pattern, null);
     }
 
-    public ActualParameterList(Object[] values, TokenPattern<?>[] patterns, @NotNull TokenPattern<?> pattern) {
-        this(values, null, patterns, pattern);
+    public ActualParameterList(Object[] values, TokenPattern<?>[] patterns, @NotNull TokenPattern<?> pattern, PrismarineTypeSystem typeSystem) {
+        this(values, null, patterns, pattern, typeSystem);
     }
 
-    public ActualParameterList(Object[] values, @Nullable String[] names, TokenPattern<?>[] patterns, @NotNull TokenPattern<?> pattern) {
+    public ActualParameterList(Object[] values, @Nullable String[] names, TokenPattern<?>[] patterns, @NotNull TokenPattern<?> pattern, PrismarineTypeSystem typeSystem) {
         this.values = values;
         this.names = names;
 
@@ -50,6 +51,11 @@ public class ActualParameterList implements GenericSupplierImplementer {
         if(values.length != patterns.length || (names != null && names.length != values.length)) {
             throw new IllegalArgumentException("Mismatching list lengths");
         }
+
+        this.types = new TypeHandler<?>[values.length];
+        for(int i = 0; i < values.length; i++) {
+            types[i] = typeSystem.getHandlerForObject(values[i]);
+        }
     }
 
     @NotNull
@@ -59,6 +65,10 @@ public class ActualParameterList implements GenericSupplierImplementer {
 
     public Object getValue(int index) {
         return values[index];
+    }
+
+    public TypeHandler<?> getType(int index) {
+        return types[index];
     }
 
     @NotNull

@@ -157,7 +157,7 @@ public class OperatorManager<T extends TypedFunction> {
             }
         }
 
-        ActualParameterList params = new ActualParameterList(operands, operandPatterns, expr);
+        ActualParameterList params = new ActualParameterList(operands, operandPatterns, expr, ctx.getTypeSystem());
         PrismarineFunction function = family.pickOverload(params, ctx, null);
         return function.safeCall(params, ctx, null);
     }

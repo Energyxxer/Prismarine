@@ -5,6 +5,7 @@ import com.energyxxer.prismarine.reporting.PrismarineException;
 import com.energyxxer.prismarine.symbols.contexts.ISymbolContext;
 import com.energyxxer.prismarine.typesystem.PrismarineTypeSystem;
 import com.energyxxer.prismarine.typesystem.TypeConstraints;
+import com.energyxxer.prismarine.typesystem.TypeHandler;
 import com.energyxxer.prismarine.typesystem.functions.ActualParameterList;
 import com.energyxxer.prismarine.typesystem.functions.FormalParameter;
 import com.energyxxer.prismarine.typesystem.functions.PrimitivePrismarineFunction;
@@ -30,8 +31,11 @@ public class TypedFunctionFamily<T extends TypedFunction> implements PrimitivePr
         return new PrismarineFunction.FixedThisFunctionSymbol(name, pickOverload(params, ctx, thisObject), thisObject);
     }
 
+    private static final ThreadLocal<ArrayList<TypedFunction>> tempOverloadPickerSupplier = ThreadLocal.withInitial(ArrayList::new);
+
     public PrismarineFunction pickOverload(ActualParameterList actualParams, ISymbolContext ctx, Object thisObject) {
-        ArrayList<T> bestScoreBranchMatches = new ArrayList<>();
+        ArrayList<TypedFunction> bestScoreBranchMatches = tempOverloadPickerSupplier.get();
+        bestScoreBranchMatches.clear();
         double bestScore = -1;
 
         //PrismarineFunctionBranch bestPick = null;
@@ -50,8 +54,10 @@ public class TypedFunctionFamily<T extends TypedFunction> implements PrimitivePr
                 if(!foundByName) actualIndex = i;
 
                 Object actualParam = null;
+                TypeHandler<?> actualParamType = null;
                 if(actualIndex < actualParams.size() && (foundByName || actualParams.getNameForIndex(actualIndex) == null)) {
                     actualParam = actualParams.getValue(actualIndex);
+                    actualParamType = actualParams.getType(actualIndex);
                 }
 
                 TypeConstraints formalConstraints = formalParam.getTypeConstraints();
@@ -59,7 +65,7 @@ public class TypedFunctionFamily<T extends TypedFunction> implements PrimitivePr
                 if(formalConstraints.isGeneric()) {
                     formalConstraints.startGenericSubstitution(GenericUtils.nonGeneric(formalConstraints.getGenericHandler(), thisObject, actualParams, ctx));
                 }
-                int paramScore = formalConstraints.rateMatch(actualParam, ctx);
+                int paramScore = formalConstraints.rateMatch(actualParam, actualParamType, ctx);
                 if(formalConstraints.isGeneric()) {
                     formalConstraints.endGenericSubstitution();
                 }
@@ -113,26 +119,28 @@ public class TypedFunctionFamily<T extends TypedFunction> implements PrimitivePr
                     overloads.append(returnConstraints);
                 }
             }
+            bestScoreBranchMatches.clear();
             throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "Overload not found for parameter types: (" + sb.toString() + ")\nValid overloads are:" + overloads.toString(), actualParams.getPattern(), ctx);
         }
         T bestMatch;
         if(bestScoreBranchMatches.size() > 1) {
             bestMatch = breakTies(bestScoreBranchMatches, actualParams, ctx);
         } else {
-            bestMatch = bestScoreBranchMatches.get(0);
+            bestMatch = (T)bestScoreBranchMatches.get(0);
         }
+        bestScoreBranchMatches.clear();
 
         this.validatePickedOverload(bestMatch, actualParams, ctx);
 
         return bestMatch.getFunction();
     }
 
-    protected T breakTies(ArrayList<T> bestScoreBranchMatches, ActualParameterList actualParams, ISymbolContext ctx) {
+    protected T breakTies(ArrayList<TypedFunction> bestScoreBranchMatches, ActualParameterList actualParams, ISymbolContext ctx) {
         int sameLengthMatches = 0;
-        T bestMatch = bestScoreBranchMatches.get(0);
-        for(T branch : bestScoreBranchMatches) {
+        T bestMatch = (T)bestScoreBranchMatches.get(0);
+        for(TypedFunction branch : bestScoreBranchMatches) {
             if(branch.getFormalParameters().size() == actualParams.size()) {
-                bestMatch = branch;
+                bestMatch = (T)branch;
                 sameLengthMatches++;
             }
         }
