@@ -91,12 +91,12 @@ public class TypedFunction {
 
                 if(actualParams.getNameForIndex(formalIndex) != null) {
                     if(formalParameter.getTypeConstraints().isNullable()) {
-                        return ActualParameterResponse.get(null, -1);
+                        return ActualParameterResponse.NULL;
                     }
                     throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "There is no argument given that corresponds to the required formal parameter '" + formalParameter.getName() + "'", actualParams.getPattern(formalIndex), ctx);
                 } else if(actualIndex >= actualParams.size()) {
                     if(formalParameter.getTypeConstraints().isNullable()) {
-                        return ActualParameterResponse.get(null, -1);
+                        return ActualParameterResponse.NULL;
                     }
                 }
             } else if(actualIndex != formalIndex) {
@@ -120,7 +120,7 @@ public class TypedFunction {
             if(formalParameter.getValueConstraints() != null) {
                 formalParameter.getValueConstraints().validate(actualValue, formalParameter.getName(), actualPattern, ctx);
             }
-            return ActualParameterResponse.get(actualValue, actualIndex);
+            return ActualParameterResponse.get(actualValue, actualIndex, actualType);
         } finally {
             if(formalConstraints.isGeneric()) {
                 formalConstraints.endGenericSubstitution();
@@ -130,14 +130,17 @@ public class TypedFunction {
 
     public static class ActualParameterResponse {
         private static final ThreadLocal<ActualParameterResponse> INSTANCE = ThreadLocal.withInitial(ActualParameterResponse::new);
+        public static final ActualParameterResponse NULL = new ActualParameterResponse();
 
         public Object value;
-        public int index;
+        public int index = -1;
+        public TypeHandler type;
 
-        public static ActualParameterResponse get(Object value, int index) {
+        public static ActualParameterResponse get(Object value, int index, TypeHandler type) {
             ActualParameterResponse response = INSTANCE.get();
             response.value = value;
             response.index = index;
+            response.type = type;
             return response;
         }
     }

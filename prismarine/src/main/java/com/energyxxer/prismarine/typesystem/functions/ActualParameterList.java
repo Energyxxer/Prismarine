@@ -67,6 +67,11 @@ public class ActualParameterList implements GenericSupplierImplementer {
         return values[index];
     }
 
+    public ActualParameterList setType(int index, TypeHandler<?> type) {
+        types[index] = type;
+        return this;
+    }
+
     public TypeHandler<?> getType(int index) {
         if(types[index] == null) {
             return types[index] = typeSystem.getHandlerForObject(values[index]);

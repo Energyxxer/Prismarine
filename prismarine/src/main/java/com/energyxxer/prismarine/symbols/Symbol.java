@@ -5,6 +5,7 @@ import com.energyxxer.prismarine.reporting.PrismarineException;
 import com.energyxxer.prismarine.symbols.contexts.ISymbolContext;
 import com.energyxxer.prismarine.typesystem.PrismarineTypeSystem;
 import com.energyxxer.prismarine.typesystem.TypeConstraints;
+import com.energyxxer.prismarine.typesystem.TypeHandler;
 import com.energyxxer.prismarine.typesystem.ValueConstraints;
 import org.jetbrains.annotations.Nullable;
 
@@ -93,11 +94,11 @@ public class Symbol {
         maySet = false;
     }
 
-    public void safeSetValue(Object value, TokenPattern<?> pattern, ISymbolContext ctx) {
+    public void safeSetValue(Object value, TypeHandler valueType, TokenPattern<?> pattern, ISymbolContext ctx) {
         if(maySet) {
             if(typeConstraints != null) {
                 value = ctx.getTypeSystem().sanitizeObject(value);
-                value = typeConstraints.validateAndAdjust(value, null, pattern, ctx);
+                value = typeConstraints.validateAndAdjust(value, valueType, pattern, ctx);
             }
             if(valueConstraints != null) {
                 valueConstraints.validate(value, name, pattern, ctx);

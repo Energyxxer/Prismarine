@@ -4,6 +4,7 @@ import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.prismarine.symbols.contexts.ISymbolContext;
 import com.energyxxer.prismarine.typesystem.PrismarineTypeSystem;
 import com.energyxxer.prismarine.typesystem.TypeConstraints;
+import com.energyxxer.prismarine.typesystem.TypeHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,9 +44,9 @@ public class AutoPropertySymbol<T> extends Symbol {
     }
 
     @Override
-    public void safeSetValue(Object value, TokenPattern<?> pattern, ISymbolContext ctx) {
+    public void safeSetValue(Object value, TypeHandler valueType, TokenPattern<?> pattern, ISymbolContext ctx) {
         if(getTypeConstraints() != null) {
-            value = getTypeConstraints().validateAndAdjust(value, null, pattern, ctx);
+            value = getTypeConstraints().validateAndAdjust(value, valueType, pattern, ctx);
         }
         setter.set(((T) value));
     }
