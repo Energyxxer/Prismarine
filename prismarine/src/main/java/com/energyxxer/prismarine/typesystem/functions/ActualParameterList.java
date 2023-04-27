@@ -23,6 +23,7 @@ public class ActualParameterList implements GenericSupplierImplementer {
     private final TypeHandler<?>[] types;
     private @NotNull
     final TokenPattern<?> pattern;
+    private PrismarineTypeSystem typeSystem;
 
     private GenericSupplier genericSupplier;
 
@@ -48,14 +49,13 @@ public class ActualParameterList implements GenericSupplierImplementer {
         this.patterns = patterns;
         this.pattern = pattern;
 
+        this.typeSystem = typeSystem;
+
         if(values.length != patterns.length || (names != null && names.length != values.length)) {
             throw new IllegalArgumentException("Mismatching list lengths");
         }
 
         this.types = new TypeHandler<?>[values.length];
-        for(int i = 0; i < values.length; i++) {
-            types[i] = typeSystem.getHandlerForObject(values[i]);
-        }
     }
 
     @NotNull
@@ -68,7 +68,11 @@ public class ActualParameterList implements GenericSupplierImplementer {
     }
 
     public TypeHandler<?> getType(int index) {
-        return types[index];
+        if(types[index] == null) {
+            return types[index] = typeSystem.getHandlerForObject(values[index]);
+        } else {
+            return types[index];
+        }
     }
 
     @NotNull
