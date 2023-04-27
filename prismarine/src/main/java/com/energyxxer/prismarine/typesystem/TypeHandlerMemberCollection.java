@@ -66,8 +66,9 @@ public class TypeHandlerMemberCollection<T> {
     }
 
     public Object getMember(T instance, String name, TokenPattern<?> pattern, ISymbolContext ctx, boolean keepSymbol) {
-        if(members.containsKey(name)) {
-            Object found = members.get(name).unwrap(instance);
+        MemberWrapper<T> existing = members.get(name);
+        if(existing != null) {
+            Object found = existing.unwrap(instance);
             if(found instanceof Symbol && !keepSymbol) {
                 found = ((Symbol) found).getValue(pattern, ctx);
             }

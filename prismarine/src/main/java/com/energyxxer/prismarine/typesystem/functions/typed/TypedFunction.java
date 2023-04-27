@@ -6,6 +6,7 @@ import com.energyxxer.prismarine.symbols.SymbolVisibility;
 import com.energyxxer.prismarine.symbols.contexts.ISymbolContext;
 import com.energyxxer.prismarine.typesystem.PrismarineTypeSystem;
 import com.energyxxer.prismarine.typesystem.TypeConstraints;
+import com.energyxxer.prismarine.typesystem.TypeHandler;
 import com.energyxxer.prismarine.typesystem.functions.ActualParameterList;
 import com.energyxxer.prismarine.typesystem.functions.FormalParameter;
 import com.energyxxer.prismarine.typesystem.functions.PrismarineFunction;
@@ -105,15 +106,17 @@ public class TypedFunction {
                 }
             }
             Object actualValue;
+            TypeHandler actualType;
             if(actualIndex < actualParams.size()) {
                 actualValue = actualParams.getValue(actualIndex);
+                actualType = actualParams.getType(actualIndex);
             } else {
                 actualValue = null;
+                actualType = null;
             }
 
             TokenPattern<?> actualPattern = actualIndex < actualParams.size() ? actualParams.getPattern(actualIndex) : actualParams.getPattern();
-            formalParameter.getTypeConstraints().validate(actualValue, actualPattern, ctx);
-            actualValue = formalParameter.getTypeConstraints().adjustValue(actualValue, actualPattern, ctx);
+            actualValue = formalParameter.getTypeConstraints().validateAndAdjust(actualValue, actualType, actualPattern, ctx);
             if(formalParameter.getValueConstraints() != null) {
                 formalParameter.getValueConstraints().validate(actualValue, formalParameter.getName(), actualPattern, ctx);
             }

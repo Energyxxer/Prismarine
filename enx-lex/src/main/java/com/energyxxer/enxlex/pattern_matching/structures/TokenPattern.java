@@ -3,6 +3,7 @@ package com.energyxxer.enxlex.pattern_matching.structures;
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenSource;
 import com.energyxxer.enxlex.lexical_analysis.token.TokenType;
+import com.energyxxer.enxlex.pattern_matching.MicroEvaluator;
 import com.energyxxer.enxlex.pattern_matching.PatternEvaluator;
 import com.energyxxer.enxlex.pattern_matching.matching.TokenPatternMatch;
 import com.energyxxer.util.ObjectPool;
@@ -28,20 +29,24 @@ public abstract class TokenPattern<T> {
 	private ArrayList<String> findCacheKeys = null;
 	private ArrayList<TokenPattern<?>> findCacheValues = null;
 	private int findCacheLastIndex = 0;
+	private MicroEvaluator microEvaluator;
 
 	public TokenPattern(TokenPatternMatch source) {
 		this.source = source;
 	}
 
 	public abstract T getContents();
+
 	public abstract TokenPattern<T> setName(String name);
 
 	public abstract void collect(TokenType type, List<Token> list);
+
 	public abstract void deepCollect(TokenType type, List<Token> list);
 
 	public abstract TokenPattern<?> getByName(String name);
 
 	public abstract void collectByName(String name, List<TokenPattern<?>> list);
+
 	public abstract void deepCollectByName(String name, List<TokenPattern<?>> list);
 
 	public abstract TokenPattern<?> find(String path);
@@ -56,6 +61,7 @@ public abstract class TokenPattern<T> {
 		}
 		return result;
 	}
+
 	protected boolean isPathInCache(String path) {
 		if(findCacheKeys == null) return false;
 		for(int i = 0; i < findCacheKeys.size(); i++) {
@@ -67,6 +73,7 @@ public abstract class TokenPattern<T> {
 		}
 		return false;
 	}
+
 	protected TokenPattern<?> getCachedFindResult(String path) {
 		for(int i = 0; i < findCacheKeys.size(); i++) {
 			int j = (i + findCacheLastIndex) % findCacheKeys.size();
@@ -88,6 +95,7 @@ public abstract class TokenPattern<T> {
 	public String flatten(boolean separate) {
 		return flatten(separate ? " " : "");
 	}
+
 	public abstract String flatten(String delimiter);
 
 	public abstract TokenSource getSource();
@@ -98,6 +106,7 @@ public abstract class TokenPattern<T> {
 	}
 
 	public abstract StringLocation getStringLocation();
+
 	public abstract StringBounds getStringBounds();
 
 	public int getCharLength() {
@@ -126,19 +135,19 @@ public abstract class TokenPattern<T> {
 	}
 
 	public TokenPattern addTags(List<String> newTags) {
-    	if(newTags != null) {
+		if(newTags != null) {
 			if(tags == null) tags = new ArrayList<>(2);
-    		tags.addAll(newTags);
+			tags.addAll(newTags);
 		}
 		return this;
 	}
 
 	public List<String> getTags() {
-    	return tags;
+		return tags;
 	}
 
 	public boolean hasTag(String tag) {
-    	return tags != null && tags.contains(tag);
+		return tags != null && tags.contains(tag);
 	}
 
 	public abstract void validate();
@@ -146,6 +155,7 @@ public abstract class TokenPattern<T> {
 	public boolean isValidated() {
 		return validated;
 	}
+
 	public abstract void traverse(Consumer<TokenPattern<?>> consumer, Stack<TokenPattern<?>> stack);
 
 	public <CTX> Object findThenEvaluate(String path, Object defaultValue, CTX ctx, Object[] data) {
@@ -161,26 +171,35 @@ public abstract class TokenPattern<T> {
 	}
 
     public <CTX> Object evaluate(CTX ctx, Object[] data) {
-    	SimplificationDomain simplified = SimplificationDomain.get(this, ctx, data).simplifyFully();
-
-    	TokenPatternMatch simplifiedSource = simplified.pattern.source;
-
-    	PatternEvaluator<CTX> evaluator = simplifiedSource.getEvaluator();
-    	if(evaluator == null) {
-    		throw new PatternEvaluator.NoEvaluatorException("Missing evaluator for pattern " + simplifiedSource);
-		}
+		SimplificationDomain simplified = SimplificationDomain.get(this, ctx, data).simplifyFully();
+		TokenPattern<?> simplifiedPattern = simplified.pattern;
+		CTX simplifiedContext = (CTX)simplified.ctx;
+		Object[] simplifiedData = simplified.data;;
+		TokenPatternMatch simplifiedSource = simplifiedPattern.source;
 		simplified.unlock();
-		return evaluator.evaluate(simplified.pattern, (CTX) simplified.ctx, simplified.data);
+		simplified = null;
+
+		MicroEvaluator<CTX> microEvaluator = simplifiedPattern.microEvaluator;
+		if(microEvaluator != null) {
+			return microEvaluator.evaluate(simplifiedContext, simplifiedData);
+		}
+
+
+		PatternEvaluator<CTX> evaluator = simplifiedSource.getEvaluator();
+		if(evaluator == null) {
+			throw new PatternEvaluator.NoEvaluatorException("Missing evaluator for pattern " + simplifiedSource);
+		}
+		return evaluator.evaluate(simplifiedPattern, simplifiedContext, simplifiedData);
 	}
 
 	public static <CTX> Object evaluate(TokenPattern<?> pattern, CTX ctx, Object[] data) {
 		SimplificationDomain domain = SimplificationDomain.get(pattern, ctx, data).simplifyFully();
 		domain.unlock();
-    	return domain.pattern.evaluate(domain.ctx, domain.data);
+		return domain.pattern.evaluate(domain.ctx, domain.data);
 	}
 
 	public void simplify(SimplificationDomain domain) {
-    	//domain.pattern == this
+		//domain.pattern == this
 		Consumer<SimplificationDomain> simplificationFunction = source.getSimplificationFunction();
 		if(simplificationFunction != null) {
 			simplificationFunction.accept(domain);
@@ -191,9 +210,9 @@ public abstract class TokenPattern<T> {
 
 	public static class SimplificationDomain {
 		private static ThreadLocal<SimplificationDomain> INSTANCE = ThreadLocal.withInitial(SimplificationDomain::new);
-    	public TokenPattern<?> pattern;
+		public TokenPattern<?> pattern;
 		public Object ctx;
-    	public Object[] data;
+		public Object[] data;
 		private boolean locked = false;
 
 		public SimplificationDomain() {
@@ -246,5 +265,17 @@ public abstract class TokenPattern<T> {
 		this.heldData.set(heldData);
 		this.holdsData.set(true);
 		return heldData;
+	}
+
+	public <CTX> void setMicroEvaluator(MicroEvaluator<CTX> evaluator) {
+		if(microEvaluator != null) {
+			throw new IllegalStateException("A micro evaluator has already been set!");
+		}
+		this.microEvaluator = evaluator;
+	}
+
+	public <CTX> Object setMicroEvaluatorAndEvaluate(MicroEvaluator<CTX> evaluator, CTX ctx, Object[] data) {
+		setMicroEvaluator(evaluator);
+		return evaluator.evaluate(ctx, data);
 	}
 }

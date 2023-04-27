@@ -123,9 +123,15 @@ public abstract class PrismarineTypeSystem {
         return null;
     }
 
+    private Class cachedHandledClass;
+    private TypeHandler<?> cachedHandledClassResult;
+
     public TypeHandler<?> getHandlerForHandledClass(Class handledClass) {
         if(handledClass == null) return null;
-        return primitiveHandlersByClass.get(handledClass);
+        if(cachedHandledClass == handledClass) return cachedHandledClassResult;
+        cachedHandledClass = handledClass;
+        cachedHandledClassResult = primitiveHandlersByClass.get(handledClass);
+        return cachedHandledClassResult;
     }
 
     public TypeHandler getStaticHandlerForObject(Object obj) {
@@ -280,7 +286,7 @@ public abstract class PrismarineTypeSystem {
         for(int i = 0; i < expected.length; i++) {
             expectedTypes[i] = ctx.getTypeSystem().getHandlerForHandledClass(sanitizeClass(expected[i]));
         }
-        param = convertToType(param, pattern, ctx, false, expectedTypes);
+        param = convertToType(param, null, pattern, ctx, false, expectedTypes);
 
         //Ensure of the expected types
         for(Class cls : expected) {
@@ -307,10 +313,10 @@ public abstract class PrismarineTypeSystem {
     }
 
     @Contract("null, _, _, true, _ -> null")
-    public static Object convertToType(Object value, TokenPattern<?> pattern, ISymbolContext ctx, boolean nullable, TypeHandler... expected) { //coercion
+    public static Object convertToType(Object value, TypeHandler valueType, TokenPattern<?> pattern, ISymbolContext ctx, boolean nullable, TypeHandler... expected) { //coercion
         if(value == null && nullable) return null;
         if(value != null) {
-            TypeHandler valueType = ctx.getTypeSystem().getHandlerForObject(value);
+            if(valueType == null) valueType = ctx.getTypeSystem().getHandlerForObject(value);
 
             TypeHandler couldCoerce = null;
             for(TypeHandler type : expected) {

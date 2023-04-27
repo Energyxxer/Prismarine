@@ -41,7 +41,8 @@ public class TypedFunctionFamily<T extends TypedFunction> implements PrimitivePr
         //PrismarineFunctionBranch bestPick = null;
         //boolean bestPickFullyMatched = false;
 
-        for(T method : implementations) {
+        for(int j = 0, size = implementations.size(); j < size; j++) {
+            T method = implementations.get(j);
             List<FormalParameter> formalParams = method.getFormalParameters();
             boolean branchMatched = true;
             double score = 0;

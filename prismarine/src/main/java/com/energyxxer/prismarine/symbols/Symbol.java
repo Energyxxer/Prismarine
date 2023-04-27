@@ -97,8 +97,7 @@ public class Symbol {
         if(maySet) {
             if(typeConstraints != null) {
                 value = ctx.getTypeSystem().sanitizeObject(value);
-                typeConstraints.validate(value, pattern, ctx);
-                value = typeConstraints.adjustValue(value, pattern, ctx);
+                value = typeConstraints.validateAndAdjust(value, null, pattern, ctx);
             }
             if(valueConstraints != null) {
                 valueConstraints.validate(value, name, pattern, ctx);

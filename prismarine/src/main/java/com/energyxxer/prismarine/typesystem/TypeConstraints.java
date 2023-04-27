@@ -48,18 +48,30 @@ public class TypeConstraints {
         typeSystem.registerUserDefinedTypeListener(userDefinedIdentifier, cls -> handler = cls);
     }
 
-    public Object adjustValue(Object value, TokenPattern<?> pattern, ISymbolContext ctx) {
+    public Object validateAndAdjust(Object value, TypeHandler valueType, TokenPattern<?> pattern, ISymbolContext ctx) {
+        return adjust(value, valueType, pattern, ctx, true);
+    }
+
+    public Object adjust(Object value, TypeHandler valueType, TokenPattern<?> pattern, ISymbolContext ctx) {
+        return adjust(value, valueType, pattern, ctx, false);
+    }
+
+    public Object adjust(Object value, TypeHandler valueType, TokenPattern<?> pattern, ISymbolContext ctx, boolean validate) {
+        if(value != null && valueType == null && (validate || handler != null)) valueType = ctx.getTypeSystem().getHandlerForObject(value);
+        if(validate) validate(value, valueType, pattern, ctx);
         if(isGeneric() && !genericSubstituted) throw new IllegalStateException("Cannot use this generic handler without starting a generic substitution");
-        if(handler != null) value = convertToType(value, pattern, ctx, nullable, handler);
+        if(handler != null) {
+            value = convertToType(value, valueType, pattern, ctx, nullable, handler);
+        }
         return value;
     }
 
-    public void validate(Object value, TokenPattern<?> pattern, ISymbolContext ctx) {
+    public void validate(Object value, TypeHandler valueType, TokenPattern<?> pattern, ISymbolContext ctx) {
         if(isGeneric() && !genericSubstituted) throw new IllegalStateException("Cannot use this generic handler without starting a generic substitution");
         if(value == null && !nullable) {
             throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "Expected a non-null value, Found null", pattern, ctx);
         }
-        if(value != null && handler != null && !handler.isInstance(value) && !typeSystem.getHandlerForObject(value).canCoerce(value, handler, ctx)) {
+        if(value != null && handler != null && !handler.isInstance(value) && !valueType.canCoerce(value, handler, ctx)) {
             throw new PrismarineException(PrismarineTypeSystem.TYPE_ERROR, "Incompatible types. Expected '" + typeSystem.typeHandlerToString(handler) + "', Found '" + typeSystem.getTypeIdentifierForObject(value) + "'", pattern, ctx);
         }
     }

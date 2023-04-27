@@ -45,8 +45,7 @@ public class AutoPropertySymbol<T> extends Symbol {
     @Override
     public void safeSetValue(Object value, TokenPattern<?> pattern, ISymbolContext ctx) {
         if(getTypeConstraints() != null) {
-            getTypeConstraints().validate(value, pattern, ctx);
-            value = getTypeConstraints().adjustValue(value, pattern, ctx);
+            value = getTypeConstraints().validateAndAdjust(value, null, pattern, ctx);
         }
         setter.set(((T) value));
     }
