@@ -29,10 +29,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import static com.energyxxer.prismarine.Prismarine.DEFAULT_CHARSET;
 
 public class ProjectReader {
+    private static final Pattern CRLF_PATTERN = Pattern.compile("\r\n", Pattern.LITERAL);
     private final CompoundInput input;
     private final Function<Path, TokenSource> sourceFunction;
 
@@ -248,7 +250,7 @@ public class ProjectReader {
                 lexer.setSummaryModule(summary);
             }
 
-            lexer.start(source, result.string, query.unitConfig.createLexerProfile());
+            lexer.start(source, CRLF_PATTERN.matcher(result.string).replaceAll("\n"), query.unitConfig.createLexerProfile());
             TokenMatchResponse response = ((LazyLexer) lexer).getMatchResponse();
 
             if(query.needsPattern) {
