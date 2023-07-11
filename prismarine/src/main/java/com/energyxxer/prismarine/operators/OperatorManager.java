@@ -12,6 +12,7 @@ import com.energyxxer.prismarine.typesystem.functions.ActualParameterList;
 import com.energyxxer.prismarine.typesystem.functions.PrismarineFunction;
 import com.energyxxer.prismarine.typesystem.functions.typed.TypedFunction;
 import com.energyxxer.prismarine.typesystem.functions.typed.TypedFunctionFamily;
+import com.energyxxer.util.ObjectPool;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.ElementType;
@@ -27,6 +28,7 @@ public class OperatorManager<T extends TypedFunction> {
     private Function<String, TypedFunctionFamily<T>> familyConstructor = TypedFunctionFamily::new;
 
     private final PrismarineTypeSystem typeSystem;
+    private final ObjectPool<ActualParameterList> paramListPool = new ObjectPool<>(ActualParameterList::new, a -> {});
 
     public final HashMap<String, TypedFunctionFamily<T>> unaryLeftOperators = new HashMap<>();
     public final HashMap<String, TypedFunctionFamily<T>> unaryRightOperators = new HashMap<>();
@@ -157,9 +159,11 @@ public class OperatorManager<T extends TypedFunction> {
             }
         }
 
-        ActualParameterList params = new ActualParameterList(operands, operandPatterns, expr, ctx.getTypeSystem());
+        ActualParameterList params = paramListPool.claim().reset(operands, operandPatterns, expr, ctx.getTypeSystem());
         PrismarineFunction function = family.pickOverload(params, ctx, null);
-        return function.safeCall(params, ctx, null);
+        Object returnValue = function.safeCall(params, ctx, null);
+        paramListPool.free(params);
+        return returnValue;
     }
 
     public Object evaluateUnaryLeft(String symbol, Object[] operands, TokenExpression expr, ISymbolContext ctx) {

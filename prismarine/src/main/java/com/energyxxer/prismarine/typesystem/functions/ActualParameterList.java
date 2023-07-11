@@ -11,21 +11,25 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ActualParameterList implements GenericSupplierImplementer {
     private static final Object[] NO_ARGS = new Object[0];
     private static final TokenPattern<?>[] NO_PATTERNS = new TokenPattern<?>[0];
 
     private @Nullable
-    final String[] names;
-    private final Object[] values;
-    private final TokenPattern<?>[] patterns;
-    private final TypeHandler<?>[] types;
+    String[] names;
+    private Object[] values;
+    private TokenPattern<?>[] patterns;
+    private TypeHandler<?>[] types;
     private @NotNull
-    final TokenPattern<?> pattern;
+    TokenPattern<?> pattern;
     private PrismarineTypeSystem typeSystem;
 
     private GenericSupplier genericSupplier;
+
+    public ActualParameterList() {
+    }
 
     public ActualParameterList(@NotNull TokenPattern<?> pattern) {
         this(NO_ARGS, NO_PATTERNS, pattern, null);
@@ -36,14 +40,19 @@ public class ActualParameterList implements GenericSupplierImplementer {
     }
 
     public ActualParameterList(Object[] values, @Nullable String[] names, TokenPattern<?>[] patterns, @NotNull TokenPattern<?> pattern, PrismarineTypeSystem typeSystem) {
+        reset(values, names, patterns, pattern, typeSystem);
+    }
+
+    public ActualParameterList reset(Object[] values, TokenPattern<?>[] patterns, @NotNull TokenPattern<?> pattern, PrismarineTypeSystem typeSystem) {
+        return reset(values, null, patterns, pattern, typeSystem);
+    }
+    public ActualParameterList reset(Object[] values, @Nullable String[] names, TokenPattern<?>[] patterns, @NotNull TokenPattern<?> pattern, PrismarineTypeSystem typeSystem) {
         this.values = values;
         this.names = names;
 
         if(patterns == null) {
             patterns = new TokenPattern<?>[values.length];
-            for(int i = 0; i < patterns.length; i++) {
-                patterns[i] = pattern;
-            }
+            Arrays.fill(patterns, pattern);
         }
 
         this.patterns = patterns;
@@ -56,6 +65,8 @@ public class ActualParameterList implements GenericSupplierImplementer {
         }
 
         this.types = new TypeHandler<?>[values.length];
+
+        return this;
     }
 
     @NotNull
