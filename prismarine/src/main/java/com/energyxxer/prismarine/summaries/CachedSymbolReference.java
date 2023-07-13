@@ -45,9 +45,9 @@ public class CachedSymbolReference implements SymbolReference {
             cachedSymbol = new WeakReference<>(symbol);
             symbolIsNull = symbol == null;
             if(lastProjectSummary != null) lastProjectSummary.clear();
-            lastProjectSummary = new WeakReference<>(summary.parentSummary);
-            summaryIsNull = summary.parentSummary == null;
-            generation = summaryIsNull ? 0 : summary.parentSummary.getGeneration();
+            lastProjectSummary = new WeakReference<>(summary.getParentSummary());
+            summaryIsNull = summary.getParentSummary() == null;
+            generation = summaryIsNull ? 0 : summary.getParentSummary().getGeneration();
         }
         return cachedSymbol.get();
     }

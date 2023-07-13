@@ -8,6 +8,7 @@ import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.util.SortedList;
 import com.energyxxer.util.StringBounds;
 
+import java.lang.ref.WeakReference;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.BiFunction;
@@ -15,7 +16,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class PrismarineSummaryModule extends SummaryModule {
-    protected PrismarineProjectSummary parentSummary;
+    protected WeakReference<PrismarineProjectSummary> parentSummary;
     protected Path fileLocation = null;
     protected SummaryBlock fileBlock = new SummaryBlock(this);
     protected ArrayList<Path> requires = new ArrayList<>();
@@ -34,12 +35,8 @@ public class PrismarineSummaryModule extends SummaryModule {
 
     private final SortedList<SymbolUsage> symbolUsages = new SortedList<>(u -> u.index);
 
-    public PrismarineSummaryModule() {
-        this(null);
-    }
-
     public PrismarineSummaryModule(PrismarineProjectSummary parentSummary) {
-        this.parentSummary = parentSummary;
+        this.parentSummary = new WeakReference<>(parentSummary);
         contextStack.push(fileBlock);
     }
 
@@ -91,8 +88,8 @@ public class PrismarineSummaryModule extends SummaryModule {
 
     public Collection<SummarySymbol> getSymbolsVisibleAt(int index) {
         ArrayList<SummarySymbol> list = new ArrayList<>();
-        if(parentSummary != null) {
-            for(SummarySymbol globalSymbol : parentSummary.getGlobalSymbols()) {
+        if(parentSummary.get() != null) {
+            for(SummarySymbol globalSymbol : parentSummary.get().getGlobalSymbols()) {
                 if(globalSymbol.getParentFileSummary() == null || !Objects.equals(globalSymbol.getParentFileSummary().getFileLocation(), this.getFileLocation())) {
                     list.add(globalSymbol);
                 }
@@ -111,9 +108,9 @@ public class PrismarineSummaryModule extends SummaryModule {
         }
         searchingSymbols = true;
         try {
-            if(parentSummary != null) {
+            if(parentSummary.get() != null) {
                 for(Path required : requires) {
-                    PrismarineSummaryModule superFile = parentSummary.getSummaryForLocation(required);
+                    PrismarineSummaryModule superFile = parentSummary.get().getSummaryForLocation(required);
                     if(superFile != null) {
                         superFile.collectSymbolsVisibleAt(-1, searchingSymbolsResult, fromPath);
                     }
@@ -157,11 +154,11 @@ public class PrismarineSummaryModule extends SummaryModule {
     }
 
     public PrismarineProjectSummary getParentSummary() {
-        return parentSummary;
+        return parentSummary.get();
     }
 
     public void setParentSummary(PrismarineProjectSummary parentSummary) {
-        this.parentSummary = parentSummary;
+        this.parentSummary = new WeakReference<>(parentSummary);
     }
 
     public boolean isSubSymbolStackEmpty() {

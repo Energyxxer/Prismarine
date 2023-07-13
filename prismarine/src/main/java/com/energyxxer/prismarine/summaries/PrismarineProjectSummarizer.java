@@ -112,7 +112,7 @@ public final class PrismarineProjectSummarizer<T extends PrismarineProjectSummar
                 return;
             }
             this.setCachedReader(subSummarizer.getProjectReader());
-            this.summary.join(subSummarizer.summary);
+            this.summary.addSubSummary(subSummarizer.summary);
         }
 
         logTime("Sub-Summaries");

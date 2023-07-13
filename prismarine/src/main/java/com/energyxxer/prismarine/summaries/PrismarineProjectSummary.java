@@ -10,6 +10,7 @@ import java.util.*;
 
 public class PrismarineProjectSummary implements ProjectSummary {
     protected ArrayList<PrismarineSummaryModule> fileSummaries = new SimpleReadArrayList<>();
+    private ArrayList<PrismarineProjectSummary> subSummaries = new ArrayList<>(); //here solely to keep references to dependencies' summaries alive
     protected HashMap<File, PrismarineSummaryModule> fileSummaryMap = new HashMap<>();
     protected Set<SummarySymbol> globalSymbols = new LinkedHashSet<>();
     protected Set<Todo> todos = new HashSet<>();
@@ -76,9 +77,10 @@ public class PrismarineProjectSummary implements ProjectSummary {
         return summary != null ? summary.getFileLocation() : null;
     }
 
-    public void join(PrismarineProjectSummary other) {
+    public void addSubSummary(PrismarineProjectSummary other) {
         this.fileSummaries.addAll(other.fileSummaries);
         this.globalSymbols.addAll(other.globalSymbols);
+        this.subSummaries.add(other);
     }
 
     public Collection<PrismarineSummaryModule> getAllSummaries() {
