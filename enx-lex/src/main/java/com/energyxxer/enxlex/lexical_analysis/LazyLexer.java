@@ -52,7 +52,7 @@ public class LazyLexer extends Lexer {
             this.fileContents = str;
             this.profile = profile;
 
-            if (getSummaryModule() != null) getSummaryModule().onStart();
+            if (getSummaryModule() != null) getSummaryModule().onStart(this);
 
             lineCache.setText(fileContents);
             lineCache.prepopulate();
@@ -81,7 +81,7 @@ public class LazyLexer extends Lexer {
                 stream.write(eof);
             }
 
-            if (getSummaryModule() != null) getSummaryModule().onEnd();
+            if (getSummaryModule() != null) getSummaryModule().onEnd(this);
         } finally {
             running = false;
             this.profile = null;

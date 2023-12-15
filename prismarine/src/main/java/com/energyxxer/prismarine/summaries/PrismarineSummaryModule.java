@@ -1,5 +1,6 @@
 package com.energyxxer.prismarine.summaries;
 
+import com.energyxxer.enxlex.lexical_analysis.Lexer;
 import com.energyxxer.enxlex.lexical_analysis.summary.SummaryModule;
 import com.energyxxer.enxlex.lexical_analysis.summary.Todo;
 import com.energyxxer.enxlex.lexical_analysis.token.Token;
@@ -214,8 +215,8 @@ public class PrismarineSummaryModule extends SummaryModule {
     }
 
     @Override
-    public void onEnd() {
-        super.onEnd();
+    public void onEnd(Lexer lexer) {
+        super.onEnd(lexer);
         fileBlock.clearEmptyBlocks();
     }
 
