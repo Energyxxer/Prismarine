@@ -31,7 +31,7 @@ public class PrismarineMetaBuilder {
     private final TokenPattern<?> filePattern;
     private final PrismarineProductions productions;
 
-    private final HashMap<String, Value> variables = new HashMap<>();
+    protected final HashMap<String, Value> variables = new HashMap<>();
 
     protected TokenPatternMatch returnValue = null;
 
