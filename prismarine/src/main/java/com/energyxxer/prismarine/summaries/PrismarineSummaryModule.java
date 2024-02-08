@@ -21,7 +21,7 @@ public class PrismarineSummaryModule extends SummaryModule {
     protected Path fileLocation = null;
     protected SummaryBlock fileBlock = new SummaryBlock(this);
     protected ArrayList<Path> requires = new ArrayList<>();
-    protected ArrayList<Todo> todos = new ArrayList<>();
+    protected SortedList<Todo> todos = new SortedList<>((todo -> todo.getToken().index));
     protected StringBuilder documentation = new StringBuilder();
     protected int documentationEndIndex;
     protected HashMap<String, Object> tempMap;
