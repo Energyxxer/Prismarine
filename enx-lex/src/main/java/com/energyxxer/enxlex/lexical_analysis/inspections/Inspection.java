@@ -3,6 +3,7 @@ package com.energyxxer.enxlex.lexical_analysis.inspections;
 import com.energyxxer.enxlex.pattern_matching.structures.TokenPattern;
 import com.energyxxer.util.StringBounds;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 public class Inspection {
@@ -16,6 +17,7 @@ public class Inspection {
     private final ArrayList<CodeAction> actions = new ArrayList<>();
 
     private String forceStyle;
+    private Color forceColor;
 
 
     public Inspection(String description) {
@@ -85,6 +87,15 @@ public class Inspection {
 
     public Inspection setForceStyle(String forceStyle) {
         this.forceStyle = forceStyle;
+        return this;
+    }
+
+    public Color getForceColor() {
+        return forceColor;
+    }
+
+    public Inspection setForceColor(Color forceColor) {
+        this.forceColor = forceColor;
         return this;
     }
 }

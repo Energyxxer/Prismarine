@@ -4,5 +4,6 @@ public enum InspectionSeverity {
     ERROR,
     WARNING,
     SUGGESTION,
+    STYLING,
     HIDDEN
 }

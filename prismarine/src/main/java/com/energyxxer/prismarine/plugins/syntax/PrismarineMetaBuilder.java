@@ -170,10 +170,10 @@ public class PrismarineMetaBuilder {
                     String text = ((StringLiteralValue) args.get(0)).stringValue;
                     return new TokenMatchValue(new TokenItemMatch(TokenType.UNKNOWN, text).setName("LITERAL_" + text.toUpperCase()).addTags(SuggestionTags.ENABLED, PLUGIN_CREATED_TAG));
                 } else {
-                    throw new IllegalArgumentException("Function 'hint' only accepts String Literal values at argument 0, found " + args.get(0).getClass().getSimpleName());
+                    throw new IllegalArgumentException("Function 'literal' only accepts String Literal values at argument 0, found " + args.get(0).getClass().getSimpleName());
                 }
             } else {
-                throw new IllegalArgumentException("Function 'hint' requires at least 1 parameter, found " + args.size());
+                throw new IllegalArgumentException("Function 'literal' requires at least 1 parameter, found " + args.size());
             }
         });
     }
