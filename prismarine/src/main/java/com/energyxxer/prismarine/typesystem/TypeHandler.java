@@ -10,9 +10,9 @@ import java.util.Iterator;
 public interface TypeHandler<T> {
     PrismarineTypeSystem getTypeSystem();
 
-    Object getMember(T object, String member, TokenPattern<?> pattern, ISymbolContext ctx, boolean keepSymbol);
+    Object getMember(T object, String member, TokenPattern<?> pattern, ISymbolContext ctx, boolean keepSymbol, Object additionalContext);
 
-    Object getIndexer(T object, Object index, TokenPattern<?> pattern, ISymbolContext ctx, boolean keepSymbol);
+    Object getIndexer(T object, Object index, TokenPattern<?> pattern, ISymbolContext ctx, boolean keepSymbol, Object additionalContext);
 
     Object cast(T object, TypeHandler targetType, TokenPattern<?> pattern, ISymbolContext ctx);
 

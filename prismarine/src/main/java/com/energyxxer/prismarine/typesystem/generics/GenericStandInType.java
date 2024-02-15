@@ -22,12 +22,12 @@ public class GenericStandInType implements TypeHandler<GenericStandInType> {
     }
 
     @Override
-    public Object getMember(GenericStandInType object, String member, TokenPattern<?> pattern, ISymbolContext ctx, boolean keepSymbol) {
+    public Object getMember(GenericStandInType object, String member, TokenPattern<?> pattern, ISymbolContext ctx, boolean keepSymbol, Object additionalContext) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Object getIndexer(GenericStandInType object, Object index, TokenPattern<?> pattern, ISymbolContext ctx, boolean keepSymbol) {
+    public Object getIndexer(GenericStandInType object, Object index, TokenPattern<?> pattern, ISymbolContext ctx, boolean keepSymbol, Object additionalContext) {
         throw new UnsupportedOperationException();
     }
 

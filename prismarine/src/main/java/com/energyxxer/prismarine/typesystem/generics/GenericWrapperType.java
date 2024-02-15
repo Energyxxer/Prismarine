@@ -23,13 +23,13 @@ public class GenericWrapperType<T> implements TypeHandler<T>, GenericSupplierImp
     }
 
     @Override
-    public Object getMember(T object, String member, TokenPattern<?> pattern, ISymbolContext ctx, boolean keepSymbol) {
-        return sourceType.getMember(object, member, pattern, ctx, keepSymbol);
+    public Object getMember(T object, String member, TokenPattern<?> pattern, ISymbolContext ctx, boolean keepSymbol, Object additionalContext) {
+        return sourceType.getMember(object, member, pattern, ctx, keepSymbol, additionalContext);
     }
 
     @Override
-    public Object getIndexer(T object, Object index, TokenPattern<?> pattern, ISymbolContext ctx, boolean keepSymbol) {
-        return sourceType.getIndexer(object, index, pattern, ctx, keepSymbol);
+    public Object getIndexer(T object, Object index, TokenPattern<?> pattern, ISymbolContext ctx, boolean keepSymbol, Object additionalContext) {
+        return sourceType.getIndexer(object, index, pattern, ctx, keepSymbol, additionalContext);
     }
 
     @Override
